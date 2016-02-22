@@ -30,11 +30,11 @@ def create(	switchObject,
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Check switchObject
 	if not mc.objExists(switchObject):
 		raise Exception('Switch object "'+switchObject+'" does not exist!')
-	
+
 	# Compare Target and Enum List
 	if not targetAttrList or not targetEnumList:
 		raise Exception('Visibility target or enum list has zero elements!')
@@ -44,21 +44,21 @@ def create(	switchObject,
 	if targetIndexList:
 		if len(targetAttrList) != len(targetIndexList):
 			raise Exception('Visibility target and index list length mis-match!')
-	
+
 	# =================================
 	# - Create Visibility Switch Attr -
 	# =================================
-	
+
 	# Check Visibility Switch Attr
 	if not mc.objExists(switchObject+'.'+switchAttr):
-		
+
 		# Build Enum Value
 		targetEnum = ''
 		for i in targetEnumList: targetEnum += i+':'
 		# Add switch attr
 		mc.addAttr(switchObject,ln=switchAttr,nn=switchName,at='enum',en=targetEnum)
 		mc.setAttr(switchObject+'.'+switchAttr,e=True,cb=True)
-	
+
 	# Create Custom Visibility Index (choice)
 	target_choice = ''
 	if targetIndexList:
@@ -68,30 +68,30 @@ def create(	switchObject,
 		for i in range(len(targetIndexList)):
 			mc.setAttr(target_choice+'.targetIndex['+str(i)+']',targetIndexList[i])
 			mc.connectAttr(target_choice+'.targetIndex['+str(i)+']',target_choice+'.input['+str(i)+']',f=True)
-	
+
 	# ======================
 	# - Connect Visibility -
 	# ======================
-	
+
 	for i in range(len(targetEnumList)):
-		
+
 		# Check targetAttrList
 		if not targetAttrList[i]: continue
-		
+
 		# Create Condition Node
 		conditionNode = mc.createNode('condition',n=prefix+'_'+targetEnumList[i]+'Target_condition')
 		mc.setAttr(conditionNode+'.firstTerm',i)
 		mc.setAttr(conditionNode+'.colorIfTrue',1,0,1)
 		mc.setAttr(conditionNode+'.colorIfFalse',0,1,0)
-		
+
 		# Connect Condition Node
 		conditionInput = switchObject+'.'+switchAttr
 		if targetIndexList: conditionInput = target_choice+'.output'
 		mc.connectAttr(conditionInput,conditionNode+'.secondTerm',f=True)
-		
+
 		# Connect Each Item in List - Vis ON
 		for targetAttr in targetAttrList[i]:
-			
+
 			# Check Target Attribute
 			if not mc.objExists(targetAttr):
 				raise Exception('Attribute "'+targetAttr+'" does not exist!')
@@ -99,13 +99,13 @@ def create(	switchObject,
 				raise Exception('Object "'+targetAttr+'" is not a valid attribute!')
 			if not mc.getAttr(targetAttr,se=True):
 				raise Exception('Attribute "'+targetAttr+'" is locked or has incoming connections!')
-			
+
 			# Connect attribute
 			mc.connectAttr(conditionNode+'.outColorR',targetAttr,f=True)
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return (switchObject+'.'+switchAttr)
 

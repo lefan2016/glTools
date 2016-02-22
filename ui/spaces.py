@@ -12,21 +12,21 @@ def charUI():
 	win = mc.window(win,t='Spaces - Character UI')
 	# Form Layout
 	spacesCharFL = mc.formLayout(numberOfDivisions=100)
-	
+
 	# UI Elements
 	#-
 	# Character Prefix
 	charTFG = mc.textFieldGrp('spacesCharTFG',label='Character Prefix', text='',cw=[(1,120),(2,150)])
 	# Button
 	openB = mc.button(l='Open',c='glTools.ui.spaces.charUIFromUI()')
-	
+
 	mc.formLayout(spacesCharFL, e=True, af=[(charTFG,'left',5),(charTFG,'top',5),(charTFG,'right',5)])
 	mc.formLayout(spacesCharFL, e=True, ac=[(openB,'top',5,charTFG)])
 	mc.formLayout(spacesCharFL, e=True, af=[(openB,'left',5),(openB,'bottom',5),(openB,'right',5)])
-	
+
 	# Open window
 	mc.showWindow(win)
-	
+
 def charUIFromUI():
 	'''
 	'''
@@ -46,7 +46,7 @@ def createAddUI():
 	win = mc.window(win,t='Spaces - Create/Add UI')
 	# Form Layout
 	spacesFL = mc.formLayout(numberOfDivisions=100)
-	
+
 	# UI Elements
 	#-
 	# Text Field Grps
@@ -61,47 +61,47 @@ def createAddUI():
 	createBTN = mc.button(l='Create / Add',c='glTools.ui.spaces.createAddFromUI()')
 	# Separator
 	controlSEP = mc.separator(h=5,style='single')
-	
+
 	# Form Layout - MAIM
 	#-
 	# controlTFG
 	mc.formLayout(spacesFL, e=True, af=[(controlTFG,'left',5),(controlTFG,'top',5)])
 	mc.formLayout(spacesFL, e=True, ap=[(controlTFG,'right',5,50)])
-	
+
 	# controlTagTFG
 	mc.formLayout(spacesFL, e=True, af=[(controlTagTFG,'right',5),(controlTagTFG,'top',5)])
 	mc.formLayout(spacesFL, e=True, ap=[(controlTagTFG,'left',5,50)])
-	
+
 	# controlSEP
 	mc.formLayout(spacesFL, e=True, af=[(controlSEP,'left',5),(controlSEP,'right',5)])
 	mc.formLayout(spacesFL, e=True, ac=[(controlSEP,'top',5,controlTFG)])
-	
+
 	# targetListTXT
 	mc.formLayout(spacesFL, e=True, af=[(targetListTXT,'left',5)])
 	mc.formLayout(spacesFL, e=True, ac=[(targetListTXT,'top',5,controlSEP)])
 	mc.formLayout(spacesFL, e=True, ap=[(targetListTXT,'right',5,50)])
-	
+
 	# targetTSL
 	mc.formLayout(spacesFL, e=True, af=[(targetTSL,'left',5),(targetTSL,'bottom',5)])
 	mc.formLayout(spacesFL, e=True, ap=[(targetTSL,'right',5,50)])
 	mc.formLayout(spacesFL, e=True, ac=[(targetTSL,'top',5,targetListTXT)])
-	
+
 	# targetTagTFG
 	mc.formLayout(spacesFL, e=True, af=[(targetTagTFG,'right',5)])
 	mc.formLayout(spacesFL, e=True, ap=[(targetTagTFG,'left',5,50),(targetTagTFG,'top',5,50)])
-	
+
 	# createBTN
 	mc.formLayout(spacesFL, e=True, af=[(createBTN,'bottom',5),(createBTN,'right',5)])
 	mc.formLayout(spacesFL, e=True, ap=[(createBTN,'left',5,66)])
-	
+
 	# Poup menus
 	targetListPUM = mc.popupMenu(parent=targetTSL)
 	mc.menuItem('Add selected objects',c='glTools.ui.spaces.addSelectedToList()')
 	mc.menuItem('Remove Highlighted objects',c='glTools.ui.spaces.removeFromList()')
-	
+
 	controlPUM = mc.popupMenu(parent=controlTFG)
 	mc.menuItem('Get selected object',c='glTools.ui.spaces.getControlNameFromSel()')
-	
+
 	# Open window
 	mc.showWindow(win)
 

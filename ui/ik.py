@@ -26,33 +26,33 @@ def ikHandleUI():
 	eJointTFB = mc.textFieldButtonGrp('ikHandleEndJointTFB',label='End Joint',text='',buttonLabel='Load Selected')
 	# Prefix
 	prefixTFG = mc.textFieldGrp('ikHandlePrefixTFG',label='Prefix', text='')
-	
+
 	# IK Solver
 	solverList = ['ikSplineSolver','ikSCsolver','ikRPsolver','ik2Bsolver']
 	solverOMG = mc.optionMenuGrp('ikHandleSolverOMG',label='IK Solver')
 	for solver in solverList: mc.menuItem(label=solver)
 	mc.optionMenuGrp(solverOMG,e=True,sl=3)
-	
+
 	# Spline IK
 	splineFrameL = mc.frameLayout('ikHandleSplineFL',l='Spline IK Options',cll=0,en=0)
 	splineFormL = mc.formLayout(numberOfDivisions=100)
 	# Curve
 	curveTFB = mc.textFieldButtonGrp('ikHandleCurveTFB',label='Curve',text='',buttonLabel='Load Selected',en=0)
 	offsetFSG = mc.floatSliderGrp('ikHandleOffsetFSG',label='Offset',field=True,minValue=0.0,maxValue=1.0,fieldMinValue=0.0,fieldMaxValue=1.0,value=0,en=0)
-	
+
 	mc.setParent('..')
 	mc.setParent('..')
-	
+
 	# Buttons
 	createB = mc.button('ikHandleCreateB',l='Create',c='glTools.ui.ik.ikHandleFromUI(False)')
 	cancelB = mc.button('ikHandleCancelB',l='Cancel',c='mc.deleteUI("'+window+'")')
-	
+
 	# UI callback commands
 	mc.optionMenuGrp(solverOMG,e=True,cc='mc.frameLayout("'+splineFrameL+'",e=True,en=not(mc.optionMenuGrp("'+solverOMG+'",q=True,sl=True)-1))')
 	mc.textFieldButtonGrp(sJointTFB,e=True,bc='glTools.ui.ik.ikHandleUI_autoComplete("'+sJointTFB+'","'+eJointTFB+'","'+prefixTFG+'")')
 	mc.textFieldButtonGrp(eJointTFB,e=True,bc='glTools.ui.utils.loadTypeSel("'+eJointTFB+'",selType="joint")')
 	mc.textFieldButtonGrp(curveTFB,e=True,bc='glTools.ui.utils.loadCurveSel("'+curveTFB+'")')
-	
+
 	# Form Layout - MAIN
 	mc.formLayout(FL,e=True,af=[(sJointTFB,'top',5),(sJointTFB,'left',5),(sJointTFB,'right',5)])
 	mc.formLayout(FL,e=True,ac=[(eJointTFB,'top',5,sJointTFB)])
@@ -67,12 +67,12 @@ def ikHandleUI():
 	mc.formLayout(FL,e=True,af=[(createB,'left',5),(createB,'right',5)])
 	mc.formLayout(FL,e=True,ac=[(createB,'bottom',5,cancelB)])
 	mc.formLayout(FL,e=True,af=[(cancelB,'left',5),(cancelB,'right',5),(cancelB,'bottom',5)])
-	
+
 	# Form Layout - Spline
 	mc.formLayout(splineFormL,e=True,af=[(curveTFB,'top',5),(curveTFB,'left',5),(curveTFB,'right',5)])
 	mc.formLayout(splineFormL,e=True,ac=[(offsetFSG,'top',5,curveTFB)])
 	mc.formLayout(splineFormL,e=True,af=[(offsetFSG,'left',5),(offsetFSG,'right',5)])
-	
+
 	# Show Window
 	mc.showWindow(window)
 
@@ -81,7 +81,7 @@ def ikHandleUI_autoComplete(sJointTFB,eJointTFB,prefixTFG):
 	'''
 	# Load selection to UI field
 	glTools.ui.utils.loadTypeSel(sJointTFB,prefixTFG,selType="joint")
-	
+
 	# Get start joint and determine end joint
 	sJoint = mc.textFieldButtonGrp(sJointTFB,q=True,text=True)
 	sJointChain = mc.listRelatives(sJoint,ad=True)
@@ -89,7 +89,7 @@ def ikHandleUI_autoComplete(sJointTFB,eJointTFB,prefixTFG):
 	eJointList = mc.ls(sJointChain,type='joint')
 	if not eJointList: return
 	eJoint = str(eJointList[0])
-	
+
 	# Set End joint field value
 	mc.textFieldButtonGrp(eJointTFB,e=True,text=eJoint)
 
@@ -100,7 +100,7 @@ def ikHandleFromUI(close=False):
 	# Window
 	window = 'ikHandleUI'
 	if not mc.window(window,q=True,ex=1): raise UIError('IkHandle UI does not exist!!')
-	
+
 	# Get UI data
 	startJ = mc.textFieldButtonGrp('ikHandleStartJointTFB',q=True,text=True)
 	endJ = mc.textFieldButtonGrp('ikHandleEndJointTFB',q=True,text=True)
@@ -108,10 +108,10 @@ def ikHandleFromUI(close=False):
 	solver = mc.optionMenuGrp('ikHandleSolverOMG',q=True,v=True)
 	curve = mc.textFieldButtonGrp('ikHandleCurveTFB',q=True,text=True)
 	offset = mc.floatSliderGrp('ikHandleOffsetFSG',q=True,v=True)
-	
+
 	# Execute command
 	glTools.tools.ikHandle.build(startJoint=startJ,endJoint=endJ,solver=solver,curve=curve,ikSplineOffset=offset,prefix=pre)
-	
+
 	# Cleanup
 	if close: mc.deleteUI(window)
 
@@ -145,19 +145,19 @@ def stretchyIkChainUI():
 	# Blend
 	blendCtrlTFB = mc.textFieldButtonGrp('stretchyIkChainBlendCtrlTFB',label='Blend Control',text='',buttonLabel='Load Selected')
 	blendAttrTFG = mc.textFieldGrp('stretchyIkChainBlendAttrTFB',label='Blend Attribute',text='stretchScale')
-	
+
 	# Separator
 	SEP = mc.separator(height=10,style='single')
-	
+
 	# Buttons
 	createB = mc.button('stretchyIkChainCreateB',l='Create',c='glTools.ui.ik.stretchyIkChainFromUI(False)')
 	cancelB = mc.button('stretchyIkChainCancelB',l='Cancel',c='mc.deleteUI("'+window+'")')
-	
+
 	# UI callback commands
 	mc.textFieldButtonGrp(handleTFB,e=True,bc='glTools.ui.utils.loadTypeSel("'+handleTFB+'","'+prefixTFG+'",selType="ikHandle")')
 	mc.textFieldButtonGrp(blendCtrlTFB,e=True,bc='glTools.ui.utils.loadObjectSel("'+blendCtrlTFB+'")')
 	mc.textFieldButtonGrp(scaleAttrTFB,e=True,bc='glTools.ui.utils.loadChannelBoxSel("'+scaleAttrTFB+'")')
-	
+
 	# Form Layout - MAIN
 	mc.formLayout(FL,e=True,af=[(handleTFB,'top',5),(handleTFB,'left',5),(handleTFB,'right',5)])
 	mc.formLayout(FL,e=True,ac=[(prefixTFG,'top',5,handleTFB)])
@@ -180,7 +180,7 @@ def stretchyIkChainUI():
 	mc.formLayout(FL,e=True,ac=[(cancelB,'top',5,SEP)])
 	mc.formLayout(FL,e=True,af=[(cancelB,'right',5),(cancelB,'bottom',5)])
 	mc.formLayout(FL,e=True,ap=[(cancelB,'left',5,50)])
-	
+
 	# Show Window
 	mc.showWindow(window)
 
@@ -191,7 +191,7 @@ def stretchyIkChainFromUI(close=False):
 	# Window
 	window = 'stretchyIkChainUI'
 	if not mc.window(window,q=True,ex=1): raise UIError('StretchyIkChain UI does not exist!!')
-	
+
 	# Get UI data
 	ik = mc.textFieldButtonGrp('stretchyIkChainTFB',q=True,text=True)
 	pre = mc.textFieldGrp('stretchyIkChainPrefixTFG',q=True,text=True)
@@ -200,10 +200,10 @@ def stretchyIkChainFromUI(close=False):
 	scaleAttr = mc.textFieldButtonGrp('stretchyIkChainScaleAttrTFB',q=True,text=True)
 	blendCtrl = mc.textFieldButtonGrp('stretchyIkChainBlendCtrlTFB',q=True,text=True)
 	blendAttr = mc.textFieldGrp('stretchyIkChainBlendAttrTFB',q=True,text=True)
-	
+
 	# Execute command
 	glTools.tools.stretchyIkChain.build(ikHandle=ik,scaleAttr=scaleAttr,scaleAxis=scaleAxis,blendControl=blendCtrl,blendAttr=blendAttr,shrink=shrink,prefix=pre)
-	
+
 	# Cleanup
 	if close: mc.deleteUI(window)
 
@@ -232,19 +232,19 @@ def stretchyIkLimbUI():
 	mc.optionMenuGrp(scaleAxisOMG,e=True,sl=1)
 	# Scale Attr
 	scaleAttrTFB = mc.textFieldButtonGrp('stretchyIkLimbScaleAttrTFB',label='Scale Attribute',text='',buttonLabel='Load Selected')
-	
+
 	# Separator
 	SEP = mc.separator(height=10,style='single')
-	
+
 	# Buttons
 	createB = mc.button('stretchyIkLimbCreateB',l='Create',c='glTools.ui.ik.stretchyIkLimbFromUI(False)')
 	cancelB = mc.button('stretchyIkLimbCancelB',l='Cancel',c='mc.deleteUI("'+window+'")')
-	
+
 	# UI callback commands
 	mc.textFieldButtonGrp(handleTFB,e=True,bc='glTools.ui.utils.loadTypeSel("'+handleTFB+'","'+prefixTFG+'",selType="ikHandle")')
 	mc.textFieldButtonGrp(controlTFB,e=True,bc='glTools.ui.utils.loadObjectSel("'+controlTFB+'")')
 	mc.textFieldButtonGrp(scaleAttrTFB,e=True,bc='glTools.ui.utils.loadChannelBoxSel("'+scaleAttrTFB+'")')
-	
+
 	# Form Layout - MAIN
 	mc.formLayout(FL,e=True,af=[(handleTFB,'top',5),(handleTFB,'left',5),(handleTFB,'right',5)])
 	mc.formLayout(FL,e=True,ac=[(prefixTFG,'top',5,handleTFB)])
@@ -263,7 +263,7 @@ def stretchyIkLimbUI():
 	mc.formLayout(FL,e=True,ac=[(cancelB,'top',5,SEP)])
 	mc.formLayout(FL,e=True,af=[(cancelB,'right',5),(cancelB,'bottom',5)])
 	mc.formLayout(FL,e=True,ap=[(cancelB,'left',5,50)])
-	
+
 	# Show Window
 	mc.showWindow(window)
 
@@ -274,17 +274,17 @@ def stretchyIkLimbFromUI(close=False):
 	# Window
 	window = 'stretchyIkLimbUI'
 	if not mc.window(window,q=True,ex=1): raise UIError('StretchyIkChain UI does not exist!!')
-	
+
 	# Get UI data
 	ik = mc.textFieldButtonGrp('stretchyIkLimbTFB',q=True,text=True)
 	pre = mc.textFieldGrp('stretchyIkLimbPrefixTFG',q=True,text=True)
 	ctrl = mc.textFieldButtonGrp('stretchyIkLimbControlTFB',q=True,text=True)
 	scaleAxis = str.lower(str(mc.optionMenuGrp('stretchyIkLimbAxisOMG',q=True,v=True)))
 	scaleAttr = mc.textFieldButtonGrp('stretchyIkLimbScaleAttrTFB',q=True,text=True)
-	
+
 	# Execute command
 	glTools.tools.stretchyIkLimb.StretchyIkLimb().build(ikHandle=ik,control=ctrl,scaleAttr=scaleAttr,scaleAxis=scaleAxis,prefix=pre)
-	
+
 	# Cleanup
 	if close: mc.deleteUI(window)
 
@@ -314,35 +314,35 @@ def stretchyIkSplineUI():
 	# Blend
 	blendCtrlTFB = mc.textFieldButtonGrp('stretchyIkSplineBlendCtrlTFB',label='Blend Control',text='',buttonLabel='Load Selected')
 	blendAttrTFG = mc.textFieldGrp('stretchyIkSplineBlendAttrTFG',label='Blend Attribute',text='stretchScale')
-	
+
 	# Stretch Method
 	methodList = ['Arc Length','Parametric']
 	methodOMG = mc.optionMenuGrp('stretchyIkSplineMethodOMG',label='Stretch Method')
 	for method in methodList: mc.menuItem(label=method)
 	mc.optionMenuGrp(methodOMG,e=True,sl=2)
-	
+
 	# Parametric Layout
 	paramFrameL = mc.frameLayout('stretchyIkSplineParamFL',l='Parametric Bounds',cll=0)
 	paramFormL = mc.formLayout(numberOfDivisions=100)
-	
+
 	# Min/Max Percent
 	minPercentFSG = mc.floatSliderGrp('stretchyIkSplineMinPFSG',label='Min Percent',field=True,minValue=0.0,maxValue=1.0,fieldMinValue=0.0,fieldMaxValue=1.0,value=0.0)
 	maxPercentFSG = mc.floatSliderGrp('stretchyIkSplineMaxPFSG',label='Max Percent',field=True,minValue=0.0,maxValue=1.0,fieldMinValue=0.0,fieldMaxValue=1.0,value=1.0)
 	closestPointCBG = mc.checkBoxGrp('stretchyIkSplineClosestPointCBG',l='Use Closest Point',ncb=1,v1=True)
-	
+
 	mc.setParent('..')
 	mc.setParent('..')
-	
+
 	# Buttons
 	createB = mc.button('stretchyIkSplineCreateB',l='Create',c='glTools.ui.ik.stretchyIkSplineFromUI(False)')
 	cancelB = mc.button('stretchyIkSplineCancelB',l='Cancel',c='mc.deleteUI("'+window+'")')
-	
+
 	# UI callback commands
 	mc.textFieldButtonGrp(handleTFB,e=True,bc='glTools.ui.utils.loadTypeSel("'+handleTFB+'","'+prefixTFG+'",selType="ikHandle")')
 	mc.textFieldButtonGrp(scaleAttrTFB,e=True,bc='glTools.ui.utils.loadChannelBoxSel("'+scaleAttrTFB+'")')
 	mc.textFieldButtonGrp(blendCtrlTFB,e=True,bc='glTools.ui.utils.loadObjectSel("'+blendCtrlTFB+'")')
 	mc.optionMenuGrp(methodOMG,e=True,cc='mc.frameLayout("'+paramFrameL+'",e=True,en=mc.optionMenuGrp("'+methodOMG+'",q=True,sl=True)-1)')
-	
+
 	# Form Layout - MAIN
 	mc.formLayout(FL,e=True,af=[(handleTFB,'top',5),(handleTFB,'left',5),(handleTFB,'right',5)])
 	mc.formLayout(FL,e=True,ac=[(prefixTFG,'top',5,handleTFB)])
@@ -363,14 +363,14 @@ def stretchyIkSplineUI():
 	mc.formLayout(FL,e=True,ap=[(createB,'right',5,50)])
 	mc.formLayout(FL,e=True,af=[(cancelB,'right',5),(cancelB,'bottom',5)])
 	mc.formLayout(FL,e=True,ap=[(cancelB,'left',5,50)])
-	
+
 	# Form Layout - Parametric
 	mc.formLayout(paramFormL,e=True,af=[(minPercentFSG,'top',5),(minPercentFSG,'left',5),(minPercentFSG,'right',5)])
 	mc.formLayout(paramFormL,e=True,ac=[(maxPercentFSG,'top',5,minPercentFSG)])
 	mc.formLayout(paramFormL,e=True,af=[(maxPercentFSG,'left',5),(maxPercentFSG,'right',5)])
 	mc.formLayout(paramFormL,e=True,ac=[(closestPointCBG,'top',5,maxPercentFSG)])
 	mc.formLayout(paramFormL,e=True,af=[(closestPointCBG,'left',5),(closestPointCBG,'right',5)])
-	
+
 	# Show Window
 	mc.showWindow(window)
 
@@ -380,7 +380,7 @@ def stretchyIkSplineFromUI(close=False):
 	# Window
 	window = 'stretchyIkSplineUI'
 	if not mc.window(window,q=True,ex=1): raise UIError('StretchyIkSpline UI does not exist!!')
-	
+
 	# Get UI data
 	ik = mc.textFieldButtonGrp('stretchyIkSplineTFB',q=True,text=True)
 	pre = mc.textFieldGrp('stretchyIkSplinePrefixTFG',q=True,text=True)
@@ -392,7 +392,7 @@ def stretchyIkSplineFromUI(close=False):
 	method = mc.optionMenuGrp('stretchyIkSplineMethodOMG',q=True,sl=True)-1
 	minPercent = mc.floatSliderGrp('stretchyIkSplineMinPFSG',q=True,v=True)
 	maxPercent = mc.floatSliderGrp('stretchyIkSplineMaxPFSG',q=True,v=True)
-	
+
 	# Execute command
 	if method: # Parametric
 		glTools.tools.stretchyIkSpline.stretchyIkSpline_parametric(	ikHandle=ik,
@@ -411,6 +411,6 @@ def stretchyIkSplineFromUI(close=False):
 																	blendControl=blendCtrl,
 																	blendAttr=blendAttr,
 																	prefix=pre)
-	
+
 	# Cleanup
 	if close: mc.deleteUI(window)

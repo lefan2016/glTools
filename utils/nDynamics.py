@@ -24,7 +24,7 @@ def isNDynamicsNode(nNode):
 	if not mc.objExists(nNode): return False
 	# Check shape
 	if mc.objectType(nNode) == 'transform': nNode = mc.listRelatives(nNode,s=True,ni=True,pa=True)[0]
-	
+
 	# Check nucleus
 	if mc.objectType(nNode) == 'nucleus': return True
 	# Check nCloth
@@ -37,7 +37,7 @@ def isNDynamicsNode(nNode):
 	if mc.objectType(nNode) == 'nComponent': return True
 	# Check dynamicConstraint
 	if mc.objectType(nNode) == 'dynamicConstraint': return True
-	
+
 	# Return result
 	return False
 
@@ -54,10 +54,10 @@ def isNType(nNode,nType):
 	# Check shape
 	if mc.objectType(nNode) == 'transform': nNode = mc.listRelatives(nNode,s=True,ni=True,pa=True)[0]
 	if mc.objectType(nNode) != nType: return False
-	
+
 	# Return result
 	return True
-	
+
 def isNucleus(nucleus):
 	'''
 	Check if the specified object is a nucleus node
@@ -121,10 +121,10 @@ def getConnectedNucleus(obj):
 		nNode = nNode[0]
 	else:
 		nNode = obj
-	
+
 	# Check nucleus connections
 	nucleusConn = mc.listConnections(nNode,type='nucleus')
-	
+
 	# Return result
 	if nucleusConn: return nucleusConn[0]
 	else: return ''
@@ -139,7 +139,7 @@ def getConnectedNNode(obj,nType=''):
 	# Check object exists
 	if not mc.objExists(obj):
 		raise Exception('Object "'+obj+'" does not exist!')
-	
+
 	# Check nNode
 	nNode = obj
 	if mc.objectType(obj) == 'transform':
@@ -148,27 +148,27 @@ def getConnectedNNode(obj,nType=''):
 	if isNDynamicsNode(nNode):
 		if not nType or nType == mc.objectType(nNode):
 			return [nNode]
-		
+
 	# Check nCloth
 	if not nType or nType == 'nCloth':
 		nNodeConn = mc.listConnections(nNode,type='nCloth',shapes=True)
 		if nNodeConn: return list(set(nNodeConn))
-	
+
 	# Check nRigid
 	if not nType or nType == 'nRigid':
 		nNodeConn = mc.listConnections(nNode,type='nRigid',shapes=True)
 		if nNodeConn: return list(set(nNodeConn))
-	
+
 	# Check nParticle
 	if not nType or nType == 'nParticle':
 		nNodeConn = mc.listConnections(nNode,type='nParticle',shapes=True)
 		if nNodeConn: return list(set(nNodeConn))
-	
+
 	# Check nComponent
 	if not nType or nType == 'nComponent':
 		nNodeConn = mc.listConnections(nNode,type='nComponent',shapes=True)
 		if nNodeConn: return list(set(nNodeConn))
-	
+
 	# No nNode found, return empty result
 	return []
 
@@ -212,15 +212,15 @@ def getConnectedMesh(nNode,returnShape=False):
 	# Check nNode node
 	if not isNDynamicsNode(nNode):
 		nNode = getConnectedNNode(nNode)
-	
+
 	# Check outgoing connections
 	meshConn = mc.listConnections(nNode,s=False,d=True,sh=returnShape,type='mesh')
 	if meshConn: return meshConn[0]
-	
+
 	# Check incoming connections
 	meshConn = mc.listConnections(nNode,s=True,d=False,sh=returnShape,type='mesh')
 	if meshConn: return meshConn[0]
-	
+
 	# No mesh connections found, return empty result
 	return ''
 
@@ -246,7 +246,7 @@ def setActiveNucleus(nucleus):
 	# Check nucleus
 	if not isNucleus(nucleus):
 		raise Exception('Object "'+nucleus+'" is not a valid nucleus node!')
-	
+
 	# Set active nucleus
 	mm.eval('source getActiveNucleusNode')
 	mm.eval('setActiveNucleusNode("'+nucleus+'")')
@@ -265,14 +265,14 @@ def createNucleus(name='',setActive=True):
 	'''
 	# Check nucleus name
 	if not name: name = 'nucleus#'
-	
+
 	# Create nucleus node
 	nucleus = mc.createNode('nucleus',n=name)
 	mc.connectAttr('time1.outTime',nucleus+'.currentTime')
-	
+
 	# Set active nucleus
 	if setActive: setActiveNucleus(nucleus)
-	
+
 	# Return result
 	return nucleus
 
@@ -291,38 +291,38 @@ def createNCloth(mesh,nucleus='',worldSpace=False,prefix=''):
 	# Check mesh
 	if not glTools.utils.mesh.isMesh(mesh):
 		raise Exception('Object "'+mesh+'" is not a valid mesh!')
-	
+
 	# Check prefix
 	if not prefix:
 		if '_' in mesh: prefix = glTools.utils.stringUtils.stripSuffix(mesh)
 		else: prefix = mesh
 		if ':' in prefix: prefix = prefix.split(':')[-1]
-	
+
 	# Check nucleus
 	if nucleus:
 		if not isNucleus(nucleus):
 			print('Object "'+nucleus+'" is not a valid nucleus. Using current active nucleus!')
 			getActiveNucleus(nucleus)
-		
+
 		# Set active nucleus
 		setActiveNucleus(nucleus)
-	
+
 	# Create nCloth from mesh
 	mc.select(mesh)
 	nClothShape = mm.eval('createNCloth '+str(int(worldSpace)))
 	nCloth = mc.listRelatives(nClothShape,p=True)[0]
-	
+
 	# Rename nCloth
 	nCloth = mc.rename(nCloth,prefix+'_nCloth')
 	nClothShape = mc.listRelatives(nCloth,s=True)[0]
-	
+
 	# Get outMesh
 	outMesh = mc.listConnections(nClothShape+'.outputMesh',s=False,d=True,sh=True)[0]
 	outMesh = mc.rename(outMesh,mesh+'ClothShape')
-	
+
 	# return result
 	return nCloth
-	
+
 
 def createNRigid(mesh,nucleus='',prefix=''):
 	'''
@@ -337,30 +337,30 @@ def createNRigid(mesh,nucleus='',prefix=''):
 	# Check mesh
 	if not glTools.utils.mesh.isMesh(mesh):
 		raise Exception('Object "'+mesh+'" is not a valid mesh!')
-	
+
 	# Check prefix
 	if not prefix:
 		if '_' in mesh: prefix = glTools.utils.stringUtils.stripSuffix(mesh)
 		else: prefix = mesh
 		if ':' in prefix: prefix = prefix.split(':')[-1]
-		
+
 	# Check nucleus
 	if nucleus:
 		if not isNucleus(nucleus):
 			print('Object "'+nucleus+'" is not a valid nucleus. Using current active nucleus!')
 			getActiveNucleus(nucleus)
-		
+
 		# Set active nucleus
 		setActiveNucleus(nucleus)
-	
+
 	# Create nRigid from mesh
 	mc.select(mesh)
 	nRigidShape = mm.eval('makeCollideNCloth')
 	nRigid = mc.listRelatives(nRigidShape,p=True,pa=True)[0]
-	
+
 	# Rename nCloth
 	nRigid = mc.rename(nRigid,prefix+'_nRigid')
-	
+
 	# Return result
 	return nRigid
 
@@ -377,16 +377,16 @@ def createNParticle(ptList=[],nucleus='',prefix=''):
 	# Check prefix
 	if prefix: nParticle = prefix+'_nParticle'
 	else: nParticle = 'nParticle#'
-	
+
 	# Check nucleus
 	if nucleus:
 		if not isNucleus(nucleus):
 			print('Object "'+nucleus+'" is not a valid nucleus. Using current active nucleus!')
 			getActiveNucleus(nucleus)
-		
+
 		# Set active nucleus
 		setActiveNucleus(nucleus)
-	
+
 	# Create nParticles
 	nParticle = mc.nParticle(p=ptList,n=nParticle)
 
@@ -402,7 +402,7 @@ def softBody(geometry,nucleus='',prefix=''):
 	'''
 	# Check prefix
 	if not prefix: prefix = geometry
-	
+
 	# Check geometry
 	geometryType = mc.objectType(geometry)
 	if geometryType == 'transform':
@@ -413,25 +413,25 @@ def softBody(geometry,nucleus='',prefix=''):
 	else:
 		geometryTransform = mc.listRelatives(geometry,p=True)[0]
 		geometryShape = geometry
-	
+
 	# Check geometry type
 	geometryType = mc.objectType(geometryShape)
 	if geometryType == 'mesh': geometryAttribute = 'inMesh'
 	elif geometryType == 'nurbsCurve': geometryAttribute = 'create'
 	elif geometryType == 'nurbsSurface': geometryAttribute = 'create'
 	else: raise Exception('Invalid geometry type ('+geometryType+')!')
-	
+
 	# Get geometry points
 	mPtList = glTools.utils.base.getMPointArray(geometry)
 	ptList = [(i[0],i[1],i[2]) for i in mPtList]
-	
+
 	# Create nParticles
 	nParticle = mc.nParticle(p=ptList,n=prefix+'_nParticle')
-	
+
 	# Connect to geometry
 	mc.connectAttr(geometryTransform+'.worldMatrix[0]',nParticle+'.targetGeometryWorldMatrix',f=True)
 	mc.connectAttr(nParticle+'.targetGeometry',geometryShape+'.'+geometryAttribute,f=True)
-	
+
 	# Return result
 	return nParticle
 
@@ -450,7 +450,7 @@ def connectToNucleus(object,nucleus):
 	# Check nucleus
 	if not isNucleus(nucleus):
 		preNucleusList = mc.ls(type='nucleus')
-	
+
 	# Check nDynamics node
 	if isNDynamicsNode(object):
 		nNode = object
@@ -458,21 +458,21 @@ def connectToNucleus(object,nucleus):
 		nNode = getConnectedNNode(nNode)
 		if not nNode: raise Exception('Object "'+object+'" is not a valid nDynamics node, or connected to a valid nDynamics node!')
 		nNode = nNode[0]
-	
+
 	# Check nRigid
 	if isNRigid(nNode): connectNRigidToNucleus(nNode,nucleus,True)
-	
+
 	# Assign nNode to nucleus solver
 	mc.select(nNode)
 	mm.eval('assignNSolver '+nucleus)
-	
+
 	# Rename new nucleus node
 	if not mc.objExists(nucleus):
 		postNucleusList = mc.ls(type='nucleus')
 		newNucleus = list(set(postNucleusList) - set(preNucleusList))
 		if not newNucleus: raise Exception('Unable to determine new nucleus node attached to "'+object+'"!')
 		nucleus = mc.rename(newNucleus[0],nucleus)
-	
+
 	# Return result
 	mc.select(nucleus)
 	return nucleus
@@ -493,19 +493,19 @@ def connectNRigidToNucleus(nRigid,nucleus,createNucleus=True):
 		nRigid = getConnectedNRigid(nRigid)
 		if not nRigid: raise Exception('Object "'+nRigid+'" is not a valid nRigid node!')
 		nRigid = nRigid[0]
-	
+
 	# Check nucleus
 	if not isNucleus(nucleus):
 		if createNucleus: nucleus = createNucleus(nucleus)
 		else: raise Exception('Object "'+nucleus+'" is not a valid nucleus node!')
-	
+
 	# Get next available index
 	nIndex = glTools.utils.attribute.nextAvailableMultiIndex(nucleus+'.inputPassive',0)
-	
+
 	# Connect to nucleus
 	mc.connectAttr(nRigid+'.currentState',nucleus+'.inputPassive['+str(nIndex)+']')
 	mc.connectAttr(nRigid+'.startState',nucleus+'.inputPassiveStart['+str(nIndex)+']')
-	
+
 	# Return result
 	return nIndex
 
@@ -519,20 +519,20 @@ def deleteUnusedNucleusNodes():
 	'''
 	# Get existsing nucleus nodes
 	nucleusList = mc.ls(type=nucleus)
-	
+
 	# Initialize return list
 	nucleusDel = []
-	
+
 	# Iterate over nodes
 	for nucleus in nucleusList:
-		
+
 		# Check outgoing connections
 		nConn = mc.listConnections(nucleus,s=False,d=True)
 		if not nConn: nucleusDel.append(nucleus)
-	
+
 	# Delete unused nucleus nodes
 	mc.delete(nucleusDel)
-	
+
 	# Return result
 	return nucleusDel
 
@@ -546,11 +546,11 @@ def deleteNCloth(nCloth):
 	connNCloth = getConnectedNCloth(nCloth)
 	if not connNCloth: raise Exception('Object "'+nCloth+'" is not a valid nCloth object!')
 	nCloth = connNCloth[0]
-	
-	# Get connected mesh 
+
+	# Get connected mesh
 	nClothMesh = getConnectedMesh(nCloth)
 	mc.select(nClothMesh)
-	
+
 	# Remove nCloth
 	mm.eval('nClothRemove')
 
@@ -570,10 +570,10 @@ def getVertexWeights(nCloth,attr):
 	connNCloth = getConnectedNCloth(nCloth)
 	if not connNCloth: raise Exception('Object "'+nCloth+'" is not a valid nCloth object!')
 	nCloth = connNCloth[0]
-		
+
 	# Get vertex weights
 	wt = mc.getAttr(nCloth+'.'+attr+'PerVertex')
-	
+
 	# Return Result
 	return wt
 
@@ -591,7 +591,7 @@ def setVertexWeights(nCloth,attr,wt):
 	connNCloth = getConnectedNCloth(nCloth)
 	if not connNCloth: raise Exception('Object "'+nCloth+'" is not a valid nCloth object!')
 	nCloth = connNCloth[0]
-	
+
 	# Set vertex weights
 	mc.setAttr(nCloth+'.'+attr+'PerVertex',list(wt),type='doubleArray')
 
@@ -601,11 +601,11 @@ def saveWeightList(nCloth,attr,filePath=None,force=False):
 	# Build Weight List
 	wt = getVertexWeights(nCloth,attr)
 	wtList = WeightList(wt)
-	
+
 	# Save Weight List
 	if filePath: filePath = wtList.saveAs(filePath,force)
 	else: filePath = wtList.saveAs()
-	
+
 	# Return Result
 	return filePath
 
@@ -615,10 +615,10 @@ def loadWeightList(nCloth,attr,filePath=None,apply=True):
 	# Load Weight List
 	wt = WeightList()
 	wt = wt.load(filePath)
-	
+
 	# Apply Weight List
 	if apply: setVertexWeights(nCloth,attr,wt)
-	
+
 	# Return Result
 	return wt
 
@@ -639,21 +639,21 @@ def loadWeightMap(nCloth,attr,filePath,loadAsVertexMap=False):
 	connNCloth = getConnectedNCloth(nCloth)
 	if not connNCloth: raise Exception('Object "'+nCloth+'" is not a valid nCloth object!')
 	nCloth = connNCloth[0]
-	
+
 	# Check file path
 	if not os.path.isfile(filePath):
 		raise Exception('Weight map file path "'+filePath+'" does not exist!')
-	
+
 	# Create file node
 	fileName = os.path.basename(filePath)
 	fileName = fileName.replace('.'+fileName.split('.')[-1],'')
 	fileNode = mc.shadingNode('file',asTexture=True,n=fileName)
 	mc.setAttr(fileNode+'.fileTextureName',filePath,type='string')
-	
+
 	# Connect to nCloth
 	mc.connectAttr(fileNode+'.outAlpha',nCloth+'.'+attr+'Map',f=True)
 	mc.setAttr(nCloth+'.'+attr+'MapType',2) # Texture Map
-	
+
 	# Convert to vertex map
 	if loadAsVertexMap:
 		mc.nBase(nCloth,e=True,textureToVertex=attr+'Map')

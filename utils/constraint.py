@@ -20,17 +20,17 @@ def isBaked(constraint):
 	# Check Constraint
 	if not isConstraint(constraint):
 		raise Exception('Constraint "'+constraint+'" does not exist!!')
-	
+
 	# Get Constraint Slave
 	cSlave = slave(constraint)
-	
+
 	# Get Slave Channels
 	cSlaveAttrs = mc.listConnections(constraint,s=False,d=True,p=True) or []
 	slaveAttrs = [i.split('.')[-1] for i in attrList if i.startswith(slave+'.')] or []
-	
+
 	# Check Slave Channels
 	if slaveAttrs: return False
-	
+
 	# Return Result
 	return False
 
@@ -43,7 +43,7 @@ def targetList(constraint):
 	# Check Constraint
 	if not isConstraint(constraint):
 		raise Exception('Constraint "'+constraint+'" does not exist!!')
-	
+
 	# Get Target List
 	targetList = []
 	constraintType = mc.objectType(constraint)
@@ -56,10 +56,10 @@ def targetList(constraint):
 	elif constraintType == 'poleVectorConstraint': targetList = mc.poleVectorConstraint(constraint,q=True,tl=True)
 	elif constraintType == 'scaleConstraint': targetList = mc.scaleConstraint(constraint,q=True,tl=True)
 	elif constraintType == 'tangentConstraint': targetList = mc.tangentConstraint(constraint,q=True,tl=True)
-	
+
 	# Check Target List
 	if not targetList: targetList = []
-	
+
 	# Return Result
 	return targetList
 
@@ -87,7 +87,7 @@ def targetAliasList(constraint):
 	# Check Constraint
 	if not isConstraint(constraint):
 		raise Exception('Constraint "'+constraint+'" does not exist!!')
-	
+
 	# Get Target List
 	targetList = []
 	constraintType = mc.objectType(constraint)
@@ -100,10 +100,10 @@ def targetAliasList(constraint):
 	elif constraintType == 'poleVectorConstraint': targetList = mc.poleVectorConstraint(constraint,q=True,weightAliasList=True)
 	elif constraintType == 'scaleConstraint': targetList = mc.scaleConstraint(constraint,q=True,weightAliasList=True)
 	elif constraintType == 'tangentConstraint': targetList = mc.tangentConstraint(constraint,q=True,weightAliasList=True)
-	
+
 	# Check Target List
 	if not targetList: targetList = []
-	
+
 	# Return Result
 	return targetList
 
@@ -118,21 +118,21 @@ def targetAlias(constraint,target):
 	# Check Constraint
 	if not isConstraint(constraint):
 		raise Exception('Object "'+constraint+'" is not a valid constraint node!')
-	
-	# Get Target List 
+
+	# Get Target List
 	conTargetList = targetList(constraint)
 	if not conTargetList.count(target):
 		raise Exception('Constraint "'+constraint+'" has no target "'+target+'"!')
-	
+
 	# Get Target Alias List
 	conTargetAliasList = targetAliasList(constraint)
-	
+
 	# Get Target Index
 	targetIndex = conTargetList.index(target)
-	
+
 	# Get Target Alias
 	targetAlias = conTargetAliasList[targetIndex]
-	
+
 	# Return Result
 	return targetAlias
 
@@ -145,13 +145,13 @@ def slaveList(constraint):
 	# Check constraint
 	if not mc.objExists(constraint): raise Exception('Constraint '+constraint+' does not exist!!')
 	constraintType = mc.objectType(constraint)
-	
+
 	# Get slave list
 	#targetList = []
 	#[targetList.append(i) for i in mc.listConnections(constraint,s=False,d=True) if not targetList.count(i)]
 	#if targetList.count(constraint): targetList.remove(constraint)
 	targetList = mc.listConnections(constraint+'.constraintParentInverseMatrix',s=True,d=False) or []
-	
+
 	# Return result
 	return targetList
 
@@ -185,48 +185,48 @@ def blendConstraint(targetList,slave,blendNode='',blendAttr='bias',maintainOffse
 	'''
 	# Check prefix
 	if not prefix: prefix = slave
-	
+
 	# Check targets
 	if len(targetList) != 2: raise Exception('Target list must contain 2 target transform!')
 	for target in targetList:
 		if not mc.objExists(target):
 			raise Exception('Target transform "'+target+'" does not exist!')
-	
+
 	# Check slave
 	if not mc.objExists(slave):
 		raise Exception('Slave transform "'+slave+'" does not exist!')
-	
+
 	# Check blendNode
 	if not blendNode: blendNode = slave
-	
+
 	# Create constraint
 	constraint = mc.parentConstraint(targetList,slave,mo=maintainOffset,n=prefix+'_parentConstraint')[0]
 	constraintAlias = mc.parentConstraint(constraint,q=True,wal=True)
-	
+
 	# Create blend
 	mc.addAttr(blendNode,ln=blendAttr,min=0,max=1,dv=0.5,k=True)
 	blendSub = mc.createNode('plusMinusAverage',n=prefix+'_plusMinusAverage')
 	mc.setAttr(blendSub+'.operation',2) # Subtract
 	mc.setAttr(blendSub+'.input1D[0]',1.0)
 	mc.connectAttr(blendNode+'.'+blendAttr,blendSub+'.input1D[1]',f=True)
-	
+
 	# Connect Blend
 	mc.connectAttr(blendSub+'.output1D',constraint+'.'+constraintAlias[0],f=True)
 	mc.connectAttr(blendNode+'.'+blendAttr,constraint+'.'+constraintAlias[1],f=True)
-	
+
 	# Return result
 	return blendNode+'.'+blendAttr
 
 def rounding(transformList,control,attr='round',prefix=''):
 	'''
 	Create rounding constraint.
-	
+
 	Given 5 transforms [1,2,3,4,5]:
 		Transform 2 will be constrainted between 1 and 3.
 		Transform 4 will be constrainted between 3 and 5.
-	
+
 	The attribute control.attr controls the weights of the constraint.
-	
+
 	@param transformList: Specify 5 transforms used for constraint
 	@type transformList: list
 	@param control: Control that contains attribute for controlling constraint weight
@@ -240,24 +240,24 @@ def rounding(transformList,control,attr='round',prefix=''):
 	if len(transformList) != 5: raise Exception('Supply exactly 5 valid transforms to the transformList list argument!')
 	# Check control
 	if not mc.objExists(control): raise Exception('Object "'+control+'" does not exist!')
-	
+
 	# Check prefix
 	if not prefix: prefix = glTools.utils.stringUtils.stripSuffix(control)
-	
+
 	# Ensure attr exists and in keyable
 	if not mc.objExists(control+'.'+attr):
 		mc.addAttr(control,ln=attr,at='double',min=0.0,max=1.0,dv=0.5,k=True)
-	
+
 	# Create point constraints
 	pointConstraint1 = prefix+'_round_01_pointConstraint'
 	pointConstraint1 = mc.pointConstraint([transformList[2],transformList[0]],transformList[1],w=1,mo=False,n=pointConstraint1)[0]
 	pointConstraint2 = prefix+'_round_02_pointConstraint'
 	pointConstraint2 = mc.pointConstraint([transformList[2],transformList[4]],transformList[3],w=1,mo=False,n=pointConstraint2)[0]
-	
+
 	# Get target alias lists
 	targetAliasList1 = targetAliasList(pointConstraint1)
 	targetAliasList2 = targetAliasList(pointConstraint2)
-	
+
 	# Setup constraint weight control
 	mc.connectAttr(control+'.'+attr,pointConstraint1+'.'+targetAliasList1[1],force=True)
 	mc.connectAttr(control+'.'+attr,pointConstraint2+'.'+targetAliasList2[1],force=True)
@@ -266,7 +266,7 @@ def rounding(transformList,control,attr='round',prefix=''):
 	mc.connectAttr(control+'.'+attr, reverseNode+'.inputX',force=True)
 	mc.connectAttr(reverseNode+'.outputX',pointConstraint1+'.'+targetAliasList1[0],force=True)
 	mc.connectAttr(reverseNode+'.outputX',pointConstraint2+'.'+targetAliasList2[0],force=True)
-	
+
 	# Return point constraints
 	return [pointConstraint1,pointConstraint2]
 

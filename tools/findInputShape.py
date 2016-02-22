@@ -11,12 +11,12 @@ def findInputShape(shape):
 	'''
 	# Get MObject for shape
 	shapeObj = getMObject(shape)
-	
+
 	# Get inMesh connection
 	inMeshConn = mc.listConnections(shape+'.inMesh')
 	if not inMeshConn:
 		raise Exception('Mesh attribute "'+shape+'.inMesh" has no incoming connections!')
-	
+
 	# Find connected deformer
 	deformerObj = getMObject(inMeshConn[0])
 	if not deformerObj.hasFn(OpenMaya.MFn.kGeometryFilt):
@@ -25,14 +25,14 @@ def findInputShape(shape):
 			raise Exception('Shape node "'+shape+'" is not affected by any valid deformers!')
 		else:
 			deformerObj = getMObject(deformerHist[0])
-	
+
 	# Get deformer function set
 	deformerFn = OpenMayaAnim.MFnGeometryFilter(deformerObj)
-	
+
 	# Get input shape for deformer
 	geomIndex = deformerFn.indexForOutputShape(shapeObj)
 	inputShapeObj = deformerFn.inputShapeAtIndex(geomIndex)
-	
+
 	# Return result
 	return OpenMaya.MFnDependencyNode(inputShapeObj).name()
 
@@ -45,12 +45,12 @@ def getMObject(object):
 	# Check input object
 	if not mc.objExists(object):
 		raise UserInputError('Object "'+object+'" does not exist!!')
-	
+
 	# Get selection list
 	selectionList = OpenMaya.MSelectionList()
 	OpenMaya.MGlobal.getSelectionListByName(object,selectionList)
 	mObject = OpenMaya.MObject()
 	selectionList.getDependNode(0,mObject)
-	
+
 	# Return result
 	return mObject

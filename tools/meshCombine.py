@@ -2,7 +2,7 @@ import maya.cmds as mc
 import maya.mel as mm
 
 class MeshCombineUtilities(object):
-	
+
 	def __init__(self):
 		pass
 
@@ -25,7 +25,7 @@ class MeshCombineUtilities(object):
 				raise Exception('Object '+obj+' does not exist!')
 		if mc.objExists(new_name):
 			raise Exception('An object of name '+new_name+' already exists! Please choose another name!')
-		
+
 		# Combine multiple mesh objects to a single mesh
 		new_obj = mc.polyUnite(objs, n=new_name)
 		mc.addAttr( new_obj[0], ln='origNames', dt='string', multi=True)
@@ -35,9 +35,9 @@ class MeshCombineUtilities(object):
 		# Delete history
 		if not keepHistory : mc.delete(new_obj[1])
 		mc.delete(objs)
-		
+
 		return new_obj[0]
-	
+
 	def separate(self, obj):
 		'''
 		Seperates the geometry that has been combined with the combine method.
@@ -48,14 +48,14 @@ class MeshCombineUtilities(object):
 		# Check origNames attribute
 		if not mc.objExists(obj+'.origNames'):
 			raise Exception('Object '+obj+' does not have a "origNames" attribute!')
-		
+
 		origNamesIsMulti = True
 		if not mc.addAttr(obj+'.origNames',q=True,multi=True):
 			origNamesIsMulti = False
 			# Need to phase out the old format origNames attribute
 			#-------------------------------------------------------
 			#raise Exception(obj+'.origNames attribute is not in the correct format! Please run MeshCombineUtilities.updateOrigNamesFormat().')
-		
+
 		# Deal with scene namespace
 		scene_ns = mm.eval('getOfficialNS')
 		mm.eval('pauseNS')
@@ -67,7 +67,7 @@ class MeshCombineUtilities(object):
 		objs = []
 		try: objs = mc.polySeparate(obj,ch=1)
 		except: raise Exception('Separate failed on object "'+obj+'"!')
-		
+
 		# Get original names list
 		nameList=[]
 		if origNamesIsMulti:
@@ -76,7 +76,7 @@ class MeshCombineUtilities(object):
 		else:
 			for attr in mc.listAttr(obj+'.origNames')[1:]:
 				nameList.append( mc.getAttr(obj+'.origNames.'+attr) )
-		
+
 		# Rename separated objects
 		for i in range(len(nameList)):
 			nameList[i] = mc.rename(objs[i],ns+nameList[i])
@@ -87,17 +87,17 @@ class MeshCombineUtilities(object):
 				mc.parent(nameList[i],ns+'model')
 			else:
 				mc.parent(nameList[i], w=1 )
-		
+
 		# Cleanup:
 		# Removed rename of original objects: Objects that are referenced can't be renamed #
 		orig_child = mc.listRelatives(obj_fPath, c=1, ni=1, pa=True)
-		for i in orig_child: 
+		for i in orig_child:
 			if mc.listRelatives(i): mc.delete(i)
-		
+
 		# handle namespace
 		mm.eval('setNS("'+scene_ns+'")')
 		return nameList
-	
+
 	def separateAll(self):
 		'''
 		This is a wrapper of the 'seperate' command. 'seperateAll' will
@@ -109,15 +109,15 @@ class MeshCombineUtilities(object):
 		allSeperatedObjs=[]
 		for ns in all_ns:
 			allSeperatedObjs.extend( self.separateActor(ns) )
-		
+
 		# Return result
 		return allSeperatedObjs
-	
+
 	def separateActor(self, ns=''):
 		'''
 		This is a wrapper of the 'separate' command. 'separateActor' will
 		look at the provided namespace in the scene and model node within that for meshes that
-		have been combined using the 'combine'. Then it will separate the 
+		have been combined using the 'combine'. Then it will separate the
 		found objects.
 		@param ns: Namespace of the actor you want to separate
 		@type ns: str
@@ -128,7 +128,7 @@ class MeshCombineUtilities(object):
 		if not mc.objExists(ns+'model'):
 			print('Actor "'+ns+'" has no model group!')
 			return []
-		
+
 		# Iterate through mesh shapes
 		meshList = mc.listRelatives(ns+'model',ad=1,pa=True,type='mesh')
 		if not meshList: return []
@@ -143,16 +143,16 @@ class MeshCombineUtilities(object):
 			# Check current mesh against meshParentList
 			if not meshParentList.count(meshParent):
 				meshParentList.append(meshParent)
-		
+
 		# Separate
 		allSeperatedObjs=[]
 		for mesh in meshParentList:
 			print "Separating : "+ mesh
 			allSeperatedObjs.extend( self.separate(mesh) )
-		
+
 		# Return result
 		return allSeperatedObjs
-	
+
 	def getOriginalNames(self, obj):
 		'''
 		Get the meshOrigNames stored on an object that has been combined with glTools.common.MeshCombineUtilities.combine()
@@ -163,13 +163,13 @@ class MeshCombineUtilities(object):
 			raise Exception('Object '+obj+' does not have a "origNames" attribute!')
 		if not mc.addAttr(obj+'.origNames',q=True,multi=True):
 			raise Exception(obj+'.origNames attribute is not in the correct format! Please run MeshCombineUtilities.updateOrigNamesFormat().')
-		
+
 		origNamesList = []
 		for i in range(mc.getAttr(obj+'.origNames',s=True)):
 			origNamesList.append(mc.getAttr(obj+'.origNames['+str(i)+']'))
-		
+
 		return origNamesList
-	
+
 	def setOriginalNames(self, name_list, obj):
 		'''
 		Set the meshOrigNames stored on an object that has been combined with glTools.common.MeshCombineUtilities.combine()
@@ -189,7 +189,7 @@ class MeshCombineUtilities(object):
 		# Set original name values
 		for i in range(len(name_list)):
 			mc.setAttr( obj+'.origNames['+str(i)+']', name_list[i], type='string')
-	
+
 	def updateOrigNamesFormat(self,objectList=[]):
 		'''
 		Update a combined meshes origNames attribute to the newest format.
@@ -199,17 +199,17 @@ class MeshCombineUtilities(object):
 		# Confirm list
 		if type(objectList) == str:
 			objectList = [objectList]
-		
+
 		# Iterate through object list
 		for obj in objectList:
-			
+
 			# Check origNames attribute
 			if not mc.objExists(obj+'.origNames'):
 				raise Exception('Object '+obj+' does not have a "origNames" attribute!')
 			if mc.addAttr(obj+'.origNames',q=True,multi=True):
 				print(obj+'.origNames is already in the correct format.')
 				continue
-			
+
 			# Extract original names list from old format
 			origNamesList = []
 			index = 0
@@ -218,13 +218,13 @@ class MeshCombineUtilities(object):
 					origNamesList.append(mc.getAttr(obj+'.origNames.origNames_'+str(index)))
 					index+=1
 				else: break
-			
+
 			# Re-create the origNames attribute in the new format
 			mc.deleteAttr(obj+'.origNames')
 			mc.addAttr(obj,ln='origNames',dt='string',multi=True)
 			for i in range(len(origNamesList)):
 				mc.setAttr( obj+'.origNames['+str(i)+']', origNamesList[i], type='string')
-	
+
 	def updateActorOrigNames(self,ns=''):
 		'''
 		Update all combined meshes origNames attribute for a specified actor namespace.
@@ -235,7 +235,7 @@ class MeshCombineUtilities(object):
 		allSeperatedObjs=[]
 		if not mc.objExists(ns+'model'):
 			raise Exception('Object "'+ns+'model" does not exist!')
-		
+
 		# Iterate through mesh shapes
 		meshList = mc.listRelatives(ns+'model',ad=1,ni=1,pa=True,type='mesh')
 		meshParentList = []
@@ -244,4 +244,4 @@ class MeshCombineUtilities(object):
 			if not mc.objExists(meshParent+".origNames"): continue
 			print "Updating: "+ meshParent
 			self.updateOrigNamesFormat([meshParent])
-	
+

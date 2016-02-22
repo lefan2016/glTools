@@ -2,16 +2,16 @@ import maya.cmds as mc
 import copy
 
 class SymmetryTable(object):
-	
+
 	def __init__(self):
-		
+
 		self.symTable = []
 		self.asymTable = []
 		self.positiveVertexList = []
 		self.positiveIndexList = []
 		self.negativeVertexList = []
 		self.negativeIndexList = []
-		
+
 	def buildSymTable(self,mesh,axis=0,tol=0.001,usePivot=False):
 		'''
 		Build symmetry table for specified mesh
@@ -34,16 +34,16 @@ class SymmetryTable(object):
 		aPosVertTrans=[]
 		aVtxTrans=[]
 		aVtx2Trans=[]
-		
+
 		# Set constants
 		mAxisInd = axis
 		axis2Ind = (mAxisInd + 1) % 3
 		axis3Ind = (mAxisInd + 2) % 3
 		midOffsetTol = -0.0000001
-		
+
 		# Reset counter
 		vertCounter = 0
-		
+
 		# Check pivot
 		if usePivot:
 			aVtxTrans = mc.xform(mesh,q=True,ws=True,rp=True)
@@ -54,12 +54,12 @@ class SymmetryTable(object):
 				meshParent = mc.listRelatives(mesh,p=True)[0]
 			bBox = mc.xform(meshParent,q=True,ws=True,boundingBox=True)
 			mid = bBox[mAxisInd] + ((bBox[mAxisInd+3] - bBox[mAxisInd])/2)
-		
+
 		# Get total verts
 		totVtx = mc.polyEvaluate(mesh,v=True)
 		# Initialize abSymTable
 		abSymTable = range(int(totVtx))
-		
+
 		# Determin pos and neg verts
 		for i in range(totVtx):
 			vtx = mesh+'.vtx['+str(i)+']'
@@ -75,13 +75,13 @@ class SymmetryTable(object):
 					aNegVerts.append(vtx)
 					aNegVertsInt.append(i)
 					aNegVertTrans.append(aVtxTrans[mAxisInd])
-		
+
 		# Update class member variabels
 		self.positiveVertexList = copy.deepcopy(aPosVerts)
 		self.positiveIndexList = copy.deepcopy(aPosVertsInt)
 		self.negativeVertexList = copy.deepcopy(aNegVerts)
 		self.negativeIndexList = copy.deepcopy(aNegVertsInt)
-		
+
 		# Find Non-Symmetrical verts
 		for i in range(len(aPosVerts)):
 			vtx = aPosVerts[i]
@@ -90,7 +90,7 @@ class SymmetryTable(object):
 				aPosVerts[i] = 'm'
 				vertCounter+=1
 				continue
-			
+
 			for j in range(len(aNegVerts)):
 				if aNegVerts[j] == 'm': continue
 				negOffset = mid - aNegVertTrans[j]
@@ -98,7 +98,7 @@ class SymmetryTable(object):
 					aNegVerts[j] = 'm'
 					vertCounter+=1
 					continue
-				
+
 				if abs(posOffset-negOffset) <= tol:
 					aVtxTrans = mc.xform(vtx,q=True,ws=True,t=True)
 					aVtx2Trans = mc.xform(aNegVerts[j],q=True,ws=True,t=True)
@@ -111,21 +111,21 @@ class SymmetryTable(object):
 						vertCounter += 2
 						aPosVerts[i] = aNegVerts[j] = 'm'
 						break
-		
+
 		# Determine asymmetrical vertices
 		aNonSymVerts = []
 		[aNonSymVerts.append(i) for i in aPosVerts if i != 'm']
 		[aNonSymVerts.append(i) for i in aNegVerts if i != 'm']
-		
+
 		if vertCounter != totVtx:
 			print 'Warning: Mesh object "'+mesh+'" is not symmetrical!'
-		
+
 		# Update class member variabels
 		self.symTable = abSymTable
 		self.asymTable = aNonSymVerts
-		
+
 		# =================
 		# - Return Result -
 		# =================
-		
+
 		return self.symTable

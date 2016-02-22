@@ -12,13 +12,13 @@ class DependencyHierarchyNode( object ):
 	'''
 
 	def __init__(self):
-		
+
 		self.fullName = ''
 		self.shortName = ''
 		self.parent = None
 		self.childList = []
 		self.childCache = {}
-		
+
 	def buildHierarchyFromNode(self,root):
 		'''
 		This will map an entire hierarchy from a given root node.
@@ -27,17 +27,17 @@ class DependencyHierarchyNode( object ):
 		'''
 		# Check root exists
 		if not mc.objExists(root): raise UserInputError('Root object '+root+' does not exists!')
-		
+
 		# Get root information
 		self.fullName = mc.ls(root,l=True)[0]
 		self.shortName = self.fullName.split('|')[1]
 		self.parent = None
 		self.childList = []
 		self.childCache = {}
-		
+
 		# Traverse all decendant children
 		self.mapDecendants(recursive=True)
-	
+
 	def mapDecendants(self,recursive=True):
 		'''
 		Finds maya DAG children for the current object and records hierarchy information to class member array types
@@ -46,10 +46,10 @@ class DependencyHierarchyNode( object ):
 		'''
 		# Get dag children
 		children = mc.listRelatives(self.fullName,c=True,pa=True,type=['transform','joint','ikHandle'])
-		
+
 		# Escape if no children
 		if not children: return
-		
+
 		# Build child array
 		for child in children:
 			childNode = DependencyHierarchyNode()
@@ -62,7 +62,7 @@ class DependencyHierarchyNode( object ):
 		if recursive:
 			for childNode in self.childList:
 				childNode.mapDecendants(recursive=True)
-		
+
 	def getDependPath(self,delineator='|'):
 		'''
 		Return the dependency based path for the current node
@@ -75,7 +75,7 @@ class DependencyHierarchyNode( object ):
 			path = parent.shortName+delineator+path
 			parent = parent.parent
 		return path
-	
+
 	def getGeneration(self):
 		'''
 		Return the dependency depth (generation) for the current node
@@ -86,7 +86,7 @@ class DependencyHierarchyNode( object ):
 			generation += 1
 			parent = parent.parent
 		return generation
-	
+
 	def findDependNode(self,fullName):
 		'''
 		Find and return the node representing the specified maya object.
@@ -96,7 +96,7 @@ class DependencyHierarchyNode( object ):
 		# Check node exists
 		if not mc.objExists(fullName): raise UserInputError('Object '+fullName+' does not exists!')
 		fullName = mc.ls(fullName,l=True)[0]
-		
+
 		# Search for node in hierarchy
 		dependNode = None
 		if self.fullName == fullName: return self
@@ -107,7 +107,7 @@ class DependencyHierarchyNode( object ):
 			dependNode = child.findDependNode(fullName)
 			if dependNode: break
 		return dependNode
-	
+
 	def reparent(self,newParentNode):
 		'''
 		Reparent the current object node under another object node
@@ -117,26 +117,26 @@ class DependencyHierarchyNode( object ):
 		# Check nodes exist
 		if not mc.objExists(self.fullName): raise UserInputError('Child object '+child+' does not exists!')
 		if not mc.objExists(newParentNode.fullName): raise UserInputError('Parent object '+newParentNode.shortName+' does not exists!')
-		
+
 		# Get current parent node
 		currentParentNode = self.parent
-		
+
 		# Check parent is not the current node
 		if self.fullName == newParentNode.fullName: return
 		# Check current node is not already a child of parent
 		if currentParentNode.fullName == newParentNode.fullName: return
 		# Check parent is not a decendant of child
 		if self.findDependNode(newParentNode.fullName): raise UserInputError('Object "'+newParentNode.shortName+'" is a decendant of "'+self.shortName+'"!! Unable to perform reparent!')
-		
+
 		# Break old child/parent connections
 		currentParentNode.childCache.pop(self.fullName)
 		currentParentNode.childList.remove(self)
-		
+
 		# Make new child/parent connections
 		self.parent = newParentNode
 		newParentNode.childList.append(self)
 		newParentNode.childCache[self.fullName] = self
-		
+
 	def flatList(self,longNames=False):
 		'''
 		Return a dependency node name list from the current hierarchy
@@ -148,7 +148,7 @@ class DependencyHierarchyNode( object ):
 		else:		flatList.append(self.shortName)
 		flatList.extend(self.listChildren(longNames=longNames,recursive=True))
 		return flatList
-	
+
 	def flatListNodes(self):
 		'''
 		Return a dependency node list from the current hierarchy
@@ -157,7 +157,7 @@ class DependencyHierarchyNode( object ):
 		nodeList.append(self)
 		nodeList.extend(self.listChildNodes(recursive=True))
 		return nodeList
-	
+
 	def listChildren(self,longNames=False,recursive=False):
 		'''
 		Return a flat list of child dependency nodes
@@ -173,7 +173,7 @@ class DependencyHierarchyNode( object ):
 		for child in self.childList:
 			if recursive: childList.extend(child.listChildren(longNames=longNames,recursive=True))
 		return childList
-	
+
 	def listChildNodes(self,longNames=False,recursive=False):
 		'''
 		Return a flat list of child dependency nodes
@@ -185,7 +185,7 @@ class DependencyHierarchyNode( object ):
 		for child in self.childList:
 			if recursive: childList.extend(child.listChildNodes(recursive=True))
 		return childList
-	
+
 	def generationDict(self):
 		'''
 		Create a generation based dictionary of all nodes in the dependency hierarchy.
@@ -196,7 +196,7 @@ class DependencyHierarchyNode( object ):
 			if not generationDict.has_key(gen): generationDict[gen] = []
 			generationDict[gen].append(node.shortName)
 		return generationDict
-	
+
 	def generationList(self):
 		'''
 		Create a list of all dependency hierarchy nodes in order of generation.
@@ -207,4 +207,4 @@ class DependencyHierarchyNode( object ):
 		generationDictKeys.sort()
 		for key in generationDictKeys: generationList.extend(generationDict[key])
 		return generationList
-		
+

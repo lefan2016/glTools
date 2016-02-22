@@ -28,13 +28,13 @@ def add(surface,targetList,surfacePointsNode='',alignTo='u',rotate=True,tangentU
 	# Check surface
 	if not glTools.utils.surface.isSurface(surface):
 		raise Exception('Object "" is not a valid nurbs surface!!')
-	
+
 	# Check prefix
 	if not prefix: prefix = glTools.utils.stringUtils.stripSuffix(surface)
-	
+
 	# Check targetList
 	if not targetList: raise Exception('Invalid target list!!')
-	
+
 	# Check surfacePoints node
 	if not surfacePointsNode:
 		surfacePointsNode = prefix+'surfacePoints'
@@ -53,17 +53,17 @@ def add(surface,targetList,surfacePointsNode='',alignTo='u',rotate=True,tangentU
 		axisDict = {'x':0,'y':1,'z':2,'-x':3,'-y':4,'-z':5}
 		mc.setAttr(surfacePointsNode+'.tangentUAxis',axisDict[tangentUAxis])
 		mc.setAttr(surfacePointsNode+'.tangentVAxis',axisDict[tangentVAxis])
-	
+
 	# Find next available input index
 	nextIndex = getNextAvailableIndex(surfacePointsNode)
-	
+
 	# Create surface constraints
 	transformList = []
 	for i in range(len(targetList)):
-		
+
 		# Get current input index
 		ind = glTools.utils.stringUtils.stringIndex(i+1,2)
-		
+
 		# Initialize UV parameter variable
 		uv = (0.0,0.0)
 		pos = (0.0,0.0,0.0)
@@ -81,13 +81,13 @@ def add(surface,targetList,surfacePointsNode='',alignTo='u',rotate=True,tangentU
 				pos = mc.pointOnSurface(surface,u=uv[0],v=uv[1],p=True)
 		paramU = uv[0]
 		paramV = uv[1]
-		
+
 		# Get surface point information
 		pnt = mc.pointOnSurface(surface,u=paramU,v=paramV,p=True)
 		normal = mc.pointOnSurface(surface,u=paramU,v=paramV,nn=True)
 		tangentU = mc.pointOnSurface(surface,u=paramU,v=paramV,ntu=True)
 		tangentV = mc.pointOnSurface(surface,u=paramU,v=paramV,ntv=True)
-		
+
 		# Clamp param to safe values
 		minU = mc.getAttr(surface+'.minValueU')
 		maxU = mc.getAttr(surface+'.maxValueU')
@@ -97,26 +97,26 @@ def add(surface,targetList,surfacePointsNode='',alignTo='u',rotate=True,tangentU
 		elif paramU > (maxU-0.001): paramU = maxU
 		if paramV < (minV+0.001): paramV = minV
 		elif paramV > (maxV-0.001): paramV = maxV
-		
+
 		# Create constraint transform
 		transform = prefix+'_surfacePoint'+ind+'_transform'
 		transform = mc.createNode('transform',n=transform)
 		transformList.append(transform)
-		
+
 		# Add param attributes
 		mc.addAttr(transform,ln='param',at='compound',numberOfChildren=2)
 		mc.addAttr(transform,ln='paramU',at='double',min=minU,max=maxU,dv=paramU,k=True,p='param')
 		mc.addAttr(transform,ln='paramV',at='double',min=minV,max=maxV,dv=paramV,k=True,p='param')
-		
+
 		# Connect to surfacePoints node
 		#mc.setAttr(surfacePointsNode+'.offset['+ind+']',offsetU,offsetV,offsetN)
 		mc.connectAttr(transform+'.param',surfacePointsNode+'.param['+ind+']',f=True)
 		mc.connectAttr(transform+'.parentMatrix',surfacePointsNode+'.targetMatrix['+ind+']',f=True)
-		
+
 		# Connect to transform
 		mc.connectAttr(surfacePointsNode+'.outTranslate['+ind+']',transform+'.translate',f=True)
 		if rotate: mc.connectAttr(surfacePointsNode+'.outRotate['+ind+']',transform+'.rotate',f=True)
-	
+
 	# Return result
 	return (surfacePointsNode,transformList)
 
@@ -130,17 +130,17 @@ def getNextAvailableIndex(surfacePointsNode):
 	OpenMaya.MGlobal.getSelectionListByName(surfacePointsNode,sel)
 	obj = OpenMaya.MObject()
 	sel.getDependNode(0,obj)
-	
+
 	# Get param plug
 	paramPlug = OpenMaya.MFnDependencyNode(obj).findPlug('param')
-	
+
 	# Get valid index list
 	indexList = OpenMaya.MIntArray()
 	paramPlug.getExistingArrayAttributeIndices(indexList)
-	
+
 	# Determine next available index
 	nextIndex = 0
 	if indexList.length(): nextIndex = indexList[-1] + 1
-	
+
 	# Return next available index
 	return nextIndex

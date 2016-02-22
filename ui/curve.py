@@ -34,10 +34,10 @@ def locatorCurveUI():
 	# Buttons
 	createB = mc.button('locatorCurveCreateB',l='Create',c='glTools.ui.curve.locatorCurveFromUI(False)')
 	cancelB = mc.button('locatorCurveCancelB',l='Cancel',c='mc.deleteUI("'+window+'")')
-	
+
 	# TFB commands
 	mc.textFieldButtonGrp(curveTFB,e=True,bc='glTools.ui.utils.loadCurveSel("'+curveTFB+'","'+prefixTFG+'")')
-	
+
 	# Show Window
 	mc.showWindow(window)
 
@@ -98,13 +98,13 @@ def attachToCurveUI():
 	# Buttons
 	createB = mc.button('attachToCurveCreateB',l='Create',c='glTools.ui.curve.attachToCurveFromUI(False)')
 	cancelB = mc.button('attachToCurveCancelB',l='Cancel',c='mc.deleteUI("'+window+'")')
-	
+
 	# UI callback commands
 	mc.textFieldButtonGrp(curveTFB,e=True,bc='glTools.ui.utils.loadCurveSel("'+curveTFB+'")')
 	mc.textFieldButtonGrp(transformTFB,e=True,bc='glTools.ui.utils.loadObjectSel("'+transformTFB+'","'+prefixTFG+'")')
 	mc.textFieldButtonGrp(upVectorObjectTFB,e=True,bc='glTools.ui.utils.loadObjectSel("'+upVectorObjectTFB+'")')
 	mc.checkBoxGrp(closestPointCBG,e=True,cc='glTools.ui.utils.checkBoxToggleControl("'+closestPointCBG+'","'+parameterFSG+'",invert=True)')
-	
+
 	# Show Window
 	mc.showWindow(window)
 
@@ -156,7 +156,7 @@ def curveToLocatorsUI():
 	# Buttons
 	createB = mc.button('attachToCurveCreateB',l='Create',c='glTools.ui.curve.curveToLocatorsFromUI(False)')
 	cancelB = mc.button('attachToCurveCancelB',l='Cancel',c='mc.deleteUI("'+window+'")')
-	
+
 	# Form Layout
 	mc.formLayout(fl,e=True,af=[(curveTFB,'top',5),(curveTFB,'left',5),(curveTFB,'right',5)])
 	mc.formLayout(fl,e=True,ac=[(locListTSL,'top',5,curveTFB),(locListTSL,'bottom',5,locAddB)])
@@ -168,10 +168,10 @@ def curveToLocatorsUI():
 	mc.formLayout(fl,e=True,ac=[(createB,'bottom',1,cancelB)])
 	mc.formLayout(fl,e=True,af=[(createB,'left',5),(createB,'right',5)])
 	mc.formLayout(fl,e=True,af=[(cancelB,'bottom',5),(cancelB,'left',5),(cancelB,'right',5)])
-	
+
 	# TFB commands
 	mc.textFieldButtonGrp(curveTFB,e=True,bc='glTools.ui.utils.loadCurveSel("'+curveTFB+'")')
-	
+
 	# Show Window
 	mc.showWindow(window)
 
@@ -202,7 +202,7 @@ def createAlongCurveUI():
 	window = 'createAlongCurveUI'
 	if mc.window(window,q=True,ex=1): mc.deleteUI(window)
 	window = mc.window(window,t='Create Along Curve')
-	
+
 	# Layout
 	cl = mc.columnLayout()
 	# Curve
@@ -221,15 +221,15 @@ def createAlongCurveUI():
 	# Min/Max Percent
 	minPercentFFG = mc.floatSliderGrp('createAlongCurveMinFSG',label='Min Percent',field=True,minValue=0.0,maxValue=1.0,fieldMinValue=0.0,fieldMaxValue=1.0,value=0.0)
 	maxPercentFFG = mc.floatSliderGrp('createAlongCurveMaxFSG',label='Max Percent',field=True,minValue=0.0,maxValue=1.0,fieldMinValue=0.0,fieldMaxValue=1.0,value=1.0)
-	
+
 	# Buttons
 	createB = mc.button('createAlongCurveCreateB',l='Create',c='glTools.ui.curve.createAlongCurveFromUI(False)')
 	createCloseB = mc.button('createAlongCurveCreateCloseB',l='Create and Close',c='glTools.ui.curve.createAlongCurveFromUI(True)')
 	cancelB = mc.button('createAlongCurveCancelB',l='Cancel',c='mc.deleteUI("'+window+'")')
-	
+
 	# TFB commands
 	mc.textFieldButtonGrp(curveTFB,e=True,bc='glTools.ui.utils.loadCurveSel("'+curveTFB+'","'+prefixTFG+'")')
-	
+
 	# Show Window
 	mc.showWindow(window)
 
@@ -248,10 +248,10 @@ def createAlongCurveFromUI(close=False):
 	useDist = mc.checkBoxGrp('createAlongCurveDistCBG',q=True,v1=True)
 	minVal = mc.floatSliderGrp('createAlongCurveMinFSG',q=True,v=True)
 	maxVal = mc.floatSliderGrp('createAlongCurveMaxFSG',q=True,v=True)
-	
+
 	# Execute command
 	glTools.tools.createAlongCurve.create(curve,objType,objCount,parent,useDist,minVal,maxVal,prefix)
-	
+
 	# Cleanup
 	if close: mc.deleteUI(window)
 
@@ -265,7 +265,7 @@ def edgeLoopCurveUI():
 	window = 'edgeLoopCurveUI'
 	if mc.window(window,q=True,ex=1): mc.deleteUI(window)
 	window = mc.window(window,t='Edge Loop Curve')
-	
+
 	# Layout
 	CL = mc.columnLayout()
 	# Prefix
@@ -274,15 +274,15 @@ def edgeLoopCurveUI():
 	rebuildCBG = mc.checkBoxGrp('edgeLoopCurveRebuildCBG',numberOfCheckBoxes=1,label='Rebuild Curve',v1=True)
 	# Span Count
 	spanISG = mc.intSliderGrp('edgeLoopCurveSpanISG',field=True,label='Rebuild Spans',minValue=0,maxValue=10,fieldMinValue=0,fieldMaxValue=100,value=0,en=1)
-	
+
 	# Toggle UI element
 	mc.checkBoxGrp('edgeLoopCurveRebuildCBG',e=True,cc='mc.intSliderGrp("edgeLoopCurveSpanISG",e=1,en=(not mc.intSliderGrp("edgeLoopCurveSpanISG",q=1,en=1)))')
-	
+
 	# Buttons
 	createB = mc.button('edgeLoopCurveCreateB',l='Create',c='glTools.ui.curve.edgeLoopCurveFromUI(False)')
 	createCloseB = mc.button('edgeLoopCurveCreateCloseB',l='Create and Close',c='glTools.ui.curve.edgeLoopCurveFromUI(True)')
 	cancelB = mc.button('edgeLoopCurveCancelB',l='Cancel',c='mc.deleteUI("'+window+'")')
-	
+
 	# Show Window
 	mc.showWindow(window)
 
@@ -299,10 +299,10 @@ def edgeLoopCurveFromUI(close=False):
 	prefix = str(mc.textFieldGrp('edgeLoopCurvePrefixTFG',q=True,text=True))
 	rebuildCrv = mc.checkBoxGrp('edgeLoopCurveRebuildCBG',q=True,v1=True)
 	spans = mc.intSliderGrp('edgeLoopCurveSpanISG',q=True,v=True)
-	
+
 	# Execute command
 	glTools.utils.curve.edgeLoopCrv(selection,rebuild=rebuildCrv,rebuildSpans=spans,prefix=prefix)
-	
+
 	# Cleanup
 	if close: mc.deleteUI(window)
 
@@ -316,7 +316,7 @@ def uniformRebuildCurveUI():
 	window = 'uniformRebuildCurveUI'
 	if mc.window(window,q=True,ex=1): mc.deleteUI(window)
 	window = mc.window(window,t='Uniform Rebuild Curve')
-	
+
 	# Layout
 	cl = mc.columnLayout()
 	# Curve
@@ -327,15 +327,15 @@ def uniformRebuildCurveUI():
 	replaceCBG = mc.checkBoxGrp('uniformRebuildCurveReplaceCBG',numberOfCheckBoxes=1,label='Replace Original',v1=False)
 	# Spans
 	spanISG = mc.intSliderGrp('uniformRebuildCurveSpansISG',field=True,label='Rebuild Spans',minValue=2,maxValue=10,fieldMinValue=2,fieldMaxValue=100,value=6)
-	
+
 	# Buttons
 	createB = mc.button('uniformRebuildCurveCreateB',l='Create',c='glTools.ui.curve.uniformRebuildCurveFromUI(False)')
 	createCloseB = mc.button('uniformRebuildCurveCreateCloseB',l='Create and Close',c='glTools.ui.curve.uniformRebuildCurveFromUI(True)')
 	cancelB = mc.button('uniformRebuildCurveCancelB',l='Cancel',c='mc.deleteUI("'+window+'")')
-	
+
 	# TFB commands
 	mc.textFieldButtonGrp(curveTFB,e=True,bc='glTools.ui.utils.loadCurveSel("'+curveTFB+'","'+prefixTFG+'")')
-	
+
 	# Show Window
 	mc.showWindow(window)
 
@@ -352,10 +352,10 @@ def uniformRebuildCurveFromUI(close=False):
 	prefix = str(mc.textFieldGrp('uniformRebuildCurvePrefixTFG',q=True,text=True))
 	replace = mc.checkBoxGrp('uniformRebuildCurveReplaceCBG',q=True,v1=True)
 	spans = mc.intSliderGrp('uniformRebuildCurveSpansISG',q=True,v=True)
-	
+
 	# Execute command
 	glTools.utils.curve.uniformRebuild(curve=curve,spans=spans,replaceOriginal=replace,prefix=prefix)
-	
+
 	# Cleanup
 	if close: mc.deleteUI(window)
 
@@ -368,13 +368,13 @@ def mirrorCurveFromSel():
 	# Get Selection
 	sel = mc.ls(sl=1,type=['transform','joint','nurbsCurve'])
 	if not sel: return
-	
+
 	# For Each Item in Selection
 	for item in sel:
-		
+
 		# Define Curve Shape
 		crv = ''
-		
+
 		# Check Transform
 		if glTools.utils.transform.isTransform(item):
 			# Get Shapes
@@ -395,13 +395,13 @@ def mirrorCurveFromSel():
 		else:
 			# Set Curve
 			crv = item
-		
+
 		# Find Mirror
 		mirrorCrv = ''
 		if crv.startswith('lf_'): mirrorCrv = crv.replace('lf_','rt_')
 		elif crv.startswith('rt_'): mirrorCrv = crv.replace('rt_','lf_')
 		else: print('Unable to determine mirror curve for "'+crv+'"! Skipping...')
-		
+
 	# Mirror Curve
 	glTools.utils.curve.mirrorCurve(crv,mirrorCrv)
 

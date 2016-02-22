@@ -22,10 +22,10 @@ class EvaluationOrder( object ):
 		self.root = ''
 		# Initialize dependencyHierarchyNode
 		self.hierarchy = glTools.tools.dependencyHierarchyNode.DependencyHierarchyNode()
-		
+
 		# DEBUG
 		self.debug = debug
-	
+
 	def buildHierarchy(self,root):
 		'''
 		'''
@@ -36,14 +36,14 @@ class EvaluationOrder( object ):
 		self.root = root
 		# Build Hierarchy from Root
 		self.hierarchy.buildHierarchyFromNode(root)
-	
+
 	def reorder(self):
 		'''
 		Reorder hierarchy based on ik and constraint relationships
 		'''
 		self.ikReorder()
 		self.constraintReorder()
-	
+
 	def ikReorder(self):
 		'''
 		Reorganize the evaluation order based on ikHandle/joint relationships.
@@ -55,19 +55,19 @@ class EvaluationOrder( object ):
 			# Find ikHandle start joint
 			startJoint = mc.listConnections(ik+'.startJoint',s=True,d=False)[0]
 			startJointNode = self.hierarchy.findDependNode(startJoint)
-			
+
 			# Check ikHandle is in a lower generation than the startJoints current parent
 			if startJointNode.parent:
 				if startJointNode.parent.getGeneration() >= ikNode.getGeneration(): continue
-			
+
 			# Adjust dependency hierarchy
 			if ikNode.getGeneration() > startJointNode.getGeneration():
 				if self.debug: print('Parent '+startJoint+' under ikHandle '+ik)
 				startJointNode.reparent(ikNode)
-			
+
 		# Print complete message
 		print('EvaluationOrder::ikReorder() completed.')
-	
+
 	def constraintReorder(self,constraintList=[]):
 		'''
 		Reorganize the evaluation order based on hierarchy constraint dependencies.
@@ -77,35 +77,35 @@ class EvaluationOrder( object ):
 		# Iterate through all constraints below hierarchy root
 		if not constraintList:
 			constraintList = mc.listRelatives(self.hierarchy.fullName,ad=True,type='constraint')
-		
+
 		if self.debug: print constraintList
-		
+
 		for constraintNode in constraintList:
-			
+
 			if self.debug: print constraintNode
-			
+
 			# Initialize comparison variables
 			lowestNode = None
 			generation = -1
-			
+
 			# Iterate through constraint targets, to find the target at the lowest generation
 			targetList = glTools.utils.constraint.targetList(constraintNode)
 			if self.debug: print 'targetlist = '
 			if self.debug: print targetList
-			for target in targetList:                                             
+			for target in targetList:
 				targetNode = self.hierarchy.findDependNode(target)
 				targetGeneration = targetNode.getGeneration()
-				
+
 				if self.debug: print 'targetGen = '+str(targetGeneration)+' : gen = '+str(generation)
-				
+
 				if targetGeneration > generation:
 					lowestNode = targetNode
 					generation = targetGeneration
-			
+
 			if self.debug:
 				if lowestNode: print 'Lowest node = '+lowestNode.shortName
 				else: print 'Lowest node = None'
-			
+
 			# Move constraint slaves below the lowest generation constraint target
 			if lowestNode:
 				slaveList = glTools.utils.constraint.slaveList(constraintNode)
@@ -116,10 +116,10 @@ class EvaluationOrder( object ):
 					if lowestNode.getGeneration() > slaveNode.getGeneration():
 						if self.debug: print('Parent '+slave+' under constraint target '+lowestNode.shortName)
 						slaveNode.reparent(lowestNode)
-			
+
 		# Print complete message
 		print('EvaluationOrder::constraintReorder() completed.')
-	
+
 	def addAttribute(self,target):
 		'''
 		Add evaluation order array attribute to a specified maya node.
@@ -134,7 +134,7 @@ class EvaluationOrder( object ):
 			mc.addAttr( target,ln=self.attribute,dt='string',multi=True,h=True)
 		else:
 			print('Attribute "'+target+'.'+self.attribute+'" already exists!')
-	
+
 	def setAttr(self,target,intersectList=[],evalOrderList=[]):
 		'''
 		Store the calculated evaluation order list as a string array attribute to a specified control.
@@ -161,4 +161,4 @@ class EvaluationOrder( object ):
 			mc.setAttr(target+'.'+self.attribute+'['+str(i)+']',evalOrderList[i],type='string')
 		# Return evaluation order list
 		return evalOrderList
-	
+

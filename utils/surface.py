@@ -22,7 +22,7 @@ def isSurface(surface):
 	# Check shape
 	if mc.objectType(surface) == 'transform': surface = mc.listRelatives(surface,s=True,ni=True,pa=True)[0]
 	if mc.objectType(surface) != 'nurbsSurface': return False
-	
+
 	# Return result
 	return True
 
@@ -36,7 +36,7 @@ def getSurfaceFn(surface):
 	if not isSurface(surface): raise Exception('Object '+surface+' is not a valid surface!')
 	if mc.objectType(surface) == 'transform':
 		surface = mc.listRelatives(surface,s=True,ni=True,pa=True)[0]
-	
+
 	# Get MFnNurbsSurface
 	selection = OpenMaya.MSelectionList()
 	OpenMaya.MGlobal.getSelectionListByName(surface,selection)
@@ -44,7 +44,7 @@ def getSurfaceFn(surface):
 	selection.getDagPath(0,surfacePath)
 	surfaceFn = OpenMaya.MFnNurbsSurface()
 	surfaceFn.setObject(surfacePath)
-	
+
 	# Return result
 	return surfaceFn
 
@@ -79,14 +79,14 @@ def closestPoint(surface,pos=(0,0,0)):
 	'''
 	# Check surface
 	if not isSurface(surface): raise Exception('Object '+surface+' is not a valid surface!')
-	
+
 	# Get point world position
 	pos = glTools.utils.base.getPosition(pos)
 	pt = OpenMaya.MPoint(pos[0],pos[1],pos[2],1.0)
-	
+
 	# Get surface function set
 	surfFn = getSurfaceFn(surface)
-	
+
 	# Get uCoord and vCoord pointer objects
 	uCoord = OpenMaya.MScriptUtil()
 	uCoord.createFromDouble(0.0)
@@ -94,7 +94,7 @@ def closestPoint(surface,pos=(0,0,0)):
 	vCoord = OpenMaya.MScriptUtil()
 	vCoord.createFromDouble(0.0)
 	vCoordPtr = vCoord.asDoublePtr()
-	
+
 	# get closest uCoord to edit point position
 	surfFn.closestPoint(pt,uCoordPtr,vCoordPtr,True,0.0001,OpenMaya.MSpace.kWorld)
 	return (OpenMaya.MScriptUtil(uCoordPtr).asDouble(),OpenMaya.MScriptUtil(vCoordPtr).asDouble())
@@ -104,14 +104,14 @@ def distToSurface(surface,pos=(0,0,0)):
 	'''
 	# Get point world position
 	pos = glTools.utils.base.getPosition(pos)
-	
+
 	# Get closest point to surface
 	uv = closestPoint(surface,pos)
 	pt = mc.pointOnSurface(surface,u=uv[0],v=uv[1],p=True)
-	
+
 	# Get distance to surface point
 	dist = glTools.utils.mathUtils.distanceBetween(pos,pt)
-	
+
 	# Return Result
 	return dist
 
@@ -124,13 +124,13 @@ def snapPtsToSurface(surface,pointList):
 	'''
 	# Check surface
 	if not isSurface(surface): raise Exception('Object '+surface+' is not a valid surface!')
-	
+
 	# Check points
 	pointList = mc.ls(pointList,fl=True)
-	
+
 	# Transform types
 	transform = ['transform','joint','ikHandle','effector']
-	
+
 	# Snap points
 	for pt in pointList:
 		# Check Transform
@@ -142,7 +142,7 @@ def snapPtsToSurface(surface,pointList):
 		(uParam,vParam) = closestPoint(surface,pos)
 		sPt = mc.pointOnSurface(surface,u=uParam,v=vParam,position=True)
 		mc.move(sPt[0],sPt[1],sPt[2],pt,ws=True,a=True)
-	
+
 def locatorSurface(surface,controlPoints=[],locatorScale=0.075,prefix=''):
 	'''
 	Drive the control point positions of a surface with a set of control locators
@@ -160,19 +160,19 @@ def locatorSurface(surface,controlPoints=[],locatorScale=0.075,prefix=''):
 		raise Exception('Object '+surface+' is not a valid surface!')
 	if mc.objectType(surface) == 'transform':
 		surface = mc.listRelatives(surface,s=True,ni=True,pa=True)[0]
-	
+
 	# Check prefix
 	if not prefix: prefix = glTools.utils.stringUtils.stripSuffix(surface)
-	
+
 	# Calculate locator scale
 	locatorScale *= math.sqrt(glTools.utils.surface.surfaceArea(surface))
-	
+
 	# Get Control Points
 	if not controlPoints:
 		controlPoints = glTools.utils.component.getComponentIndexList(surface)[surface]
 	else:
 		controlPoints = glTools.utils.component.getComponentIndexList(controlPoints)[surface]
-	
+
 	# Create locators and connect to control points
 	locatorList = []
 	for cv in controlPoints:
@@ -184,14 +184,14 @@ def locatorSurface(surface,controlPoints=[],locatorScale=0.075,prefix=''):
 		loc = mc.spaceLocator(n=loc)[0]
 		locatorList.append(loc)
 		mc.setAttr(loc+'.localScale',locatorScale,locatorScale,locatorScale)
-		
+
 		# Get control point world position
 		pos = mc.pointPosition(surface+'.cv['+str(cv[0])+']['+str(cv[1])+']')
 		mc.setAttr(loc+'.t',pos[0],pos[1],pos[2])
 		mc.makeIdentity(loc,apply=True,t=1,r=1,s=1,n=0)
 		# Connect locator position to control point
 		mc.connectAttr(loc+'.worldPosition[0]',surface+'.controlPoints['+str(ind)+']')
-		
+
 	return locatorList
 
 def surfaceArea(surface,worldSpace=True):
@@ -209,14 +209,14 @@ def surfaceArea(surface,worldSpace=True):
 		if mc.objectType(surfaceShape) != 'nurbsSurface':
 			raise Exception('Object '+surface+' is not a valid nurbs surface!')
 		surface = surfaceShape
-	
+
 	# Get MFnNurbsSurface
 	surfaceFn = getSurfaceFn(surface)
 	# Get surface area
 	area = 0.0
 	if worldSpace: area = surfaceFn.area(OpenMaya.MSpace.kWorld)
 	else: area = surfaceFn.area(OpenMaya.MSpace.kObject)
-	
+
 	# Return result
 	return area
 
@@ -238,13 +238,13 @@ def snapToSurface(surface,obj,uValue=0.0,vValue=0.0,useClosestPoint=False,snapPi
 	'''
 	# Check surface
 	if not isSurface(surface): raise Exception('Object '+surface+' is not a valid surface!!')
-	
+
 	# Check uValue/vValue
 	minu = mc.getAttr(surface+'.minValueU')
 	maxu = mc.getAttr(surface+'.maxValueU')
 	minv = mc.getAttr(surface+'.minValueV')
 	maxv = mc.getAttr(surface+'.maxValueV')
-	
+
 	# Closest Point
 	if useClosestPoint:
 		pos = mc.xform(obj,q=True,ws=True,rp=True)
@@ -252,10 +252,10 @@ def snapToSurface(surface,obj,uValue=0.0,vValue=0.0,useClosestPoint=False,snapPi
 	# Verify surface parameter
 	if uValue < minu or uValue > maxu: raise Exception('U paramater '+str(uValue)+' is not within the U parameter range for '+surface+'!!')
 	if vValue < minv or vValue > maxv: raise Exception('V paramater '+str(vValue)+' is not within the V parameter range for '+surface+'!!')
-	
+
 	# Get surface point position
 	pnt = mc.pointPosition(surface+'.uv['+str(uValue)+']['+str(vValue)+']')
-	
+
 	# Snap to Curve
 	piv = mc.xform(obj,q=True,ws=True,rp=True)
 	if snapPivot: mc.xform(obj,piv=pnt,ws=True)
@@ -306,15 +306,15 @@ def orientToSurface(	surface,
 	# Verify surface parameter
 	if uValue < minu or uValue > maxu: raise Exception('U paramater '+str(uValue)+' is not within the U parameter range for '+surface+'!!')
 	if vValue < minv or vValue > maxv: raise Exception('V paramater '+str(uValue)+' is not within the V parameter range for '+surface+'!!')
-	
+
 	# Check object
 	if not mc.objExists(obj): raise Exception('Object '+obj+' does not exist!!')
 	rotateOrder = mc.getAttr(obj+'.ro')
-	
+
 	# Get tangents at surface point
 	tanU = mc.pointOnSurface(surface,u=uValue,v=vValue,ntu=True)
 	tanV = mc.pointOnSurface(surface,u=uValue,v=vValue,ntv=True)
-	
+
 	# Build rotation matrix
 	aimVector = tanU
 	if alignTo == 'v': aimVector = tanV
@@ -324,10 +324,10 @@ def orientToSurface(	surface,
 	if alignTo == 'v': aimAxis = tangentVAxis
 	upAxis = tangentVAxis
 	if alignTo == 'v': upAxis = tangentUAxis
-	
+
 	mat = glTools.utils.matrix.buildRotation(aimVector,upVector,aimAxis,upAxis)
 	rot = glTools.utils.matrix.getRotation(mat,rotateOrder)
-	
+
 	# Orient object to surface
 	mc.rotate(rot[0],rot[1],rot[2],obj,a=True,ws=True)
 
@@ -346,19 +346,19 @@ def rebuild(surface,spansU=0,spansV=0,fullRebuildU=False,fullRebuildV=False,rebu
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Check surface
 	if not isSurface(surface):
 		raise Exception('Object "'+surface+'" is not a valid surface!')
-	
+
 	# Check spans
 	if not spansU: spansU = mc.getAttr(surface+'.spansU')
 	if not spansV: spansV = mc.getAttr(surface+'.spansV')
-	
+
 	# =============
 	# - Rebuild U -
 	# =============
-	
+
 	# Get V range
 	if rebuildUfirst:
 		dir = 'u'
@@ -373,17 +373,17 @@ def rebuild(surface,spansU=0,spansV=0,fullRebuildU=False,fullRebuildV=False,rebu
 		min = mc.getAttr(surface+'.minValueU')
 		max = mc.getAttr(surface+'.maxValueU')
 	val = min + (max - min) * 0.5
-	
+
 	# Caluculate surface length
 	iso_crv = mc.duplicateCurve(surface+'.'+opp+'['+str(val)+']',ch=0,rn=0,local=0)[0]
 	iso_len = mc.arclen(iso_crv)
 	iso_inc = iso_len / spans
-	
+
 	# Get spaced isoparm list
 	curveFn = glTools.utils.curve.getCurveFn(iso_crv)
 	iso_list = [surface+'.'+dir+'['+str(curveFn.findParamFromLength(iso_inc*i))+']' for i in range(spans+1)]
 	mc.delete(iso_crv)
-	
+
 	# Check full rebuild
 	if fullRebuildV:
 		# Extract isoparm curves
@@ -398,11 +398,11 @@ def rebuild(surface,spansU=0,spansV=0,fullRebuildU=False,fullRebuildV=False,rebu
 	else:
 		# Loft intermediate surface
 		int_surface = mc.loft(iso_list,ch=0,u=1,c=0,ar=1,d=3,ss=1,rn=0,po=0,rsn=True)[0]
-	
+
 	# =============
 	# - Rebuild V -
 	# =============
-	
+
 	# Get V range (intermediate surface)
 	if rebuildUfirst:
 		dir = 'u'
@@ -417,17 +417,17 @@ def rebuild(surface,spansU=0,spansV=0,fullRebuildU=False,fullRebuildV=False,rebu
 		min = mc.getAttr(int_surface+'.minValueV')
 		max = mc.getAttr(int_surface+'.maxValueV')
 	val = min + (max - min) * 0.5
-	
+
 	# Caluculate surface length (intermediate surface)
 	iso_crv = mc.duplicateCurve(int_surface+'.'+opp+'['+str(val)+']',ch=0,rn=0,local=0)[0]
 	iso_len = mc.arclen(iso_crv)
 	iso_inc = iso_len / spans
-	
+
 	# Get spaced isoparm list
 	curveFn = glTools.utils.curve.getCurveFn(iso_crv)
 	iso_list = [int_surface+'.'+dir+'['+str(curveFn.findParamFromLength(iso_inc*i))+']' for i in range(spans+1)]
 	mc.delete(iso_crv)
-	
+
 	# Check full rebuild
 	if fullRebuildU:
 		# Extract isoparm curves
@@ -442,31 +442,31 @@ def rebuild(surface,spansU=0,spansV=0,fullRebuildU=False,fullRebuildV=False,rebu
 	else:
 		# Loft final surface
 		rebuild_surface = mc.loft(iso_list,ch=0,u=1,c=0,ar=1,d=3,ss=1,rn=0,po=0,rsn=True)[0]
-	
+
 	# Rename rebuilt surface
 	rebuild_surface = mc.rename(rebuild_surface,surface+'_rebuild')
 	rebuild_surfaceShape = mc.listRelatives(surface,s=True,ni=True,pa=True)[0]
 	mc.delete(int_surface)
-	
+
 	# Re-parameterize 0-1
 	mc.rebuildSurface(rebuild_surface,ch=False,rpo=True,dir=2,rt=0,end=1,kr=0,kcp=1,kc=1,tol=0,fr=0)
-	
+
 	# Initialize return value
 	outputShape = rebuild_surfaceShape
-	
+
 	# ====================
 	# - Replace Original -
 	# ====================
-	
+
 	if replaceOrig:
-	
+
 		"""
 		# Get original shape
 		shapes = glTools.utils.shape.getShapes(surface,nonIntermediates=True,intermediates=False)
 		if not shapes:
 			# Find Intermediate Shapes
 			shapes = glTools.utils.shape.listIntermediates(surface)
-		
+
 		# Check shapes
 		if not shapes:
 			raise Exception('Unable to determine shape for surface "'+surface+'"!')
@@ -475,7 +475,7 @@ def rebuild(surface,spansU=0,spansV=0,fullRebuildU=False,fullRebuildV=False,rebu
 			# Find Intermediate Shapes
 			shapes = glTools.utils.shape.findInputShape(shapes[0])
 		"""
-	
+
 		# Check history
 		shapes = mc.listRelatives(surface,s=True,ni=True,pa=True)
 		if not shapes: raise Exception('Unable to determine shape for surface "'+surface+'"!')
@@ -483,15 +483,15 @@ def rebuild(surface,spansU=0,spansV=0,fullRebuildU=False,fullRebuildV=False,rebu
 		shapeHist = mc.listHistory(shape)
 		if shapeHist.count(shape): shapeHist.remove(shape)
 		if shapeHist: print('Surface "" contains construction history, creating new shape!')
-		
+
 		# Override shape info and delete intermediate
 		mc.connectAttr(rebuild_surfaceShape+'.local',shape+'.create',f=True)
 		outputShape = shape
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return outputShape
 
 def rebuild_old(surface,spansU=0,spansV=0,fullRebuildU=False,fullRebuildV=False,replaceOrig=False):
@@ -509,19 +509,19 @@ def rebuild_old(surface,spansU=0,spansV=0,fullRebuildU=False,fullRebuildV=False,
 	# Check surface
 	if not isSurface(surface):
 		raise Exception('Object "'+surface+'" is not a valid surface!')
-	
+
 	# Check spans
 	if not spansU: spansU = mc.getAttr(surface+'.spansU')
 	if not spansV: spansV = mc.getAttr(surface+'.spansV')
-	
+
 	# -------------
 	# - Rebuild V -
-	
+
 	# Get V range
 	minu = mc.getAttr(surface+'.minValueU')
 	maxu = mc.getAttr(surface+'.maxValueU')
 	u = minu + (maxu - minu) * 0.5
-	
+
 	# Extract isoparm curve
 	iso_crv = mc.duplicateCurve(surface+'.u['+str(u)+']',ch=0,rn=0,local=0)[0]
 	iso_len = mc.arclen(iso_crv)
@@ -529,7 +529,7 @@ def rebuild_old(surface,spansU=0,spansV=0,fullRebuildU=False,fullRebuildV=False,
 	curveFn = glTools.utils.curve.getCurveFn(iso_crv)
 	iso_list = [surface+'.v['+str(curveFn.findParamFromLength(iso_inc*i))+']' for i in range(spansV+1)]
 	mc.delete(iso_crv)
-	
+
 	# Check full rebuild
 	if fullRebuildU:
 		# Extract isoparm curves
@@ -544,15 +544,15 @@ def rebuild_old(surface,spansU=0,spansV=0,fullRebuildU=False,fullRebuildV=False,
 	else:
 		# Loft intermediate surface
 		int_surface = mc.loft(iso_list,ch=0,u=1,c=0,ar=1,d=3,ss=1,rn=0,po=0,rsn=True)[0]
-	
+
 	# -------------
 	# - Rebuild U -
-	
+
 	# Get V range (intermediate surface)
 	minv = mc.getAttr(int_surface+'.minValueV')
 	maxv = mc.getAttr(int_surface+'.maxValueV')
 	v = minv + (maxv - minv) * 0.5
-	
+
 	# Extract isoparm curve (intermediate surface)
 	iso_crv = mc.duplicateCurve(int_surface+'.v['+str(v)+']',ch=0,rn=0,local=0)[0]
 	iso_len = mc.arclen(iso_crv)
@@ -560,7 +560,7 @@ def rebuild_old(surface,spansU=0,spansV=0,fullRebuildU=False,fullRebuildV=False,
 	curveFn = glTools.utils.curve.getCurveFn(iso_crv)
 	iso_list = [int_surface+'.u['+str(curveFn.findParamFromLength(iso_inc*i))+']' for i in range(spansU+1)]
 	mc.delete(iso_crv)
-	
+
 	# Check full rebuild
 	if fullRebuildV:
 		# Extract isoparm curves
@@ -575,26 +575,26 @@ def rebuild_old(surface,spansU=0,spansV=0,fullRebuildU=False,fullRebuildV=False,
 	else:
 		# Loft final surface
 		rebuild_surface = mc.loft(iso_list,ch=0,u=1,c=0,ar=1,d=3,ss=1,rn=0,po=0,rsn=True)[0]
-	
+
 	rebuild_surface = mc.rename(rebuild_surface,surface+'_rebuild')
 	rebuild_surfaceShape = mc.listRelatives(surface,s=True,ni=True,pa=True)[0]
 	mc.delete(int_surface)
-	
+
 	# Initialize return value
 	outputShape = rebuild_surfaceShape
-	
+
 	# --------------------
 	# - Replace Original -
-	
+
 	if replaceOrig:
-	
+
 		"""
 		# Get original shape
 		shapes = glTools.utils.shape.getShapes(surface,nonIntermediates=True,intermediates=False)
 		if not shapes:
 			# Find Intermediate Shapes
 			shapes = glTools.utils.shape.listIntermediates(surface)
-		
+
 		# Check shapes
 		if not shapes:
 			raise Exception('Unable to determine shape for surface "'+surface+'"!')
@@ -603,7 +603,7 @@ def rebuild_old(surface,spansU=0,spansV=0,fullRebuildU=False,fullRebuildV=False,
 			# Find Intermediate Shapes
 			shapes = glTools.utils.shape.findInputShape(shapes[0])
 		"""
-	
+
 		# Check history
 		shapes = mc.listRelatives(surface,s=True,ni=True,pa=True)
 		if not shapes: raise Exception('Unable to determine shape for surface "'+surface+'"!')
@@ -611,11 +611,11 @@ def rebuild_old(surface,spansU=0,spansV=0,fullRebuildU=False,fullRebuildV=False,
 		shapeHist = mc.listHistory(shape)
 		if shapeHist.count(shape): shapeHist.remove(shape)
 		if shapeHist: print('Surface "" contains construction history, creating new shape!')
-		
+
 		# Override shape info and delete intermediate
 		mc.connectAttr(rebuild_surfaceShape+'.local',shape+'.create',f=True)
 		outputShape = shape
-	
+
 	# Return result
 	return outputShape
 
@@ -635,14 +635,14 @@ def intersect(surface,source,direction):
 	source = glTools.utils.base.getMPoint(source)
 	# Get direction vector
 	direction = OpenMaya.MVector(direction[0],direction[1],direction[2])
-	
+
 	# Calculate intersection
 	hitPt = OpenMaya.MPoint()
 	hit = surfaceFn.intersect(source,direction,None,None,hitPt,0.0001,OpenMaya.MSpace.kWorld,False,None,None)
 	if not hit:
 		print 'No intersection found!'
 		hitPt = OpenMaya.MPoint.origin
-	
+
 	# Return intersection hit point
 	return [hitPt[0],hitPt[1],hitPt[2]]
 
@@ -665,27 +665,27 @@ def projectToSurface(surface,targetSurface,direction='u',keepOriginal=False,pref
 		raise Exception('Surface "'+surface+'" does not exist!!')
 	if not isSurface(surface):
 		raise Exception('Object "'+surface+'" is not a valid nurbs surface!!')
-	
+
 	# Check target surface
 	if not mc.objExists(targetSurface):
 		raise Exception('Target surface "'+targetSurface+'" does not exist!!')
-	
+
 	# Check prefix
 	if not prefix: prefix = glTools.utils.stringUtils.stripSuffix(surface)
-	
+
 	# Check direction
 	direction = direction.upper()
 	if (direction != 'U') and (direction != 'V'):
 		raise Exception('Invalid surface direction specified! Must specify either "u" or "v"!!')
-	
+
 	# Get surface information
 	spans = mc.getAttr(surface+'.spans'+direction)
 	minVal = mc.getAttr(surface+'.minValue'+direction)
 	maxVal = mc.getAttr(surface+'.maxValue'+direction)
-	
+
 	# Create main surface group
 	mainGrp = mc.createNode('transform',n=prefix+'_grp')
-	
+
 	# Extract curves
 	curveList = []
 	curveGrpList = []
@@ -717,23 +717,23 @@ def projectToSurface(surface,targetSurface,direction='u',keepOriginal=False,pref
 			geomConstraintList.append(geomConstraint[0])
 		# Center group pivot
 		mc.xform(curveGrp,cp=True)
-	
+
 	# Delete original surface
 	surfaceName = prefix+'_surface'
 	if not keepOriginal:
 		surfaceName = surface
 		mc.delete(surface)
-	
+
 	# Loft new surface
 	surfaceLoft = mc.loft(curveList,ch=1,u=1,c=0,ar=1,d=3,ss=1,rn=0,po=0,rsn=True)
 	surface = mc.rename(surfaceLoft[0],surface)
 	surface = mc.parent(surface,mainGrp)[0]
 	mc.reorder(surface,f=True)
 	loft = mc.rename(surfaceLoft[1],prefix+'_loft')
-	
+
 	# Return result
 	return[surface,loft,curveList,curveGrpList,curveLocList,geomConstraintList]
-	
+
 def rebuildFromExistingIsoparms(surface,direction='u',degree=3,close=False,keepHistory=False):
 	'''
 	Build a new nurbs surface from an existing surfaces isoparms
@@ -753,12 +753,12 @@ def rebuildFromExistingIsoparms(surface,direction='u',degree=3,close=False,keepH
 		raise Exception('Surface "'+surface+'" does not exist!!')
 	if not isSurface(surface):
 		raise Exception('Object "'+surface+'" is not a valid nurbs surface!!')
-	
+
 	# Check direction
 	direction = direction.lower()
 	if not direction == 'u' and not direction == 'v':
 		raise Exception('Invalid surface direction! Accepted values are "u" and "v"!')
-	
+
 	# Get surface details
 	surfFn = getSurfaceFn(surface)
 	spans = mc.getAttr(surface+'.spans'+direction.upper())
@@ -767,18 +767,18 @@ def rebuildFromExistingIsoparms(surface,direction='u',degree=3,close=False,keepH
 	knots = OpenMaya.MDoubleArray()
 	if direction == 'u': surfFn.getKnotsInU(knots)
 	if direction == 'v': surfFn.getKnotsInV(knots)
-	
+
 	# Build iso list for surface rebuild
 	if degree > 1: knots = knots[(degree-1):-(degree-1)]
 	isoList = [surface+'.'+direction+'['+str(i)+']' for i in knots]
 	if not close and form:
 		#isoList.append(isoList[0])
 		isoList[-1] = isoList[-1] - 0.0001
-	
+
 	# Loft new rebuild surface
 	rebuild = mc.loft(isoList,ch=keepHistory,u=True,c=close,ar=False,d=degree,ss=1,rn=False,po=False,rsn=(direction=='v'))
 	rebuild = mc.rename(rebuild[0],surface+'_rebuild')
-	
+
 	# Return result
 	return rebuild
 
@@ -799,13 +799,13 @@ def rebuildFromIsoparms(surface,spansU=0,spansV=0,degree=3,keepHistory=False):
 		raise Exception('Surface "'+surface+'" does not exist!!')
 	if not isSurface(surface):
 		raise Exception('Object "'+surface+'" is not a valid nurbs surface!!')
-	
+
 	# Initialize function pointers
 	uMinPtr = OpenMaya.MScriptUtil().asDoublePtr()
 	uMaxPtr = OpenMaya.MScriptUtil().asDoublePtr()
 	vMinPtr = OpenMaya.MScriptUtil().asDoublePtr()
 	vMaxPtr = OpenMaya.MScriptUtil().asDoublePtr()
-	
+
 	# Get surface details
 	surfFn = getSurfaceFn(surface)
 	surfFn.getKnotDomain(uMinPtr,uMaxPtr,vMinPtr,vMaxPtr)
@@ -815,15 +815,15 @@ def rebuildFromIsoparms(surface,spansU=0,spansV=0,degree=3,keepHistory=False):
 	vMax = OpenMaya.MScriptUtil(vMaxPtr).asDouble()
 	uDif = uMax - uMin
 	vDif = vMax - vMin
-	
+
 	# Get surface form
 	closeU = bool(mc.getAttr(surface+'.formU'))
 	closeV = bool(mc.getAttr(surface+'.formV'))
-	
+
 	# Check spans
 	if not spansU: spansU = surfFn.numKnotsInU()
 	if not spansV: spansV = surfFn.numKnotsInV()
-	
+
 	# Get new knot values
 	uList = []
 	vList = []
@@ -831,15 +831,15 @@ def rebuildFromIsoparms(surface,spansU=0,spansV=0,degree=3,keepHistory=False):
 	vInc = vDif/(spansV-int(not closeV))
 	for u in range(spansU): uList.append(uMin+(uInc*u))
 	for v in range(spansV): vList.append(vMin+(vInc*v))
-	
+
 	# Rebuild in U
 	uLoft = mc.loft([surface+'.u['+str(i)+']' for i in uList],close=closeU,degree=degree)
 	uSurface = uLoft[0]
-	
+
 	# Rebuld in V
 	vLoft = mc.loft([uSurface+'.v['+str(i)+']' for i in vList],close=closeV,degree=degree)
 	rebuildSurface = vLoft[0]
-	
+
 	# Return result
 	return rebuildSurface
 

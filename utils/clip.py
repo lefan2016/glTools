@@ -35,14 +35,14 @@ def createClip(charSet,startTime=None,endTime=None,name=''):
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Check Character Set
 	if not glTools.utils.characterSet.isCharSet(charSet):
 		raise Exception('Object "'+charSet+'" is not a valid character set!')
-	
+
 	# Check Name
 	if not name: name = 'clip'
-	
+
 	# Check Start/End Time
 	if (startTime == None) or (endTime == None):
 		charList = mc.sets(charSet,q=True)
@@ -52,20 +52,20 @@ def createClip(charSet,startTime=None,endTime=None,name=''):
 		startTime = charKeys[0]
 	if endTime == None:
 		endTime = charKeys[-1]
-	
+
 	# ===============
 	# - Create Clip -
 	# ===============
-	
+
 	clip = ['']
 	try: clip = mc.clip(charSet, startTime=startTime, endTime=endTime, name=name )
 	except: print('Error creating clip "'+name+'"!')
 	else: print('Clip "'+name+'" successfully created!')
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return str(clip[0])
 
 def exportClip(clip,clipPath,force=False):
@@ -81,15 +81,15 @@ def exportClip(clip,clipPath,force=False):
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Check Clip
 	if not isClip(clip):
 		raise Exception('Object "'+clip+'" is not a valid animation clip!')
-	
+
 	# Check Directory Path
 	dirpath = os.path.dirname(clipPath)
 	if not os.path.isdir(dirpath): os.makedirs(dirpath)
-	
+
 	# Check File Path
 	if os.path.isfile(clipPath):
 		if not force:
@@ -97,31 +97,31 @@ def exportClip(clip,clipPath,force=False):
 		else:
 			try: os.remove(clipPath)
 			except: pass
-	
-	
+
+
 	# Check Extension
 	ext = os.path.splitext(clipPath)[1].lower()[1:]
 	if not (ext == 'ma') and not (ext == 'mb'):
 		raise Exception('Invalid file extension "'+ext+'"!')
-	
+
 	# =======================
 	# - Source Required MEL -
 	# =======================
-	
+
 	scriptsPath = mm.eval('getenv MAYA_LOCATION')+'/scripts/others'
 	mm.eval('source "'+scriptsPath+'/doExportClipArgList.mel"')
-	
+
 	# ===============
 	# - Export Clip -
 	# ===============
-	
+
 	mc.select(clip)
 	result = mm.eval('clipEditorExportClip("'+clipPath+'", "'+ext+'")')
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return result
 
 def importClip(clipPath,toChar='',toTrax=False):
@@ -137,55 +137,55 @@ def importClip(clipPath,toChar='',toTrax=False):
 	# Check File Path
 	if not os.path.isfile(clipPath):
 		raise Exception('No file exists at path "'+clipPath+'"!')
-	
+
 	# Check Extension
 	ext = os.path.splitext(clipPath)[1].lower()[1:]
 	if not (ext == 'ma') and not (ext == 'mb'):
 		raise Exception('Invalid file extension "'+ext+'"!')
-	
+
 	# Check To Character
 	if toChar:
-		
+
 		if not glTools.utils.characterSet.isCharSet(toChar):
 			raise Exception('Object "'+toChar+'" is not a valid character set!')
-		
+
 		# Set Current Character
 		glTools.utils.characterSet.setCurrent(toChar)
-	
+
 	else:
-		
+
 		# Get Current Character Set
 		currChar = glTools.utils.characterSet.getCurrent()
 		if currChar: toChar = currChar
-	
+
 	# =======================
 	# - Source Required MEL -
 	# =======================
-	
+
 	scriptsPath = mm.eval('getenv MAYA_LOCATION')+'/scripts/others'
 	mm.eval('source "'+scriptsPath+'/doImportClipArgList.mel"')
-		
+
 	# ===============
 	# - Import Clip -
 	# ===============
-	
+
 	# Set Global MEL variables
 	if toChar:
 		mm.eval('global int $gImportClipToCharacter = 1;')
 		mm.eval('global string $gImportToCharacter = "'+toChar+'";')
 	if toTrax:
 		mm.eval('global int $gScheduleClipOnCharacter = 1;')
-	
+
 	# Import Clip
 	result = mm.eval('clipEditorImportClip("'+clipPath+'", "'+ext+'")')
-	
+
 	# Print Result
 	if result: print ('Imported Clip: '+clipPath)
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return result
 
 def importClips(charSet='',clips=[],toTrax=False):
@@ -203,28 +203,28 @@ def importClips(charSet='',clips=[],toTrax=False):
 		charSet = glTools.utils.characterSet.getCurrent()
 	if charSet:
 		glTools.utils.characterSet.setCurrent(charSet)
-	
+
 	# Get Asset from Character Set
 	charSetNS = glTools.utils.namespace.getNS(charSet,topOnly=True)
 	charCtx = glTools.utils.reference.contextFromNsReferencePath(charSetNS)
 	char = charCtx['asset']
-	
+
 	# Get Starting Directory
 	assetPath = ''
-	
+
 	# Get Clips
 	if not clips:
 		clips = mc.fileDialog2(dir=assetPath,fileFilter='Maya Files (*.ma *.mb)',dialogStyle=2,fileMode=4,okCaption='Import',caption='Load Clip')
-	
+
 	# Import Clips
 	for clipPath in clips:
-		
+
 		# Check Clip
 		if not os.path.isfile(clipPath):
 			print('Clip "'+clipPath+'" is not a valid file! Skipping...')
 			continue
-		
-		# Import 
+
+		# Import
 		importClip(clipPath,toChar=charSet,toTrax=toTrax)
 
 def importCharClips(charSet='',clips=[],toTrax=False):
@@ -241,20 +241,20 @@ def importCharClips(charSet='',clips=[],toTrax=False):
 	charSetNS = glTools.utils.namespace.getNS(charSet,topOnly=True)
 	charCtx = glTools.utils.reference.contextFromNsReferencePath(charSetNS)
 	char = charCtx['asset']
-	
+
 	# Import Clips
 	for clip in clips:
-		
+
 		# Determine Clip File Path
 		clipFile = clipPath+clip+'.mb'
-		
+
 		# Check Clip File Path
 		if not os.path.isfile(clipFile):
 			clipFile = clipPath+clip+'.ma'
 		if not os.path.isfile(clipFile):
 			print('Clip file "'+clipFile+'" does not exist! Unable to import clip...')
 			continue
-		
+
 		# Import Clip
 		glTools.utils.clip.importClip(clipFile,toChar=charSet,toTrax=toTrax)
 
@@ -270,15 +270,15 @@ def importClipsForAllChars(clips=[],toTrax=False):
 	'''
 	# Get Clips
 	if not clips:
-		
+
 		# Get Starting Directory
 		assetPath = '/'
-		
+
 		# Select Clips
 		clipList = mc.fileDialog2(dir=assetPath,fileFilter='Maya Files (*.ma *.mb)',dialogStyle=2,fileMode=4,okCaption='Import',caption='Load Clip')
 		clips = [os.path.splitext(os.path.basename(clip))[0] for clip in clipList]
-	
+
 	# Import Clips
 	for charSet in mc.ls(type='character'):
-		
+
 		importCharClips(charSet=charSet,clips=clips,toTrax=toTrax)

@@ -6,11 +6,11 @@ def getPanel():
 	'''
 	# Get Panel with Focus
 	panel = mc.getPanel(wf=True)
-	
+
 	# Check Model Panel
 	if not mc.modelPanel(panel,q=True,ex=True):
 		panel = mc.getPanel(type='modelPanel')[0]
-	
+
 	# Return Result
 	return panel
 
@@ -27,40 +27,40 @@ def isolate(state,sel=None,panel=None):
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Check Selection
 	if (sel != None) and (not sel): sel = mc.ls(sl=1)
-	
+
 	# Check Panel
 	if not panel:
 		try: panel = getPanel()
 		except:
 			print('Unable to determine model panel! Aborting...')
 			return
-	
+
 	# ====================
 	# - Isolate Selected -
 	# ====================
-	
+
 	if state:
-	
+
 		# Clear Selection
 		mc.select(cl=True)
-		
+
 		# Isolate Selected - Enable
 		mc.isolateSelect(panel,state=True)
-		
+
 		# Update Selection
 		if sel: mc.select(sel)
-		
+
 		# Load Selected
 		mc.isolateSelect(panel,loadSelected=True)
-		
+
 		# Update Isolate Set
 		mc.isolateSelect(panel,update=True)
-	
+
 	else:
-		
+
 		# Isolate Selected - Disable
 		mc.isolateSelect(panel,state=False)
 
@@ -72,7 +72,7 @@ def getPanelVis(panel=None):
 	'''
 	# Check Panel
 	if not panel: panel = getPanel()
-	
+
 	# Get Panel Vis
 	panelVis = []
 	panelVis.append(mc.modelEditor(panel,q=True,nurbsCurves=True))
@@ -183,13 +183,13 @@ def disableAllPanelVis():
 	'''
 	# Get Visible Panels
 	panels = mc.getPanel(type='modelPanel') or []
-	
+
 	# Store/Disable Panel Vis States
 	panelVis = {}
 	for panel in panels:
 		panelVis[panel] = getPanelVis(panel=panel)
 		disablePanelVis(panel)
-	
+
 	# Return Result
 	return panelVis
 
@@ -201,11 +201,11 @@ def enableAllPanelVis(panelVis):
 	'''
 	# Get Stored Panel List
 	panels = panelVis.keys() or []
-	
+
 	# Restore/Enable Panel Vis States
 	for panel in panels:
 		if mc.modelPanel(panel,q=True,ex=True):
 			setPanelVis(panel,panelVis[panel])
-	
+
 	# Return Result
 	return panels

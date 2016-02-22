@@ -12,14 +12,14 @@ def getFileList(path,filesOnly=False):
 	# Check path
 	if not os.path.isdir(path):
 		raise Exception('Invalid path! ("'+path+'")')
-	
+
 	# Get file list
 	fileList = os.listdir(path)
-	
+
 	# Filter
 	if filesOnly:
 		fileList = [i for i in fileList if not os.path.isdir(path+'/'+i)]
-	
+
 	# Return Result
 	return fileList
 
@@ -29,11 +29,11 @@ def searchAndReplaceFilename(path,search,replace):
 	# Check path
 	if not os.path.isdir(path):
 		raise Exception('Invalid path! ("'+path+'")')
-	
+
 	# Get dir list
 	fileList = os.listdir(path)
 	fileList.sort()
-	
+
 	for file in fileList:
 		if file.count(search):
 			newfile = file.replace(search,replace)

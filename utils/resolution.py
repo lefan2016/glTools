@@ -19,7 +19,7 @@ def addResolutionAttr(obj,resList=['low','medium','high'],resAttr='resolution',k
 		raise UserInputError('Object '+obj+' does not exist. Cannot add attribute!')
 	if mc.objExists(obj+'.'+resAttr):
 		raise UserInputError('Attribute "'+obj+'.'+resAttr+'" already exists. Cannot add the attribute again.')
-	
+
 	# Build enum string
 	enumStr = ''
 	for res in resList: enumStr += (res+':')

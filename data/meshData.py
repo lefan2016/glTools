@@ -20,18 +20,18 @@ class MeshData( data.Data ):
 
 		# Initialize Class Defaults
 		self.maxDist = 9999999.9
-		
+
 		# Initialize Default Class Data Members
 		self._data['name'] = ''
 		self._data['vertexList'] = []
 		self._data['polyCounts'] = []
 		self._data['polyConnects'] = []
-		
+
 		self._data['uvCounts'] = []
 		self._data['uvIds'] = []
 		self._data['uArray'] = []
 		self._data['vArray'] = []
-		
+
 		# Build Data
 		if mesh: self.buildData(mesh)
 
@@ -44,18 +44,18 @@ class MeshData( data.Data ):
 		# ==========
 		# - Checks -
 		# ==========
-		
+
 		# Check Mesh
 		if not glTools.utils.mesh.isMesh(mesh):
 			raise Exception('Object "'+mesh+'" is not a vaild Mesh node!')
-		
+
 		# ==============
 		# - Build Data -
 		# ==============
-		
+
 		# Start timer
 		timer = mc.timerX()
-		
+
 		# Get basic mesh info
 		self._data['name'] = mesh
 
@@ -74,18 +74,18 @@ class MeshData( data.Data ):
 		numVerts = meshFn.numVertices()
 		meshPtUtil = OpenMaya.MScriptUtil()
 		self._data['vertexList'] = [meshPtUtil.getFloatArrayItem(meshPts,i) for i in xrange(numVerts*3)]
-		
+
 		# =======
 		# - UVs -
 		# =======
-		
+
 		# UV Connect Data
 		uvCounts = OpenMaya.MIntArray()
 		uvIds = OpenMaya.MIntArray()
 		meshFn.getAssignedUVs(uvCounts,uvIds)
 		self._data['uvCounts'] = list(uvCounts)
 		self._data['uvIds'] = list(uvIds)
-		
+
 		# Get UVs
 		uArray = OpenMaya.MFloatArray()
 		vArray = OpenMaya.MFloatArray()
@@ -96,11 +96,11 @@ class MeshData( data.Data ):
 		# Print timer result
 		buildTime = mc.timerX(st=timer)
 		print('MeshData: Data build time for mesh "'+mesh+'": '+str(buildTime))
-		
+
 		# =================
 		# - Return Result -
 		# =================
-		
+
 		return self._data['name']
 
 	def rebuild(self):
@@ -117,7 +117,7 @@ class MeshData( data.Data ):
 		polygonConnects = OpenMaya.MIntArray()
 		meshUtil.createIntArrayFromList(self._data['polyCounts'],polygonCounts)
 		meshUtil.createIntArrayFromList(self._data['polyConnects'],polygonConnects)
-		
+
 		# Rebuild UV Data
 		uvCounts = OpenMaya.MIntArray()
 		uvIds = OpenMaya.MIntArray()
@@ -143,10 +143,10 @@ class MeshData( data.Data ):
 									uArray,
 									vArray,
 									meshData	)
-		
+
 		# Assign UVs
 		meshFn.assignUVs(uvCounts,uvIds)
-		
+
 		meshObjHandle = OpenMaya.MObjectHandle(meshObj)
 
 		# Print Timed Result
@@ -156,7 +156,7 @@ class MeshData( data.Data ):
 		# =================
 		# - Return Result -
 		# =================
-		
+
 		return meshObjHandle
 
 	def rebuildMesh(self):
@@ -174,7 +174,7 @@ class MeshData( data.Data ):
 		polygonConnects = OpenMaya.MIntArray()
 		meshUtil.createIntArrayFromList(self._data['polyCounts'],polygonCounts)
 		meshUtil.createIntArrayFromList(self._data['polyConnects'],polygonConnects)
-		
+
 		# Rebuild UV Data
 		uArray = OpenMaya.MFloatArray()
 		vArray = OpenMaya.MFloatArray()
@@ -199,7 +199,7 @@ class MeshData( data.Data ):
 									uArray,
 									vArray,
 									meshData	)
-		
+
 		# Assign UVs
 		meshFn.assignUVs(uvCounts,uvIds)
 
@@ -217,5 +217,5 @@ class MeshData( data.Data ):
 		# =================
 		# - Return Result -
 		# =================
-		
+
 		return mesh

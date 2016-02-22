@@ -33,7 +33,7 @@ def faceForward(transform,aimAxis='z',upAxis='y',upVector=(0,1,0),upVectorType='
 	# Check upVectorObject
 	if upVectorType=='object' and not mc.objExists(upVectorObject):
 		raise UserInputError('UpVector object "'+upVectorObject+'" does not exist!!')
-	
+
 	# Get Rotate Values
 	rotate = faceForwardRotation(transform,aimAxis,upAxis,upVector,upVectorType,upVectorObject,previousFrameVelocity)
 	# Set Rotate Values
@@ -70,33 +70,33 @@ def faceForwardRotation(transform,aimAxis='z',upAxis='y',upVector=(0,1,0),upVect
 	# Check upVectorObject
 	if upVectorType=='object' and not mc.objExists(upVectorObject):
 		raise UserInputError('UpVector object "'+upVectorObject+'" does not exist!!')
-	
+
 	# Get transform parent
 	parent = ''
 	parentList = mc.listRelatives(transform,p=True,pa=True)
 	if parentList: parent = parentList[0]
-	
+
 	# Get frame
 	frame = mc.currentTime(q=True)
 	if time != None: frame = time
-	
+
 	# Get transform matrices for current frame
 	tMatrix = glTools.utils.matrix.getMatrix(transform=transform,time=frame)
 	pMatrix = OpenMaya.MMatrix.identity
 	if parent: pMatrix = glTools.utils.matrix.getMatrix(transform=parent,time=frame)
-	
+
 	# Get position for current frame
 	tx = mc.getAttr(transform+'.tx',t=frame)
 	ty = mc.getAttr(transform+'.ty',t=frame)
 	tz = mc.getAttr(transform+'.tz',t=frame)
 	cPos = OpenMaya.MPoint(tx,ty,tz,1.0)
-	
+
 	# Get position for next frame
 	tx = mc.getAttr(transform+'.tx',t=frame+1)
 	ty = mc.getAttr(transform+'.ty',t=frame+1)
 	tz = mc.getAttr(transform+'.tz',t=frame+1)
 	nPos = OpenMaya.MPoint(tx,ty,tz,1.0)
-	
+
 	# Get aimVector
 	aimVector = (0,0,0)
 	# Check forward velocity
@@ -115,7 +115,7 @@ def faceForwardRotation(transform,aimAxis='z',upAxis='y',upVector=(0,1,0),upVect
 		aimVector = (aimVec.x,aimVec.y,aimVec.z)
 	else:
 		return mc.getAttr(transform+'.rotate')[0]
-	
+
 	# Get upVector
 	if upVectorType == 'current':
 		upVec = OpenMaya.MVector(upVector[0],upVector[1],upVector[2]) * tMatrix
@@ -130,12 +130,12 @@ def faceForwardRotation(transform,aimAxis='z',upAxis='y',upVector=(0,1,0),upVect
 		upVector = (upVec.x,upVec.y,upVec.z)
 	elif upVectorType == 'vector':
 		pass
-	
+
 	# Build Rotation Matrix
 	rMatrix = glTools.utils.matrix.buildRotation(aimVector,upVector,aimAxis,upAxis)
 	if parent: rMatrix *= pMatrix.inverse()
 	rotate = glTools.utils.matrix.getRotation(rMatrix,mc.getAttr(transform+'.ro'))
-	
+
 	# Return result
 	return rotate
 
@@ -170,12 +170,12 @@ def faceForwardAnim(transform,aimAxis='z',upAxis='y',upVector=(0,1,0),upVectorTy
 	# Check upVectorObject
 	if upVectorType=='object' and not mc.objExists(upVectorObject):
 		raise UserInputError('UpVector object "'+upVectorObject+'" does not exist!!')
-	
+
 	# Get transform parent
 	parent = ''
 	parentList = mc.listRelatives(transform,p=True,pa=True)
 	if parentList: parent = parentList[0]
-	
+
 	# Get sample frames
 	sFrames = []
 	if frameStart < 0: frameStart = OpenMayaAnim.MAnimControl().minTime().value()
@@ -186,7 +186,7 @@ def faceForwardAnim(transform,aimAxis='z',upAxis='y',upVector=(0,1,0),upVectorTy
 		tAnimCurve = mc.listConnections([transform+'.tx',transform+'.ty',transform+'.tz'],s=True,d=True,type='animCurve')
 		if not tAnimCurve: raise UserInputError('Object "'+transform+'" has no translate keys! Set sampleByFrame argument greater than zero!')
 		[sFrames.append(i) for i in mc.keyframe(tAnimCurve,q=True,tc=True,t=(frameStart,frameEnd)) if not sFrames.count(i)]
-	
+
 	# Sample frames
 	for f in sFrames:
 		# Get rotation values
@@ -199,6 +199,6 @@ def faceForwardAnim(transform,aimAxis='z',upAxis='y',upVector=(0,1,0),upVectorTy
 		mc.setKeyframe(transform,at='rotateY',t=f,v=rotate[1])
 		mc.setAttr(transform+'.rotateZ',rotate[2])
 		mc.setKeyframe(transform,at='rotateZ',t=f,v=rotate[2])
-	
+
 	# Filter Curves
 	mc.filterCurve([transform+'.rotateX',transform+'.rotateY',transform+'.rotateZ'])

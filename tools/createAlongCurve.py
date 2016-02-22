@@ -36,18 +36,18 @@ def create(	curve,
 	@param prefix: Name prefix for builder created nodes. If left at default ("") prefix will be derived from curve name.
 	@type prefix: str
 	'''
-	
+
 	# Check Path
 	if not glTools.utils.curve.isCurve(curve):
 		raise Exception('Object "'+curve+'" is not a valid nurbs curve!')
-	
+
 	# Check Naming
 	if not prefix: prefix = glTools.utils.stringUtils.stripSuffix(curve)
 	if not suffix: suffix = objType
-	
+
 	# Check Object Count
 	if not objCount: objCount = mc.getAttr(curve+'.spans') + 1
-	
+
 	# Get Curve Sample Params
 	paramList = glTools.utils.curve.sampleParam(	curve = curve,
 												samples = objCount,
@@ -55,24 +55,24 @@ def create(	curve,
 												minPercent = minPercent,
 												maxPercent = maxPercent,
 												spacing = spacing )
-	
+
 	# Create Objects Along Curve
 	objList = []
 	for i in range(objCount):
-		
+
 		# Create Object
 		ind = glTools.utils.stringUtils.alphaIndex(i)
 		obj = createAtParam(	curve,
 								param	= paramList[i],
 								objType	= objType,
 								name	= prefix+ind+'_'+suffix	)
-		
+
 		# Parent
 		if parent and i: obj = mc.parent(obj,objList[-1])[0]
-		
+
 		# Append Result
 		objList.append(str(obj))
-	
+
 	# Return result
 	return objList
 
@@ -94,20 +94,20 @@ def createAtParam(	curve,
 	# Check Curve
 	if not glTools.utils.curve.isCurve(curve):
 		raise Exception('Object "'+curve+'" is not a valid nurbs curve!')
-	
+
 	# Check Name
 	if not name: name = glTools.utils.stringUtils.stripSuffix(curve)+'_'+objType
-	
+
 	# Create Object
 	obj = mc.createNode(objType)
 	if not glTools.utils.transform.isTransform(obj):
 		obj = mc.listRelatives(obj,p=True,pa=True)[0]
 	obj = mc.rename(obj,name)
-	
+
 	# Position Object
 	pos = mc.pointOnCurve(curve,pr=param)
 	mc.xform(obj,t=pos,ws=True)
-	
+
 	# Return Result
 	return obj
 
@@ -129,17 +129,17 @@ def createAtPoint(	curve,
 	# Check Curve
 	if not glTools.utils.curve.isCurve(curve):
 		raise Exception('Object "'+curve+'" is not a valid nurbs curve!')
-	
+
 	# Get Param at Point
 	point = glTools.utils.base.getPosition(point)
 	param = glTools.utils.curve.closestPoint(curve,pos=point)
-	
+
 	# Create Object
 	obj = createAtParam(	curve,
 							param	= param,
 							objType	= objType,
 							name	= None	)
-	
+
 	# Return Result
 	return obj
 

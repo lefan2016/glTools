@@ -12,21 +12,21 @@ def create(sourceList,targetList):
 	# For Each Target
 	meshSwitchList = []
 	for target in targetList:
-		
+
 		# Determine Prefix
 		pre = target.replace(target.split('_')[-1],'')
-		
+
 		# Create meshSwitch Node
 		meshSwitch = mc.createNode('meshSwitch',n=pre+'meshSwitch')
 		meshSwitchList.append(meshSwitch)
-		
+
 		# Connect Source Meshes
 		for i in range(len(sourceList)):
 			mc.connectAttr(sourceList[i]+'.outMesh',meshSwitch+'.inMesh['+str(i)+']',f=True)
-		
+
 		# Connect To Target
 		mc.connectAttr(meshSwitch+'.outMesh',target+'.inMesh',f=True)
-	
+
 	# Return Result
 	return meshSwitchList
 
@@ -41,13 +41,13 @@ def connect(switchList,sourceList):
 	# Check switchList
 	if type(switchList) == str or type(switchList) == unicode:
 		switchList = [str(switchList)]
-	
+
 	# For each switch
 	for meshSwitch in switchList:
-		
+
 		# For item in source list
 		for i in range(len(sourceList)):
-			
+
 			# Connect source item to meshSwitch input
 			try: mc.connectAttr(sourceList[i]+'.outMesh',meshSwitch+'.inMesh['+str(i)+']',f=True)
 			except: pass
@@ -61,19 +61,19 @@ def clearInput(switchList):
 	# Check switchList
 	if type(switchList) == str or type(switchList) == unicode:
 		switchList = [str(switchList)]
-	
+
 	# For each switch
 	for meshSwitch in switchList:
-		
+
 		# Get list of incoming mesh connections
 		connectionList = mc.listConnections(meshSwitch+'.inMesh',s=True,d=False,p=True,c=True)
 		if not connectionList: continue
-		
+
 		# Iterate over connections
 		for i in range(len(connectionList)):
-			
+
 			# Skip odd numbered iteration
 			if i%2: continue
-			
+
 			# Disconnect attribute
 			mc.disconnectAttr(connectionList[i+1],connectionList[i])

@@ -9,15 +9,15 @@ def prankWindow(hardcoreMode=0):
     # Reset UI
 	try: mc.deleteUI("prankWindow")
     except: pass
-    
+
     # Create Window
     window = mc.window("prankWindow")
     mainLayout = mc.columnLayout("mainLayout", adj=1, p=window)
     mc.button("Disconnect", c='maya.close(); maya = socket.socket(socket.AF_INET, socket.SOCK_STREAM)', p=mainLayout)
-    
+
     # Duplicate the following line to create quick connection shortcuts here
     mc.button("Connect: Nilouco-pc", c='maya.connect(("nilouco-pc or IP address here",12543))', p=mainLayout)
-    
+
     # Do your stuff!
     mc.separator(h=10, p=mainLayout)
     mc.button("minimizeApp", c='maya.send("minimizeApp")', p=mainLayout)
@@ -45,13 +45,13 @@ def prankWindow(hardcoreMode=0):
     mc.button("Open Help (F1)", c="maya.send('Help')", p=mainLayout)
     mc.button("Play forward timeline", c="maya.send('playButtonForward')", p=mainLayout)
     mc.button("Play backwards timeline", c="maya.send('playButtonBackward')", p=mainLayout)
-    
+
     # Hardcore ?!
     mc.separator(h=10, p=mainLayout)
     mc.button("NEW SCENE", c='maya.send("file -new -f")', en=hardcoreMode, p=mainLayout)
     mc.button("CLOSE MAYA", c='maya.send("quit -f")', en=hardcoreMode, p=mainLayout)
     mc.button("SHOW HOTBOX", c='maya.send("hotBox")', en=hardcoreMode, p=mainLayout)
     mc.button("OPEN NOTEPAD", c="maya.send('system \"start notepad\"')", en=hardcoreMode, p=mainLayout)
-    
+
     # Display window
     mc.showWindow(window)

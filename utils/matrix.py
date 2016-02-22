@@ -18,19 +18,19 @@ def getMatrix(transform,local=False,time=None):
 	# Check transform
 	if not mc.objExists(transform):
 		raise Exception('Object "'+transform+'" does not exist!!')
-	
+
 	# Define Matrix attribute
 	matAttr = 'worldMatrix[0]'
 	if local: matAttr = 'matrix'
-	
+
 	# Get time
 	mat = OpenMaya.MMatrix()
 	if time != None: mat = mc.getAttr(transform+'.'+matAttr,t=frame)
 	else: mat = mc.getAttr(transform+'.'+matAttr)
-	
+
 	# Build Matrix
 	matrix = buildMatrix(translate=(mat[12],mat[13],mat[14]),xAxis=(mat[0],mat[1],mat[2]),yAxis=(mat[4],mat[5],mat[6]),zAxis=(mat[8],mat[9],mat[10]))
-	
+
 	# Return result
 	return matrix
 
@@ -78,16 +78,16 @@ def vectorMatrixMultiply(vector,matrix,transformAsPoint=False,invertMatrix=False
 	# Create MPoint/MVector object for transformation
 	if transformAsPoint: vector = OpenMaya.MPoint(vector[0],vector[1],vector[2],1.0)
 	else: vector = OpenMaya.MVector(vector[0],vector[1],vector[2])
-	
+
 	# Check input is of type MMatrix
 	if type(matrix) != OpenMaya.MMatrix:
 		raise Exception('Matrix input variable is not of expected type! Expecting MMatrix, received '+str(type(matrix))+'!!')
-	
+
 	# Transform vector
 	if matrix != OpenMaya.MMatrix.identity:
 		if invertMatrix: matrix = matrix.inverse()
 		vector *= matrix
-	
+
 	# Return new vector
 	return [vector.x,vector.y,vector.z]
 
@@ -112,7 +112,7 @@ def getRotation(matrix,rotationOrder='xyz'):
 	'''
 	# Calculate radian constant
 	radian = 180.0/math.pi
-	
+
 	# Check rotation order
 	if type(rotationOrder) == str:
 		rotationOrder = rotationOrder.lower()
@@ -122,16 +122,16 @@ def getRotation(matrix,rotationOrder='xyz'):
 		rotationOrder = rotateOrder[rotationOrder]
 	else:
 		rotationOrder = int(rotationOrder)
-	
+
 	# Get transformation matrix
 	transformMatrix = OpenMaya.MTransformationMatrix(matrix)
-	
+
 	# Get Euler rotation from matrix
 	eulerRot = transformMatrix.eulerRotation()
-	
+
 	# Reorder rotation
 	eulerRot.reorderIt(rotationOrder)
-	
+
 	# Return XYZ rotation values
 	return (eulerRot.x*radian,eulerRot.y*radian,eulerRot.z*radian)
 
@@ -156,25 +156,25 @@ def buildRotation(aimVector,upVector=(0,1,0),aimAxis='x',upAxis='y'):
 	if upAxis[0] == '-':
 		upAxis = upAxis[1]
 		negUp = True
-	
+
 	# Check valid axis
 	axisList = ['x','y','z']
 	if not axisList.count(aimAxis): raise Exception('Aim axis is not valid!')
 	if not axisList.count(upAxis): raise Exception('Up axis is not valid!')
 	if aimAxis == upAxis: raise Exception('Aim and Up axis must be unique!')
-	
+
 	# Determine cross axis
 	axisList.remove(aimAxis)
 	axisList.remove(upAxis)
 	crossAxis = axisList[0]
-	
+
 	# Normaize aimVector
 	aimVector = mathUtils.normalizeVector(aimVector)
 	if negAim: aimVector = (-aimVector[0],-aimVector[1],-aimVector[2])
 	# Normaize upVector
 	upVector = mathUtils.normalizeVector(upVector)
 	if negUp: upVector = (-upVector[0],-upVector[1],-upVector[2])
-	
+
 	# Get cross product vector
 	crossVector = (0,0,0)
 	if (aimAxis == 'x' and upAxis == 'z') or (aimAxis == 'z' and upAxis == 'y'):
@@ -186,12 +186,12 @@ def buildRotation(aimVector,upVector=(0,1,0),aimAxis='x',upAxis='y'):
 		upVector = mathUtils.crossProduct(aimVector,crossVector)
 	else:
 		upVector = mathUtils.crossProduct(crossVector,aimVector)
-	
+
 	# Build axis dictionary
 	axisDict={aimAxis: aimVector,upAxis: upVector,crossAxis: crossVector}
 	# Build rotation matrix
 	mat = buildMatrix(xAxis=axisDict['x'],yAxis=axisDict['y'],zAxis=axisDict['z'])
-	
+
 	# Return rotation matrix
 	return mat
 
@@ -212,32 +212,32 @@ def inverseTransform(source,destination,translate=True,rotate=True,scale=True):
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	if not mc.objExists(source): raise Exception('Transform "'+source+'" does not exist!!')
 	if not mc.objExists(destination): raise Exception('Transform "'+destination+'" does not exist!!')
-	
+
 	# Load decomposeMatrix plugin
 	if not mc.pluginInfo('decomposeMatrix',q=True,l=True):
 		try: mc.loadPlugin('decomposeMatrix')
 		except: raise MissingPluginError('Unable to load "decomposeMatrix" plugin!!')
-	
+
 	# =================================
 	# - Apply Inverse Transformations -
 	# =================================
-	
+
 	# Create and name decomposeMatrix node
 	dcm = mc.createNode('decomposeMatrix',n=source+'_decomposeMatrix')
-	
+
 	# Make connections
 	mc.connectAttr(source+'.inverseMatrix',dcm+'.inputMatrix',f=True)
 	if translate: mc.connectAttr(dcm+'.outputTranslate',destination+'.translate',f=True)
 	if rotate: mc.connectAttr(dcm+'.outputRotate',destination+'.rotate',f=True)
 	if scale: mc.connectAttr(dcm+'.outputScale',destination+'.scale',f=True)
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return dcm
 
 def fromList(valueList):
@@ -249,7 +249,7 @@ def fromList(valueList):
 	# Check Value List
 	if len(valueList) != 16:
 		raise Exception('Invalid value list! Expecting 16 element, found '+str(len(valueList)))
-	
+
 	# Create transformation matrix from input vaules
 	matrix = OpenMaya.MMatrix()
 	OpenMaya.MScriptUtil.createMatrixFromList(valueList,matrix)
@@ -269,7 +269,7 @@ def fromList(valueList):
 	#OpenMaya.MScriptUtil.setDoubleArray(matrix[3], 1, valueList[13])
 	#OpenMaya.MScriptUtil.setDoubleArray(matrix[3], 2, valueList[14])
 	#OpenMaya.MScriptUtil.setDoubleArray(matrix[3], 3, valueList[15])
-	
+
 	# Return Result
 	return matrix
 

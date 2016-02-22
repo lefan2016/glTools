@@ -18,7 +18,7 @@ def centerPoint_average(ptList):
 		pos = glTools.utils.base.getPosition(pt)
 		avgPt = [avgPt[0]+pos[0],avgPt[1]+pos[1],avgPt[2]+pos[2]]
 	avgPt = [avgPt[0]/numPt,avgPt[1]/numPt,avgPt[2]/numPt]
-	
+
 	# Return Result
 	return avgPt
 
@@ -34,7 +34,7 @@ def centerPoint_geometric(ptList):
 		pos = glTools.utils.base.getPosition(pt)
 		bbox.expand(OpenMaya.MPoint(pos[0],pos[1],pos[2],1.0))
 	cntPt = bbox.center()
-	
+
 	# Return Result
 	return [cntPt.x,cntPt.y,cntPt.z]
 
@@ -48,11 +48,11 @@ def centerPointLocator(ptList,name=''):
 	'''
 	# Determine center point
 	avgPt = centerPoint_average(ptList)
-	
+
 	# Create locator
 	if not name: name = 'locator#'
 	loc = mc.spaceLocator(n=name)[0]
-	
+
 	# Position locator
 	mc.move(avgPt[0],avgPt[1],avgPt[2],loc,ws=True,a=True)
 
@@ -66,11 +66,11 @@ def centerToGeometry(geo,obj=None):
 	'''
 	# Check Object
 	if not obj: obj = mc.spaceLocator(n=geo+'_center')[0]
-	
+
 	# Get Geometry Center
 	geoPts = glTools.utils.component.getComponentStrList(geo)
 	pt = centerPoint_average(geoPts)
-	
+
 	# Move Object to Geometry Center
 	pos = glTools.utils.base.getPosition(obj)
 	offset = glTools.utils.mathUtils.offsetVector(pos,pt)
@@ -86,7 +86,7 @@ def centerToPoints(ptList,obj):
 	'''
 	# Get Geometry Center
 	pt = centerPoint_average(ptList)
-	
+
 	# Move Object to Geometry Center
 	pos = glTools.utils.base.getPosition(obj)
 	offset = glTools.utils.mathUtils.offsetVector(pos,pt)

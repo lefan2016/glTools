@@ -15,11 +15,11 @@ def checkNonReferenceInputShapes(root,verbose=False):
 	# Check Root Exists
 	if not mc.objExists(root):
 		raise Exception('Root node "'+root+'" does not exist!')
-	
+
 	# Get Transform Descendants (Geometry Only)
 	xforms = mc.ls(mc.listRelatives(root,ad=True),transforms=True)
 	geoList = [geo for geo in xforms if mc.listRelatives(geo,s=True)]
-	
+
 	# Check Non Referenced Input Shapes
 	nonRefInputs = []
 	hasNonRefInput = False
@@ -31,7 +31,7 @@ def checkNonReferenceInputShapes(root,verbose=False):
 		else:
 			if hasNonRefInput:
 				nonRefInputs.append(geo)
-	
+
 	# Print Result
 	if verbose:
 		if nonRefInputs:
@@ -44,7 +44,7 @@ def checkNonReferenceInputShapes(root,verbose=False):
 			print('==========================================')
 			print('No nonReference input geometries found...')
 			print('==========================================\n')
-	
+
 	# Return Result
 	return nonRefInputs
 
@@ -59,10 +59,10 @@ def fixNonReferenceInputShapes(root,verbose=False):
 	# Check Root
 	if not mc.objExists(root):
 		raise Exception('Root node "'+root+'" does not exist!')
-	
+
 	# Get Non Reference Input Geometry
 	nonRefInputs = checkNonReferenceInputShapes(root,verbose=verbose)
-	
+
 	# Fix Non Referenced Input Shapes
 	for geo in nonRefInputs:
 		if verbose:	print('# ==== Fixing nonReference input shape for geometry "'+geo+'"!')

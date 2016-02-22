@@ -51,7 +51,7 @@ def memberList(layer,objectList=True):
 	# Check Layer
 	if not isLayer(layer):
 		raise Excpetion('Object "'+layer+'" is not a valid layer type!')
-	
+
 	# Get Member List
 	members = []
 	if isDisplayLayer(layer):
@@ -60,13 +60,13 @@ def memberList(layer,objectList=True):
 		members = mc.listConnections(layer+'.renderInfo',s=False,d=True,sh=True)
 	if isAnimLayer(layer):
 		members = mc.listConnections(layer+'.dagSetMembers',s=True,d=False,sh=True)
-	
+
 	# Get List of Objects from Member List
 	if objectList: members = mc.ls(members,o=True)
-	
+
 	# Format Result
 	if not members: members = []
 	members = list(set(members))
-	
+
 	# Return Result
 	return members

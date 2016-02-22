@@ -13,27 +13,27 @@ def makeRelativeUI():
 	win = mc.window(win,t='SkinCluster - Make Relative')
 	# Form Layout
 	makeRelativeFL = mc.formLayout(numberOfDivisions=100)
-	
+
 	# SkinCluster option menu
 	skinClusterOMG = mc.optionMenuGrp('makeRelativeSkinClusterOMG',label='SkinCluster')
 	for skin in mc.ls(type='skinCluster'): mc.menuItem(label=skin)
-	
+
 	# Relative To TextField
 	makeRelativeTFB = mc.textFieldButtonGrp('makeRelativeToTFB',label='RelativeTo',text='',buttonLabel='Load Selected')
-	
+
 	# Button
 	makeRelativeBTN = mc.button(l='Make Relative',c='glTools.ui.skinCluster.makeRelativeFromUI()')
-	
+
 	# UI Callbacks
 	mc.textFieldButtonGrp(makeRelativeTFB,e=True,bc='glTools.ui.utils.loadTypeSel("'+makeRelativeTFB+'","transform")')
-	
+
 	# Form Layout - MAIN
 	mc.formLayout(makeRelativeFL,e=True,af=[(skinClusterOMG,'left',5),(skinClusterOMG,'top',5),(skinClusterOMG,'right',5)])
 	mc.formLayout(makeRelativeFL,e=True,af=[(makeRelativeTFB,'left',5),(makeRelativeTFB,'right',5)])
 	mc.formLayout(makeRelativeFL,e=True,ac=[(makeRelativeTFB,'top',5,skinClusterOMG)])
 	mc.formLayout(makeRelativeFL,e=True,af=[(makeRelativeBTN,'left',5),(makeRelativeBTN,'right',5),(makeRelativeBTN,'bottom',5)])
 	mc.formLayout(makeRelativeFL,e=True,ac=[(makeRelativeBTN,'top',5,makeRelativeTFB)])
-	
+
 	# Open window
 	mc.showWindow(win)
 

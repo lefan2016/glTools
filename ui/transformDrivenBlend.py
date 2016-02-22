@@ -10,10 +10,10 @@ def ui():
 	window = 'transformDrivenBlendUI'
 	if mc.window(window,q=True,ex=1): mc.deleteUI(window)
 	window = mc.window(window,t='Transform Driven Blend')
-	
+
 	# Layout
 	cl = mc.columnLayout()
-	
+
 	# UI Elements
 	driveAttrTFG = mc.textFieldGrp('tdb_driveAttrTFG',label='Drive Attr', text='')
 	blendShapeTFG = mc.textFieldGrp('tdb_blendShapeTFG',label='BlendShape', text='')
@@ -26,18 +26,18 @@ def ui():
 	createB = mc.button('tdb_createB',label='Create',c='glTools.ui.transformDrivenBlend.executeFromUI()')
 	refreshB = mc.button('tdb_refreshB',label='Refresh',c='glTools.ui.transformDrivenBlend.refreshUI()')
 	cancelB = mc.button('tdb_cancelB',label='Cancel',c='mc.deleteUI('+window+')')
-	
+
 	# Popup Menus
 	mc.popupMenu('tdb_blendShapePUM',p=blendShapeTFG)
 	mc.popupMenu('tdb_target1PUM',p=target1TFG)
 	mc.popupMenu('tdb_target2PUM',p=target2TFG)
 	mc.popupMenu('tdb_driveAttrPUM',p=driveAttrTFG)
 	mc.menuItem(label='Set from selected',c='glTools.ui.utils.loadChannelBoxSel("'+driveAttrTFG+'")')
-	
+
 	# Show Window
 	refreshUI()
 	mc.showWindow(window)
-	
+
 def refreshUI():
 	'''
 	'''
@@ -45,14 +45,14 @@ def refreshUI():
 	blendShape = mc.textFieldGrp('tdb_blendShapeTFG',q=True,text=True)
 	target1 = mc.textFieldGrp('tdb_target1TFG',q=True,text=True)
 	target2 = mc.textFieldGrp('tdb_target1TFG',q=True,text=True)
-	
+
 	# Update blendShape menu list
 	blendShapeList = mc.ls(type='blendShape')
 	mc.popupMenu('tdb_blendShapePUM',e=True,deleteAllItems=True)
 	mc.setParent('tdb_blendShapePUM',m=True)
 	for item in blendShapeList:
 		mc.menuItem(label=item,c='mc.textFieldGrp("tdb_blendShapeTFG",e=True,text="'+item+'");glTools.ui.transformDrivenBlend.refreshUI()')
-	
+
 	# Check BlendShape
 	if blendShape and mc.objExists('blendShape') and (mc.objectType(blendShape) == 'blendShape'):
 		targetList = mc.listAttr(blendShape+'.w',m=True)
@@ -66,14 +66,14 @@ def refreshUI():
 			mc.menuItem(label=target,c='mc.textFieldGrp("tdb_target1TFG",e=True,text="'+target+'");glTools.ui.transformDrivenBlend.refreshUI()',en=not bool(targetCon))
 			mc.setParent('tdb_target2PUM',m=True)
 			mc.menuItem(label=target,c='mc.textFieldGrp("tdb_target1TFG",e=True,text="'+target+'");glTools.ui.transformDrivenBlend.refreshUI()',en=not bool(targetCon))
-			
+
 def executeFromUI():
 	'''
 	'''
-	# Set Default Values 
+	# Set Default Values
 	minValue = 0.0
 	maxValue = 1.0
-	
+
 	# Get UI input values
 	driveAttr = mc.textFieldGrp('tdb_driveAttrTFG',q=True,text=True)
 	blendShape = mc.textFieldGrp('tdb_blendShapeTFG',q=True,text=True)
@@ -83,7 +83,7 @@ def executeFromUI():
 	weight2 = mc.floatFieldGrp('tdb_weight2FFG',q=True,v1=True)
 	overlap = mc.floatFieldGrp('tdb_overlapFFG',q=True,v1=True)
 	prefix = mc.textFieldGrp('tdb_prefixTFG',q=True,text=True)
-	
+
 	# Check Arguments
 	if not blendShape: raise Exception('No blendShape specified!')
 	if not target1: raise Exception('Target 1 not specified!')
@@ -92,7 +92,7 @@ def executeFromUI():
 		maxValue = weight2
 	else:
 		maxValue = weight1
-	
+
 	# Execute Command
 	if target1 and target2:
 		glTools.tools.transformDrivenBlend.drive2Shapes(blendShape,target1,target2,driveAttr,minValue,maxValue,overlap,prefix)

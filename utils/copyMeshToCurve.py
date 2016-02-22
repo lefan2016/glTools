@@ -14,24 +14,24 @@ def create(baseCrv,curveList,inMeshList,prefix):
 	'''
 	# Create copyMeshToCurve node
 	copyMeshToCurve = mc.createNode('copyMeshToCurve',n=prefix+'_copyMeshToCurve')
-	
+
 	# Connect base curve
 	mc.connectAttr(baseCrv+'.worldSpace[0]',copyMeshToCurve+'.baseCurve',f=True)
-	
+
 	# Connect input curves
 	connectInputCurves(copyMeshToCurve,curveList)
-	
+
 	# Connect input mesh
 	connectInputMesh(copyMeshToCurve,inMeshList)
-	
+
 	# Create output mesh
 	outMeshShape = mc.createNode('mesh',n=prefix+'_outMeshShape')
 	outMesh = mc.listRelatives(outMeshShape,p=True)[0]
 	mc.rename(outMesh,prefix+'_outMesh')
-	
+
 	# Connect out mesh
 	mc.connectAttr(copyMeshToCurve+'.outputMesh',outMeshShape+'.inMesh',f=True)
-	
+
 	# Return Reult
 	return copyMeshToCurve
 
@@ -46,7 +46,7 @@ def connectInputCurves(copyMeshToCurve,curveList):
 	# Connect Input Curves
 	for i in range(len(curveList)):
 		mc.connectAttr(curveList[i]+'.worldSpace[0]',copyMeshToCurve+'.inputCurve['+str(i)+']',f=True)
-		
+
 def connectInputMesh(copyMeshToCurve,inMeshList):
 	'''
 	Connect a list of input meshes to the specified copyMeshToCurve node.

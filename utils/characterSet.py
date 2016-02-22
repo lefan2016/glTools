@@ -48,22 +48,22 @@ def create(	objectList,
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Check Character Set
 	if isCharSet(name):
 		raise Exception('Character set "'+name+'" already exists!')
-	
+
 	# Check Root
 	if root and not mc.objExists(root):
 		raise Exception('Root object "'+root+'" does not exists!')
-	
+
 	# ========================
 	# - Create Character Set -
 	# ========================
-	
+
 	# Initialize Character Var
 	char = ''
-	
+
 	if root:
 		# Create With Root Node
 		char = mc.character(	objectList,
@@ -83,11 +83,11 @@ def create(	objectList,
 								excludeScale=excludeScale,
 								excludeDynamic=excludeDynamic,
 								excludeVisibility=excludeVisibility )
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return char
 
 def setCurrent(charSet):
@@ -99,10 +99,10 @@ def setCurrent(charSet):
 	# Check Character Set
 	if not isCharSet(charSet):
 		raise Exception('Object "'+charSet+'" is not a valid character set!')
-	
+
 	# Set Current
 	mm.eval('setCurrentCharacters({"'+charSet+'"})')
-	
+
 	# Return Result
 	return charSet
 
@@ -130,24 +130,24 @@ def bakeCharacterChannels(charSet,start=None,end=None,attrList=[]):
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	if not isCharSet(charSet):
 		raise Exception('Object "'+charSet+'" is not a valid character set!')
-	
+
 	# Start/End
 	if start == None: start = mc.playbackOptions(min=True)
 	if end == None: end = mc.playbackOptions(max=True)
-	
+
 	# =========================
 	# - Character Set Details -
 	# =========================
-	
+
 	# Get Character Set Channels
 	charChannels = mc.sets(charSet,q=True)
-	
+
 	# Get Character Set Objects
 	charObjList = mc.ls(charChannels,o=True)
-	
+
 	# Get Character Set Channel Names
 	if not attrList:
 		attrList = []
@@ -155,17 +155,17 @@ def bakeCharacterChannels(charSet,start=None,end=None,attrList=[]):
 			attr = mc.attributeName(ch,s=True)
 			if not attrList.count(attr):
 				attrList.append(attr)
-	
+
 	# ================
 	# - Bake Results -
 	# ================
-	
+
 	mc.bakeResults(charObjList,t=(1,600),at=attrList,simulation=True)
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return charObjList
 
 def removeTimelineClips(charSet):

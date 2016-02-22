@@ -21,7 +21,7 @@ def xformToNParticles(xformList=[]):
 	ptList = [mc.xform(i,q=True,ws=True,rp=True) for i in xformList]
 	particle = mc.nParticle(p=ptList)
 	return particle
-	
+
 def xformToPoly(xformList=[],scale=0.1):
 	'''
 	Create poly planes from the specified list of transforms

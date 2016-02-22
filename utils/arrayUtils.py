@@ -21,7 +21,7 @@ def dict_orderedKeyListFromValues(d):
 	@type d: dict
 	'''
 	return [ i[0] for i in sorted(d.items(), key=lambda (k, v): v) ]
-	
+
 def dict_orderedValueListFromKeys(d):
 	'''
 	Return a list of dictionary values, ordered based on their keys

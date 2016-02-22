@@ -26,14 +26,14 @@ def curveConstraint(transform,curve,parameter,useClosestPoint=True,normalizePara
 	'''
 	# Build axis dictionary
 	axisDict = {'x':(1,0,0),'y':(0,1,0),'z':(0,0,1),'-x':(-1,0,0),'-y':(0,-1,0),'-z':(0,0,-1)}
-	
+
 	# Check prefix
 	if not prefix: prefix = glTools.utils.stringUtils.stripSuffix(transform)
-	
+
 	# Parameter
 	pos = mc.xform(transform,q=True,ws=True,rp=True)
 	if useClosestPoint: parameter = glTools.utils.curve.closestPoint(curve,pos)
-	
+
 	# PointOnCurveInfo
 	poc = prefix+'_pointOnCurveInfo'
 	poc = mc.createNode('pointOnCurveInfo',n=poc)
@@ -44,14 +44,14 @@ def curveConstraint(transform,curve,parameter,useClosestPoint=True,normalizePara
 		maxParam = mc.getAttr(curve+'.maxValue')
 		parameter = (parameter-minParam)/(maxParam-minParam)
 	mc.setAttr(poc+'.parameter',parameter)
-	
+
 	# Point Constraint
 	pntCon = prefix+'_pointConstraint'
 	pntCon = mc.createNode('pointConstraint',n=pntCon)
 	mc.connectAttr(poc+'.position',pntCon+'.target[0].targetTranslate',f=True)
 	mc.connectAttr(transform+'.parentInverseMatrix[0]',pntCon+'.constraintParentInverseMatrix',f=True)
 	mc.connectAttr(pntCon+'.constraintTranslate',transform+'.translate',f=True)
-	
+
 	# Aim Constraint
 	aimCon = prefix+'_aimConstraint'
 	aimCon = mc.createNode('aimConstraint',n=aimCon)
@@ -70,20 +70,20 @@ def curveConstraint(transform,curve,parameter,useClosestPoint=True,normalizePara
 	# Connect
 	mc.connectAttr(transform+'.parentInverseMatrix[0]',aimCon+'.constraintParentInverseMatrix',f=True)
 	mc.connectAttr(aimCon+'.constraintRotate',transform+'.rotate',f=True)
-	
+
 	# Parent constraints
 	mc.parent(pntCon,transform)
 	mc.parent(aimCon,transform)
-	
+
 	# Add parameter attribute
 	if not mc.objExists(transform+'.param'):
 		if normalizeParameter: mc.addAttr(transform,ln='param',at='float',dv=parameter,min=0.0,max=1.0,k=True)
 		else: mc.addAttr(transform,ln='param',at='float',dv=parameter,min=minParam,max=maxParam,k=True)
 	mc.connectAttr(transform+'.param',poc+'.parameter',f=True)
-	
+
 	# Return result
 	return(poc,pntCon,aimCon)
-	
+
 def curveAimConstraint(transform,curve,parameter,useClosestPoint=True,aimAxis='y',tangentAxis='x',prefix=''):
 	'''
 	@param transform: Transform to aim at point on curve
@@ -103,34 +103,34 @@ def curveAimConstraint(transform,curve,parameter,useClosestPoint=True,aimAxis='y
 	'''
 	# Build axis dictionary
 	axisDict = {'x':(1,0,0),'y':(0,1,0),'z':(0,0,1),'-x':(-1,0,0),'-y':(0,-1,0),'-z':(0,0,-1)}
-	
+
 	# Check prefix
 	if not prefix: prefix = glTools.utils.stringUtils.stripSuffix(transform)
-	
+
 	# Transform worldSpace position
 	pmm = prefix+'_pointMatrixMult'
 	pmm = mc.createNode('pointMatrixMult',n=pmm)
 	mc.connectAttr(transform+'.translate',pmm+'.inPoint',f=True)
 	mc.connectAttr(transform+'.parentMatrix[0]',pmm+'.inMatrix',f=True)
 	mc.setAttr(pmm+'.vectorMultiply',1)
-	
+
 	# Parameter
 	pos = mc.xform(transform,q=True,ws=True,rp=True)
 	if useClosestPoint: paramater = glTools.utils.curve.closestPoint(curve,pos)
-	
+
 	# PointOnCurveInfo
 	poc = prefix+'_pointOnCurveInfo'
 	poc = mc.createNode('pointOnCurveInfo',n=poc)
 	mc.connectAttr(curve+'.worldSpace[0]',poc+'.inputCurve',f=True)
 	mc.setAttr(poc+'.parameter',paramater)
-	
+
 	# Offset
 	pma = prefix+'_plusMinusAverage'
 	pma = mc.createNode('plusMinusAverage',n=pma)
 	mc.connectAttr(poc+'.position',pma+'.input3D[0]',f=True)
 	mc.connectAttr(pmm+'.output',pma+'.input3D[1]',f=True)
 	mc.setAttr(pma+'.operation',2) # Subtract
-	
+
 	# Aim Constraint
 	aimCon = prefix+'_aimConstraint'
 	aimCon = mc.createNode('aimConstraint',n=aimCon)
@@ -146,7 +146,7 @@ def curveAimConstraint(transform,curve,parameter,useClosestPoint=True,aimAxis='y
 	mc.setAttr(aimCon+'.aimVector',aimVec[0],aimVec[1],aimVec[2])
 	mc.setAttr(aimCon+'.upVector',tanVec[0],tanVec[1],tanVec[2])
 	mc.parent(aimCon,transform)
-	
+
 	# Add parameter attribute
 	minU = mc.getAttr(curve+'.minValue')
 	maxU = mc.getAttr(curve+'.maxValue')
@@ -173,17 +173,17 @@ def multiCurveAimConstraint(transform,curve1,curve2,toggleAttr,aimAxis='y',tange
 	'''
 	# Build axis dictionary
 	axisDict = {'x':(1,0,0),'y':(0,1,0),'z':(0,0,1),'-x':(-1,0,0),'-y':(0,-1,0),'-z':(0,0,-1)}
-	
+
 	# Check prefix
 	if not prefix: prefix = glTools.utils.stringUtils.stripSuffix(transform)
-	
+
 	# Transform worldSpace position
 	pmm = prefix+'_pointMatrixMult'
 	pmm = mc.createNode('pointMatrixMult',n=pmm)
 	mc.connectAttr(transform+'.translate',pmm+'.inPoint',f=True)
 	mc.connectAttr(transform+'.parentMatrix[0]',pmm+'.inMatrix',f=True)
 	mc.setAttr(pmm+'.vectorMultiply',1)
-	
+
 	# PointOnCurveInfo
 	poc1 = prefix+'_pc01_pointOnCurveInfo'
 	poc1 = mc.createNode('pointOnCurveInfo',n=poc1)
@@ -191,41 +191,41 @@ def multiCurveAimConstraint(transform,curve1,curve2,toggleAttr,aimAxis='y',tange
 	poc2 = prefix+'_pc02_pointOnCurveInfo'
 	poc2 = mc.createNode('pointOnCurveInfo',n=poc2)
 	mc.connectAttr(curve2+'.worldSpace[0]',poc2+'.inputCurve',f=True)
-	
+
 	pos = mc.xform(transform,q=True,ws=True,rp=True)
 	param = glTools.utils.curve.closestPoint(curve1,pos)
 	mc.setAttr(poc1+'.parameter',param)
 	pos = mc.pointOnCurve(curve1,pr=param,p=True)
 	param = glTools.utils.curve.closestPoint(curve2,pos)
 	mc.setAttr(poc2+'.parameter',param)
-	
+
 	# Offset
 	pma1 = prefix+'_pc01_plusMinusAverage'
 	pma1 = mc.createNode('plusMinusAverage',n=pma1)
 	mc.connectAttr(poc1+'.position',pma1+'.input3D[0]',f=True)
 	mc.connectAttr(pmm+'.output',pma1+'.input3D[1]',f=True)
 	mc.setAttr(pma1+'.operation',2) # Subtract
-	
+
 	pma2 = prefix+'_pc02_plusMinusAverage'
 	pma2 = mc.createNode('plusMinusAverage',n=pma2)
 	mc.connectAttr(poc2+'.position',pma2+'.input3D[0]',f=True)
 	mc.connectAttr(pmm+'.output',pma2+'.input3D[1]',f=True)
 	mc.setAttr(pma2+'.operation',2) # Subtract
-	
+
 	# Blend Offset
 	pos_bcn = prefix+'_ps01_blendColors'
 	pos_bcn = mc.createNode('blendColors',n=pos_bcn)
 	mc.connectAttr(pma1+'.output3D',pos_bcn+'.color1',f=True)
 	mc.connectAttr(pma2+'.output3D',pos_bcn+'.color2',f=True)
 	mc.connectAttr(toggleAttr,pos_bcn+'.blender',f=True)
-	
+
 	# Blend Tangent
 	tan_bcn = prefix+'_rt01_blendColors'
 	tan_bcn = mc.createNode('blendColors',n=tan_bcn)
 	mc.connectAttr(poc1+'.tangent',tan_bcn+'.color1',f=True)
 	mc.connectAttr(poc2+'.tangent',tan_bcn+'.color2',f=True)
 	mc.connectAttr(toggleAttr,tan_bcn+'.blender',f=True)
-	
+
 	# Aim Constraint
 	aimCon = prefix+'_aimConstraint'
 	aimCon = mc.createNode('aimConstraint',n=aimCon)
@@ -241,7 +241,7 @@ def multiCurveAimConstraint(transform,curve1,curve2,toggleAttr,aimAxis='y',tange
 	mc.setAttr(aimCon+'.aimVector',aimVec[0],aimVec[1],aimVec[2])
 	mc.setAttr(aimCon+'.upVector',tanVec[0],tanVec[1],tanVec[2])
 	mc.parent(aimCon,transform)
-	
+
 	# Add parameter attribute
 	minU = mc.getAttr(curve1+'.minValue')
 	maxU = mc.getAttr(curve1+'.maxValue')
@@ -249,13 +249,13 @@ def multiCurveAimConstraint(transform,curve1,curve2,toggleAttr,aimAxis='y',tange
 		mc.addAttr(transform,ln='param1',at='float',min=minU,max=maxU,k=True)
 	mc.setAttr(transform+'.param1',mc.getAttr(poc1+'.parameter'))
 	mc.connectAttr(transform+'.param1',poc1+'.parameter',f=True)
-	
+
 	minU = mc.getAttr(curve2+'.minValue')
 	maxU = mc.getAttr(curve2+'.maxValue')
 	if not mc.objExists(transform+'.param2'):
 		mc.addAttr(transform,ln='param2',at='float',min=minU,max=maxU,k=True)
 	mc.setAttr(transform+'.param2',mc.getAttr(poc2+'.parameter'))
 	mc.connectAttr(transform+'.param2',poc2+'.parameter',f=True)
-	
+
 	# Return result
 	return (aimCon,poc1,poc2)

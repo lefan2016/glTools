@@ -18,7 +18,7 @@ def addRmanPrimVar(mesh,attrName,attrType='float',paintable=False):
 	'''
 	# Prefix attr
 	attr = ''
-	
+
 	# Data type
 	if attrType == 'float':
 		dataType = 'doubleArray'
@@ -34,23 +34,23 @@ def addRmanPrimVar(mesh,attrName,attrType='float',paintable=False):
 		attr = 'rmanC'+attrName
 	else:
 		raise Exception('Invalid attribute type! Accepted values are: "float", "vector", "color" and "string".')
-	
+
 	# Check mesh
 	if not glTools.utils.mesh.isMesh(mesh):
 		raise Exception('Mesh "'+mesh+'" does not exist!!')
-	
+
 	# Check attr
 	if mc.objExists(mesh+'.'+attr):
 		raise Exception('Attribute "'+mesh+'.'+attr+'" already exists!!')
-	
+
 	# Get shape
 	meshShape = mc.listRelatives(mesh,s=True,ni=True,pa=True)
 	if not meshShape:
 		raise Exception('Unable to determine shape for mesh "'+mesh+'"!!')
-	
+
 	# Add attribute
 	mc.addAttr(meshShape[0],ln=attr,dt=dataType)
-	
+
 	# Make paintable
 	if paintable: mc.makePaintable('mesh',attr,attrType=dataType)
 
@@ -75,57 +75,57 @@ def addAbcPrimVar(geo,attrName,attrType=None,dataType='long',keyable=False,paint
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Check Geometry
 	if not mc.objExists(geo):
 		raise Exception('Geometry "'+geo+'" does not exist!!')
 	if geoIsMesh and not glTools.utils.mesh.isMesh(geo):
 		raise Exception('Geometry "'+geo+'" is not a valid mesh!!')
-	
+
 	# Check Attribute
 	attr = 'ABC_'+attrName
 	if mc.objExists(geo+'.'+attr):
 		# mc.deleteAttr(geo+'.'+attr)
 		raise Exception('Attribute "'+geo+'.'+attr+'" already exists!!')
-	
+
 	# Check Attribute Type
 	typeList = ['var','vtx','uni','fvr']
 	if attrType and  not typeList.count(attrType):
 		raise Exception('Invalid attribute type! Accepted values are: "var", "vtx", "uni" and "fvr" (or <None> for per object attribute).')
-	
+
 	# =================
 	# - Add Attribute -
 	# =================
-	
+
 	# Data type
 	if not attrType:
-		
+
 		# Check Data Type
 		if not dataType: dataType = 'long'
-		
+
 		# Add primVar attribute
 		mc.addAttr(geo,ln=attr,at=dataType,k=keyable)
-		
+
 	else:
-		
+
 		# Set Attribute Data Type
 		dataType = 'doubleArray'
-		
+
 		# Add primVar attribute
 		mc.addAttr(geo,ln=attr,dt=dataType)
-		
+
 		# Set Geometey Scope Value
 		attrTypeAttr = 'ABC_'+attrName+'_AbcGeomScope'
 		mc.addAttr(geo,ln=attrTypeAttr,dt='string')
 		mc.setAttr(geo+'.'+attrTypeAttr,attrType,type='string',l=True)
-		
+
 		# Make paintable
 		if paintable: mc.makePaintable('mesh',attr,attrType=dataType)
-		
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return geo+'.'+attr
 
 def addAbcPrimVarStr(geo,attrName,stringVal='',lock=False):
@@ -143,34 +143,34 @@ def addAbcPrimVarStr(geo,attrName,stringVal='',lock=False):
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Check Geometry
 	if not mc.objExists(geo):
 		raise Exception('Geometry "'+geo+'" does not exist!!')
-		
+
 	# Check Attribute
 	attr = 'ABC_'+attrName
 	if mc.objExists(geo+'.'+attr):
 		# mc.deleteAttr(geo+'.'+attr)
 		raise Exception('Attribute "'+geo+'.'+attr+'" already exists!!')
-	
+
 	# =================
 	# - Add Attribute -
 	# =================
-	
+
 	# Add primVar attribute
 	mc.addAttr(geo,ln=attr,dt='string')
-	
+
 	# Set String Value
 	if stringVal: mc.setAttr(geo+'.'+attr,stringVal,type='string')
-	
+
 	# Lock Attr
 	if lock: mc.setAttr(geo+'.'+attr,l=True)
-		
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return geo+'.'+attr
 
 def addStepSeedAttr(geo,attrNode='',prefix=''):
@@ -186,59 +186,59 @@ def addStepSeedAttr(geo,attrNode='',prefix=''):
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Check Plugin
 	if not mc.pluginInfo('meshRandomSeed.py',q=True,l=True):
 		try: mc.loadPlugin('meshRandomSeed.py')
 		except: raise MissingPluginError('Unable to load "meshRandomSeed" plugin!!')
-	
+
 	# Check Prefix
 	if not prefix: prefix = geo
-	
+
 	# Check Geometry
 	if not mc.objExists(geo):
 		raise Exception('Geometry "'+geo+'" does not exist!!')
 	if not glTools.utils.mesh.isMesh(geo):
 		raise Exception('Geometry "'+geo+'" is not a valid mesh!!')
-	
+
 	# Check Attribute Node
 	if not attrNode: attrNode = geo
-	
+
 	# Check Attribute
 	attrType = None
 	attrName = 'stepSeed'
 	attr = 'ABC_'+attrName
 	if mc.objExists(attrNode+'.'+attr):
 		raise Exception('Attribute "'+attrNode+'.'+attr+'" already exists!!')
-	
+
 	# =================
 	# - Add Attribute -
 	# =================
-	
+
 	attr = addAbcPrimVar(attrNode,attrName,attrType,keyable=True)
-	
+
 	# ===================
 	# - Connect To Mesh -
 	# ===================
-	
+
 	# Get Geometry Shape
 	geoShape = mc.listRelatives(geo,s=True,ni=True,pa=True)
 	if not geoShape:
 		raise Exception('Unable to determine geometry shape from transform "'+geo+'"!')
-	
+
 	# Connect to meshRandomSeed Node
 	meshRandomSeed = mc.createNode('meshRandomSeed',n=prefix+'_meshRandomSeed')
 	mc.connectAttr(geoShape[0]+'.outMesh',meshRandomSeed+'.inputMesh',f=True)
-	
+
 	# =========================
 	# - Connect StepSeed Attr -
 	# =========================
-	
+
 	mc.connectAttr(meshRandomSeed+'.outputSeed',attr,f=True)
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return attr
 

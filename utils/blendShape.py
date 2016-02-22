@@ -34,24 +34,24 @@ def create(baseGeo,targetGeo=[],origin='local',deformOrder=None,prefix=None):
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Check Base Geometry
 	if not mc.objExists(baseGeo):
 		raise Exception('Base geometry "'+baseGeo+'" does not exist!')
-	
+
 	# Check Prefix
 	if not prefix: prefix = baseGeo.split(':')[-1]
-	
+
 	# Check BlendShape
 	blendShape = prefix+'_blendShape'
 	if glTools.utils.blendShape.isBlendShape(blendShape):
 		print('BlendShape "'+blendShape+'" already exist!')
 		return blendShape
-	
+
 	# =====================
 	# - Create BlendShape -
 	# =====================
-	
+
 	if deformOrder == 'after':
 		blendShape = mc.blendShape(baseGeo,name=blendShape,origin=origin,after=True)[0]
 	elif deformOrder == 'before':
@@ -64,23 +64,23 @@ def create(baseGeo,targetGeo=[],origin='local',deformOrder=None,prefix=None):
 		blendShape = mc.blendShape(baseGeo,name=blendShape,origin=origin,foc=True)[0]
 	else:
 		blendShape = mc.blendShape(baseGeo,name=blendShape,origin=origin)[0]
-	
+
 	# ===============
 	# - Add Targets -
 	# ===============
-	
+
 	for target in targetGeo:
 		addTarget(blendShape=blendShape,target=target,base=baseGeo)
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return blendShape
 
 def hasBase(blendShape,base):
 	'''
-	Check if the a blendShape has a specific base geometry 
+	Check if the a blendShape has a specific base geometry
 	@param blendShape: BlendShape node to query
 	@type blendShape: str
 	@param base: Base geometry to query
@@ -89,16 +89,16 @@ def hasBase(blendShape,base):
 	# Check blendShape
 	if not isBlendShape(blendShape):
 		raise Exception('Object "'+blendShape+'" is not a valid blendShape node!')
-	
+
 	# Check target
 	if base in getBaseGeo(blendShape): return True
-	
+
 	# Return Result
 	return False
 
 def hasTarget(blendShape,target):
 	'''
-	Specify if the a named target exists on a blendShape node 
+	Specify if the a named target exists on a blendShape node
 	@param blendShape: Name of blendShape to query
 	@type blendShape: str
 	@param target: BlendShape target to query
@@ -107,16 +107,16 @@ def hasTarget(blendShape,target):
 	# Check blendShape
 	if not isBlendShape(blendShape):
 		raise Exception('Object "'+blendShape+'" is not a valid blendShape node!')
-	
+
 	# Check target
 	if target in getTargetList(blendShape): return True
-	
+
 	# Return Result
 	return False
 
 def hasTargetGeo(blendShape,target,base=''):
 	'''
-	Check if the specified blendShape target has live target geometry.  
+	Check if the specified blendShape target has live target geometry.
 	@param blendShape: Name of blendShape to query
 	@type blendShape: str
 	@param target: BlendShape target to query
@@ -127,14 +127,14 @@ def hasTargetGeo(blendShape,target,base=''):
 	# Check blendShape
 	if not isBlendShape(blendShape):
 		raise Exception('Object "'+blendShape+'" is not a valid blendShape node!')
-	
+
 	# Check target
 	if not target in getTargetList(blendShape):
 		raise Exception('BlendShape "'+blendShape+'" has no target "'+target+'"!')
-	
+
 	# Check Target Geometry
 	targetGeo = getTargetGeo(blendShape,target,baseGeo=base)
-	
+
 	# Return Result
 	return bool(targetGeo)
 
@@ -147,7 +147,7 @@ def addTarget(blendShape,target,base='',targetIndex=-1,targetAlias='',targetWeig
 	@type target: str
 	@param base: BlendShape base geometry. If empty, use first connected base geomtry
 	@type base: str
-	@param targetIndex: Specify the target index. If less than 0, use next available index. 
+	@param targetIndex: Specify the target index. If less than 0, use next available index.
 	@type targetIndex: str
 	@param targetAlias: Override the default blendShape target alias with this string
 	@type targetAlias: str
@@ -157,50 +157,50 @@ def addTarget(blendShape,target,base='',targetIndex=-1,targetAlias='',targetWeig
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# BlendShape
 	if not isBlendShape(blendShape):
 		raise Exception('Object "'+blendShape+'" is not a valid blendShape node!')
-	
+
 	# Target
 	if not mc.objExists(target):
 		raise Exception('Target geometry "'+target+'" does not exist!')
-	
+
 	# Base
 	if base and not mc.objExists(base):
 		raise Exception('Base geometry "'+base+'" does not exist!')
-	
+
 	# ==============
 	# - Add Target -
 	# ==============
-	
+
 	# Get Base Geometry
 	if not base: base = getBaseGeo(blendShape)[0]
-	# Get Target Index 
+	# Get Target Index
 	if targetIndex < 0: targetIndex = nextAvailableTargetIndex(blendShape)
-	
+
 	# Add Target
 	mc.blendShape(blendShape,e=True,t=(base,targetIndex,target,1.0),topologyCheck=topologyCheck)
-	
+
 	# Get Target Name
 	targetName = getTargetName(blendShape,target)
-	
+
 	# Override Target Alias
 	if targetAlias:
 		targetIndex = getTargetIndex(blendShape,targetName)
 		mc.aliasAttr(targetAlias,blendShape+'.weight['+str(targetIndex)+']')
 		targetName = targetAlias
-	
+
 	# =====================
 	# - Set Target Weight -
 	# =====================
-	
+
 	if targetWeight: mc.setAttr(blendShape+'.'+targetName,targetWeight)
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return (blendShape+'.'+targetName)
 
 def addTargetInbetween(blendShape,targetGeo,targetName,base='',targetWeight='0.5'):
@@ -220,38 +220,38 @@ def addTargetInbetween(blendShape,targetGeo,targetName,base='',targetWeight='0.5
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# BlendShape
 	if not isBlendShape(blendShape):
 		raise Exception('Object "'+blendShape+'" is not a valid blendShape node!')
-	
+
 	# Target
 	if not mc.objExists(targetGeo):
 		raise Exception('Target geometry "'+target+'" does not exist!')
 	if not hasTarget(blendShape,targetName):
 		raise Exception('BlendShape "'+blendShape+'" has no target "'+targetName+'"!')
-	
+
 	# Base
 	if base and not mc.objExists(base):
 		raise Exception('Base geometry "'+base+'" does not exist!')
-	
+
 	# ========================
 	# - Add Target Inbetween -
 	# ========================
-	
+
 	# Get Base Geometry
 	if not base: base = getBaseGeo(blendShape)[0]
-	
+
 	# Get Target Index
 	targetIndex = getTargetIndex(blendShape,targetName)
-	
+
 	# Add Target
 	mc.blendShape(blendShape,e=True,t=(base,targetIndex,targetGeo,targetWeight))
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return (blendShape+'.'+targetName)
 
 def getBaseGeo(blendShape):
@@ -263,24 +263,24 @@ def getBaseGeo(blendShape):
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# BlendShape
 	if not isBlendShape(blendShape):
 		raise Exception('Object "'+blendShape+'" is not a valid blendShape node!')
-	
+
 	# =====================
 	# - Get Base Geometry -
 	# =====================
-	
+
 	baseGeo = glTools.utils.deformer.getAffectedGeometry(blendShape)
 	baseGeoList = zip(baseGeo.values(),baseGeo.keys())
 	baseGeoList.sort()
 	baseGeoList = [i[1] for i in baseGeoList]
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return baseGeoList
 
 def getBaseIndex(blendShape,base):
@@ -296,13 +296,13 @@ def getBaseIndex(blendShape,base):
 		raise Exception('Object "'+blendShape+'" is not a valid blendShape node!')
 	if not hasBase(blendShape,base):
 		raise Exception('Obejct "'+base+'" is not a base geometry for blendShape "'+blendShape+'"!')
-	
+
 	# Get Base Index
 	baseGeo = glTools.utils.deformer.getAffectedGeometry(blendShape)
 	if not baseGeo.has_key(base):
 		raise Exception('Unable to determine base index for "'+base+'" on blendShape "'+blendShape+'"!')
 	baseGeo[base]
-	
+
 	# Return Result
 	return baseGeo[base]
 
@@ -315,11 +315,11 @@ def getTargetList(blendShape):
 	# Check blendShape
 	if not isBlendShape(blendShape):
 		raise Exception('Object "'+blendShape+'" is not a valid blendShape node!')
-	
+
 	# Get attribute alias
 	targetList = mc.listAttr(blendShape+'.w',m=True)
 	if not targetList: targetList = []
-	
+
 	# Return result
 	return targetList
 
@@ -333,15 +333,15 @@ def getTargetGeoList(blendShape,baseGeo=''):
 	'''
 	# Get blendShape Target List
 	targetList = getTargetList(blendShape)
-	
+
 	# Get Target Geo List
 	targetGeoList = []
 	for target in targetList:
-		
+
 		# Get Target Source Geo
 		targetGeo = getTargetGeo(blendShape,target,baseGeo)
 		targetGeoList.append(targetGeo)
-		
+
 	# Return Result
 	return targetGeoList
 
@@ -357,22 +357,22 @@ def getTargetGeo(blendShape,target,baseGeo=''):
 	'''
 	# Get Target Index
 	targetIndex = getTargetIndex(blendShape,target)
-	
+
 	# Get Geometry Index
 	geomIndex = 0
 	if baseGeo: geomIndex = glTools.utils.deformer.getGeomIndex(baseGeo,blendShape)
-	
+
 	# Get Weight Index
 	# !!! Hardcoded to check "inputTargetItem" index 6000. This could be more robust by check all existing multi indexes.
 	wtIndex = 6000
-	
+
 	# Get Connected Target Geometry
 	targetGeoAttr = blendShape+'.inputTarget['+str(geomIndex)+'].inputTargetGroup['+str(targetIndex)+'].inputTargetItem['+str(wtIndex)+'].inputGeomTarget'
 	targetGeoConn = mc.listConnections(targetGeoAttr,s=True,d=False)
-	
+
 	# Check Target Geometry
 	if not targetGeoConn: targetGeoConn = ['']
-	
+
 	# Return Result
 	return targetGeoConn[0]
 
@@ -387,24 +387,24 @@ def getTargetName(blendShape,targetGeo):
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# BlendShape
 	if not isBlendShape(blendShape):
 		raise Exception('Object "'+blendShape+'" is not a valid blendShape node!')
-	
+
 	# Target
 	if not mc.objExists(targetGeo):
 		raise Exception('Target geometry "'+targetGeo+'" does not exist!')
-	
+
 	# ===================
 	# - Get Target Name -
 	# ===================
-	
+
 	# Get Target Shapes
 	targetShape = glTools.utils.shape.getShapes(targetGeo,nonIntermediates=True,intermediates=False)
 	if not targetShape: targetShape = mc.ls(mc.listRelatives(targetGeo,ad=True,pa=True),shapes=True,noIntermediate=True)
 	if not targetShape: raise Exception('No shapes found under target geometry "'+targetGeo+'"!')
-	
+
 	# Find Target Connection
 	targetConn = mc.listConnections(targetShape,sh=True,d=True,s=False,p=False,c=True)
 	if not targetConn.count(blendShape):
@@ -412,16 +412,16 @@ def getTargetName(blendShape,targetGeo):
 	targetConnInd = targetConn.index(blendShape)
 	targetConnAttr = targetConn[targetConnInd-1]
 	targetConnPlug = mc.listConnections(targetConnAttr,sh=True,p=True,d=True,s=False)[0]
-	
+
 	# Get Target Index
 	targetInd = int(targetConnPlug.split('.')[2].split('[')[1].split(']')[0])
 	# Get Target Alias
 	targetAlias = mc.aliasAttr(blendShape+'.weight['+str(targetInd)+']',q=True)
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return targetAlias
 
 def getTargetIndex(blendShape,target):
@@ -435,19 +435,19 @@ def getTargetIndex(blendShape,target):
 	# Check blendShape
 	if not isBlendShape(blendShape):
 		raise Exception('Object "'+blendShape+'" is not a valid blendShape node!')
-	
+
 	# Check target
 	if not mc.objExists(blendShape+'.'+target):
 		raise Exception('Blendshape "'+blendShape+'" has no target "'+target+'"!')
-	
+
 	# Get attribute alias
 	aliasList = mc.aliasAttr(blendShape,q=True)
 	aliasIndex = aliasList.index(target)
 	aliasAttr = aliasList[aliasIndex+1]
-	
+
 	# Get index
 	targetIndex = int(aliasAttr.split('[')[-1].split(']')[0])
-	
+
 	# Return result
 	return targetIndex
 
@@ -460,15 +460,15 @@ def nextAvailableTargetIndex(blendShape):
 	# Check blendShape
 	if not isBlendShape(blendShape):
 		raise Exception('Object "'+blendShape+'" is not a valid blendShape node!')
-	
+
 	# Get blendShape target list
 	targetList = getTargetList(blendShape)
 	if not targetList: return 0
-	
+
 	# Get last index
 	lastIndex = getTargetIndex(blendShape,targetList[-1])
 	nextIndex = lastIndex + 1
-	
+
 	# Return result
 	return nextIndex
 
@@ -485,31 +485,31 @@ def getTargetWeights(blendShape,target,geometry=''):
 	# Check blendShape
 	if not isBlendShape(blendShape):
 		raise Exception('Object "'+blendShape+'" is not a valid blendShape node!')
-	
+
 	# Check target
 	if not mc.objExists(blendShape+'.'+target):
 		raise Exception('blendShape "'+blendShape+'" has no "'+target+'" target attribute!')
-	
+
 	# Check geometry
 	if geometry and not mc.objExists(geometry):
 		raise Exception('Object "'+geometry+'" does not exist!')
-	
+
 	# Get target index
 	aliasList = mc.aliasAttr(blendShape,q=True)
 	aliasTarget = aliasList[(aliasList.index(target)+1)]
 	targetIndex = aliasTarget.split('[')[-1]
 	targetIndex = int(targetIndex.split(']')[0])
-	
+
 	# Get geometry index into blendShape
 	geomIndex = 0
 	if geometry: geomIndex = glTools.utils.deformer.getGeomIndex(geometry,blendShape)
-	
+
 	# Get weights
 	wt = mc.getAttr(blendShape+'.it['+str(geomIndex)+'].itg['+str(targetIndex)+'].tw')[0]
-	
+
 	# Return result
 	return list(wt)
-	
+
 def setTargetWeights(blendShape,target,wt,geometry=''):
 	'''
 	Set per vertex target weights for the specified blendShape target
@@ -525,27 +525,27 @@ def setTargetWeights(blendShape,target,wt,geometry=''):
 	# Check blendShape
 	if not isBlendShape(blendShape):
 		raise Exception('Object "'+blendShape+'" is not a valid blendShape node!')
-	
+
 	# Check target
 	if not mc.objExists(blendShape+'.'+target):
 		raise Exception('blendShape "'+blendShape+'" has no "'+target+'" target attribute!')
-	
+
 	# Check geometry
 	if geometry and not mc.objExists(geometry):
 		raise Exception('Object "'+geometry+'" does not exist!')
-	
+
 	# Get target index
 	aliasList = mc.aliasAttr(blendShape,q=True)
 	aliasTarget = aliasList[(aliasList.index(target)+1)]
 	targetIndex = aliasTarget.split('[')[-1]
 	targetIndex = int(targetIndex.split(']')[0])
-	
+
 	# Get geometry index into blendShape
 	geomIndex = 0
 	if geometry: geomIndex = glTools.utils.deformer.getGeomIndex(geometry,blendShape)
 	# Get number of geometry components
 	compCount = glTools.utils.component.getComponentCount(geometry)
-	
+
 	# Set target weights
 	mc.setAttr(blendShape+'.it['+str(geomIndex)+'].itg['+str(targetIndex)+'].tw[0:'+str(compCount-1)+']',*wt)
 
@@ -568,29 +568,29 @@ def connectToTarget(blendShape,targetGeo,targetName,baseGeo,weight=1.0,force=Fal
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Check blendShape
 	if not isBlendShape(blendShape):
 		raise Exception('Object "'+blendShape+'" is not a valid blendShape node!')
-	
+
 	# Check target
 	if not hasTarget(blendShape,targetName):
 		raise Exception('Blendshape "'+blendShape+'" has no target "'+target+'"!')
-	
+
 	# Check Target Geometry
 	if not mc.objExists(targetGeo):
 		raise Exception('Target geometry "'+targetGeo+'" does not exist!')
-	
+
 	# =====================
 	# - Connect To Target -
 	# =====================
-	
+
 	# Get target index
 	targetIndex = getTargetIndex(blendShape,targetName)
-	
+
 	# FORCE connection
 	if force:
-		
+
 		# Get geometry details
 		geomIndex = glTools.utils.deformer.getGeomIndex(baseGeo,blendShape)
 		geomShape = mc.listRelatives(targetGeo,s=True,ni=True)
@@ -600,21 +600,21 @@ def connectToTarget(blendShape,targetGeo,targetName,baseGeo,weight=1.0,force=Fal
 		else:
 			geomShape = targetGeo
 			geomType = 'none'
-		
+
 		# Get geometry type output attribute.
 		# Non dict values allow specific node attributes to be connected!!
 		geomDict = {'mesh':'.worldMesh[0]','nurbsSurface':'.worldSpace[0]','nurbsCurve':'.worldSpace[0]'}
 		if geomDict.has_key(geomType): geomAttr = geomDict[geomType]
 		else: geomAttr = ''
-		
+
 		# Get weight index
 		wtIndex = int(weight*6000)
-		
+
 		# Connect geometry to target input
 		mc.connectAttr(geomShape+geomAttr,blendShape+'.inputTarget['+str(geomIndex)+'].inputTargetGroup['+str(targetIndex)+'].inputTargetItem['+str(wtIndex)+'].inputGeomTarget',f=True)
-		
+
 	else:
-		
+
 		# Check InBetween
 		if hasTarget(blendShape,targetName) and weight != 1.0:
 			# Connect geometry to target input as inbetween
@@ -622,7 +622,7 @@ def connectToTarget(blendShape,targetGeo,targetName,baseGeo,weight=1.0,force=Fal
 		else:
 			# Connect geometry to target input
 			mc.blendShape(blendShape,e=True,t=[baseGeo,targetIndex,targetGeo,weight])
-	
+
 def renameTarget(blendShape,target,newName):
 	'''
 	Rename the specified blendShape target
@@ -636,14 +636,14 @@ def renameTarget(blendShape,target,newName):
 	# Check blendShape
 	if not isBlendShape(blendShape):
 		raise Exception('Object "'+blendShape+'" is not a valid blendShape node!')
-	
+
 	# Check target
 	if not hasTarget(blendShape,target):
 		raise Exception('BlendShape "'+blendShape+'" has no target "'+target+'"!')
-	
+
 	# Rename target attribute
 	mc.aliasAttr(newName,blendShape+'.'+target)
-	
+
 	# Return Result
 	return newName
 
@@ -660,14 +660,14 @@ def removeTarget(blendShape,target,baseGeo):
 	# Check blendShape
 	if not isBlendShape(blendShape):
 		raise Exception('Object "'+blendShape+'" is not a valid blendShape node!')
-	
+
 	# Check target
 	if not hasTarget(blendShape,target):
 		raise Exception('BlendShape "'+blendShape+'" has no target "'+target+'"!')
-	
+
 	# Get target index
 	targetIndex = getTargetIndex(blendShape,target)
-	
+
 	# Connect null duplicate
 	targetGeo = getTargetGeo(blendShape,target,baseGeo)
 	if not targetGeo:
@@ -675,7 +675,7 @@ def removeTarget(blendShape,target,baseGeo):
 		targetGeo = mc.duplicate(baseGeo)[0]
 		mc.setAttr(blendShape+'.envelope',1.0)
 		connectToTarget(blendShape,targetGeo,target,baseGeo,1.0,force=True)
-	
+
 	# Remove target
 	mc.blendShape(blendShape,e=True,rm=True,t=[baseGeo,targetIndex,targetGeo,1.0])
 
@@ -690,15 +690,15 @@ def removeUnconnectedTargets(blendShape,base):
 	# Check blendShape
 	if not isBlendShape(blendShape):
 		raise Exception('Object "'+blendShape+'" is not a valid blendShape deformer!!')
-	
+
 	# Get blendShape target list
 	targetList = getTargetList(blendShape)
-	
+
 	# Check blendShape target connections
 	deletedTargetList = []
 	for target in targetList:
 		targetConn = mc.listConnections(blendShape+'.'+target,s=True,d=False)
-		
+
 		# If no incoming connnections, delete target
 		if not targetConn:
 			try:
@@ -708,6 +708,6 @@ def removeUnconnectedTargets(blendShape,base):
 			else:
 				print('Target "'+target+'" deleted!')
 				deletedTargetList.append(target)
-	
+
 	# Return result
 	return deletedTargetList

@@ -37,12 +37,12 @@ def loadFilePath(textField,fileFilter=None,caption='Load File',startDir=None):
 								caption=caption,
 								okCaption='Load',
 								startingDirectory=startDir )
-	
+
 	# Check File Path
 	if not filePath:
 		print('Invalid file path!')
 		return
-	
+
 	# Load File Path to TextField
 	if mc.textField(textField,q=True,ex=True):
 		mc.textField(textField,e=True,text=filePath[0])
@@ -53,7 +53,7 @@ def loadFilePath(textField,fileFilter=None,caption='Load File',startDir=None):
 	else:
 		print('UI element "" is not a valid textField, textFieldGrp or textFieldButtonGrp!')
 		return
-	
+
 	# Return Result
 	return filePath[0]
 
@@ -73,12 +73,12 @@ def loadDirectoryPath(textField,caption='Load Directory',startDir=None):
 								caption=caption,
 								okCaption='Load',
 								startingDirectory=startDir )
-	
+
 	# Check File Path
 	if not dirPath:
 		print('Invalid directory path!')
 		return
-	
+
 	# Load File Path to TextField
 	if mc.textField(textField,q=True,ex=True):
 		mc.textField(textField,e=True,text=dirPath[0])
@@ -89,7 +89,7 @@ def loadDirectoryPath(textField,caption='Load Directory',startDir=None):
 	else:
 		print('UI element "'+textField+'" is of type "'+mc.objectTypeUI(textField)+'"! Expected textField, textFieldGrp or textFieldButtonGrp.')
 		return
-	
+
 	# Return Result
 	return dirPath[0]
 
@@ -99,7 +99,7 @@ def importFolderBrowser(textField): # ,caption='Import',startingDirectory=None):
 	'''
 	mm.eval('global proc importGetFolder(string $textField,string $path,string $type){ textFieldButtonGrp -e -text $path $textField; deleteUI projectViewerWindow; }')
 	mm.eval('fileBrowser "importGetFolder '+textField+'" Import "" 4')
-	
+
 	#dirPath = mc.fileDialog2(dialogStyle=2,fileMode=3,caption='Load Scenegraph XML',okCaption='Load',startingDirectory=startingDirectory)
 
 def exportFolderBrowser(textField):
@@ -120,11 +120,11 @@ def loadNsSel(textField,topOnly=True):
 	# Get Selection
 	sel = mc.ls(sl=True)
 	if not sel: return
-	
+
 	# Get Selected Namespace
 	NS = ''
 	NS = glTools.utils.namespace.getNS(sel[0],topOnly)
-	
+
 	# Update UI
 	mc.textFieldButtonGrp(textField,e=True,text=NS)
 
@@ -239,7 +239,7 @@ def loadChannelBoxSel(textField,fullName=True):
 	'''
 	# Get channelBox
 	channelBox = 'mainChannelBox'
-	
+
 	# Check main object channels
 	nodeList = mc.channelBox(channelBox,q=True,mol=True)
 	channelList = mc.channelBox(channelBox,q=True,sma=True)
@@ -255,12 +255,12 @@ def loadChannelBoxSel(textField,fullName=True):
 	if not channelList:
 		channelList = mc.channelBox(channelBox,q=True,soa=True)
 		nodeList = mc.channelBox(channelBox,q=True,ool=True)
-	
+
 	# Check selection
 	if not channelList:
 		print('No channel selected in the channelBox!')
 		return
-	
+
 	# Update UI
 	attr = ''
 	if fullName: attr += str(nodeList[0]+'.')
@@ -287,19 +287,19 @@ def copyTSLselToTSL(sourceTSL,targetTSL,removeFromSource=False,replaceTargetCont
 	# Get source selection
 	srcItems = mc.textScrollList(sourceTSL,q=True,si=True)
 	if not srcItems: return
-	
+
 	# Clear target list
 	if replaceTragetContents: mc.textScrollList(targetTSL,e=True,ra=True)
-	
+
 	# Get current target items
 	tgtItems = mc.textScrollList(targetTSL,q=True,si=True)
-	
+
 	# Copy to target list
 	for src in srcItems:
-		
+
 		# Check existing target items
 		if tgtItems.count(src): continue
-			
+
 		# Append to target list
 		mc.textScrollList(targetTSL,e=True,a=src)
 		tgtItems.append(src)
@@ -366,27 +366,27 @@ def selectFromTSL(TSL,mode='replace',safeFail=True):
 	# Check Mode
 	if not mode in ['add','replace','toggle','remove']:
 		raise Exception('Invalid selection mode! ("'+mode+'")')
-	
+
 	# Get Items to Select
 	listItems = mc.textScrollList(TSL,q=True,si=True)
 	if not listItems: return
-	
+
 	# Clear Selection
 	if mode.lower() == 'replace': mc.select(cl=True)
-	
+
 	# Select Items
 	for item in listItems:
-		
+
 		# Check Object Exists
 		if not mc.objExists(item):
-			
+
 			# Check Safe Fail
 			if safeFail:
 				print('Object "'+item+'" does not exist! Skipping...')
 				continue
 			else:
 				raise Exception('Object "'+item+'" does not exist!')
-		
+
 		# Add Item to Selection
 		if (mode == 'add') or (mode == 'replace'):
 			mc.select(listItems,add=True,noExpand=True)
@@ -396,7 +396,7 @@ def selectFromTSL(TSL,mode='replace',safeFail=True):
 		# Remove Item Selection
 		if (mode == 'remove'):
 			mc.select(listItems,d=True,noExpand=True)
-		
+
 
 def moveToTSLPosition(TSL,index):
 	'''
@@ -408,34 +408,34 @@ def moveToTSLPosition(TSL,index):
 	'''
 	# Get all list entries
 	listLen = len(mc.textScrollList(TSL,q=True,ai=True))
-	
+
 	# Get selected item indices
 	listItems = mc.textScrollList(TSL,q=True,si=True)
 	listIndex = mc.textScrollList(TSL,q=True,sii=True)
 	listItems.reverse()
 	listIndex.reverse()
-	
+
 	# Check position value
 	if not index or index > listLen:
 		raise UserInputError('Invalid position ('+str(index)+') provided for textScrollList!!')
 	if index < 0:
 		index = 2 + listLen + index
-	
+
 	# Remove items
 	for i in range(len(listIndex)):
 		if listIndex[i] < index: index -= 1
 	mc.textScrollList(TSL,e=True,rii=listIndex)
-	
+
 	# Append items to position
 	for i in range(len(listIndex)):
 		mc.textScrollList(TSL,e=True,ap=(index,listItems[i]))
 		listIndex[i] = index + i
-	
+
 	# Select list items
 	mc.textScrollList(TSL,e=True,da=True)
 	mc.textScrollList(TSL,e=True,sii=listIndex)
 	mc.textScrollList(TSL,e=True,shi=listIndex[0])
-	
+
 def moveUpTSLPosition(TSL):
 	'''
 	Move the selected textScrollList items up by one position
@@ -444,11 +444,11 @@ def moveUpTSLPosition(TSL):
 	'''
 	# Method variables
 	minIndex = 1
-	
+
 	# Get selected item indices
 	listItems = mc.textScrollList(TSL,q=True,si=True)
 	listIndex = mc.textScrollList(TSL,q=True,sii=True)
-	
+
 	# Iterate through list items
 	for i in range(len(listIndex)):
 		# Check minIndex
@@ -458,12 +458,12 @@ def moveUpTSLPosition(TSL):
 		mc.textScrollList(TSL,e=True,sii=listIndex[i])
 		listIndex[i] -= 1
 		moveToTSLPosition(TSL,listIndex[i])
-	
+
 	# Select list items
 	mc.textScrollList(TSL,e=True,da=True)
 	mc.textScrollList(TSL,e=True,sii=listIndex)
 	mc.textScrollList(TSL,e=True,shi=listIndex[0])
-	
+
 def moveDownTSLPosition(TSL):
 	'''
 	Move the selected textScrollList items down by one position
@@ -473,14 +473,14 @@ def moveDownTSLPosition(TSL):
 	# Get list length
 	listLen = len(mc.textScrollList(TSL,q=True,ai=True))
 	maxIndex = listLen
-	
+
 	# Get selected item indices
 	listItems = mc.textScrollList(TSL,q=True,si=True)
 	listIndex = mc.textScrollList(TSL,q=True,sii=True)
 	# Reverse lists
 	listItems.reverse()
 	listIndex.reverse()
-	
+
 	# Iterate through list items
 	for i in range(len(listItems)):
 		# Check maxIndex
@@ -493,7 +493,7 @@ def moveDownTSLPosition(TSL):
 			moveToTSLPosition(TSL,-1)
 		else:
 			moveToTSLPosition(TSL,listIndex[i]+1)
-	
+
 	# Select list items
 	mc.textScrollList(TSL,e=True,da=True)
 	mc.textScrollList(TSL,e=True,sii=listIndex)
@@ -509,7 +509,7 @@ def loadFileSelection(TSL,fileFilter='*.*',startDir=None,caption='Load Files'):
 								caption=caption,
 								okCaption='Load',
 								startingDirectory=startDir )
-	
+
 	# Add File Selection
 	if fileList:
 		for item in fileList:
@@ -531,22 +531,22 @@ def loadFileList(TSL,path,filesOnly=False,filterStr='',sort=False):
 	'''
 	# Get File List
 	fileList = glTools.utils.osUtils.getFileList(path,filesOnly=filesOnly)
-	
+
 	# Filter (regex)
 	if filterStr:
 		reFilter = re.compile(filterStr)
 		fileList = filter(reFilter.search, fileList)
-	
+
 	# Sort
 	if sort: fileList.sort()
-	
+
 	# Add File List to textScrollList
 	addToTSL(TSL,fileList)
-	
+
 # =============
 # - Check Box -
 # =============
-	
+
 def checkBoxToggleLayout(CBG,layout,invert=False):
 	'''
 	Toggle the enabled state of a UI layout based on a checkBoxGrp
@@ -563,11 +563,11 @@ def checkBoxToggleLayout(CBG,layout,invert=False):
 	# Check layout
 	if not mc.layout(layout,q=True,ex=True):
 		raise UIError('Layout "'+layout+'" does not exist!!')
-	
+
 	# Get checkBoxGrp state
 	state = mc.checkBoxGrp(CBG,q=True,v1=True)
 	if invert: state = not state
-	
+
 	# Toggle Layout
 	mc.layout(layout,e=True,en=state)
 
@@ -587,11 +587,11 @@ def checkBoxToggleControl(CBG,control,invert=False):
 	# Check control
 	if not mc.control(control,q=True,ex=True):
 		raise UIError('Control "'+control+'" does not exist!!')
-	
+
 	# Get checkBoxGrp state
 	state = mc.checkBoxGrp(CBG,q=True,v1=True)
 	if invert: state = not state
-	
+
 	# Toggle Layout
 	mc.control(control,e=True,en=state)
 
@@ -612,20 +612,20 @@ def setOptionMenuList(OMG,itemList,add=False):
 	# Check optionMenuGrp
 	if not mc.optionMenuGrp(OMG,q=True,ex=True):
 		raise UIError('OptionMenu "'+OMG+'" does not exist!')
-	
+
 	# Get existing items
 	exItemList = mc.optionMenuGrp(OMG,q=True,ill=True)
-	
+
 	# Add items
 	for item in itemList:
 		mc.setParent(OMG)
 		mc.menuItem(l=item)
-	
+
 	# Remove previous items
 	if exItemList:
 		for item in exItemList:
 			mc.deleteUI(item)
-			
+
 # =====================
 # - Float Field Group -
 # =====================
@@ -641,19 +641,19 @@ def setPointValue(FFG,point=''):
 	# Check point
 	if point and not mc.objExists(point):
 			raise Exception('Point object "'+point+'" does not exist!')
-	
+
 	# Get object selection
 	sel = mc.ls(sl=1)
 	if not point and not sel:
 		raise Exception('No point specified for floatFieldGrp values!')
-	
+
 	# Get point
 	if point: pos = glTools.utils.base.getPosition(point)
 	else: pos = glTools.utils.base.getPosition(sel[0])
-	
+
 	# Set float field values
 	mc.floatFieldGrp(FFG,e=True,v1=pos[0],v2=pos[1],v3=pos[2])
-	
+
 # =============
 # - Custom UI -
 # =============
@@ -670,32 +670,32 @@ def displayListWindow(itemList,title,enableSelect=False):
 	if not itemList:
 		mc.confirmDialog(t=title,m='No items to display!',ma='center',b='Close')
 		return
-	
+
 	# Window
 	window = 'displayListWindowUI'
 	if mc.window(window,q=True,ex=True): mc.deleteUI(window)
 	window = mc.window(window,t=title,s=True)
-	
+
 	# Layout
 	FL = mc.formLayout(numberOfDivisions=100)
-	
+
 	# ===============
 	# - UI Elements -
 	# ===============
-	
+
 	# TextScrollList
 	TSL = mc.textScrollList('displayListWindowTSL',allowMultiSelection=True)
 	for item in itemList: mc.textScrollList(TSL,e=True,a=item)
 	if enableSelect: mc.textScrollList(TSL,e=True,sc='glTools.ui.utils.selectFromTSL("'+TSL+'")')
-	
+
 	# Close Button
 	closeB = mc.button('displayListWindowB',l='Close',c='mc.deleteUI("'+window+'")')
-	
+
 	# Form Layout
 	mc.formLayout(FL,e=True,af=[(TSL,'top',5),(TSL,'left',5),(TSL,'right',5)])
 	mc.formLayout(FL,e=True,af=[(closeB,'bottom',5),(closeB,'left',5),(closeB,'right',5)])
 	mc.formLayout(FL,e=True,ac=[(TSL,'bottom',5,closeB)])
-	
+
 	# Display Window
 	mc.showWindow(window)
 
@@ -709,23 +709,23 @@ def displayMessageWindow(msg,title):
 	'''
 	# Check message
 	if not msg: return
-	
+
 	# Window
 	window = 'messageWindowUI'
 	if mc.window(window,q=True,ex=True): mc.deleteUI(window)
 	window = mc.window(window,t=title,s=True)
-	
+
 	# Layout
 	FL = mc.formLayout(numberOfDivisions=100)
-	
+
 	# UI Elements
 	reportSF = mc.scrollField('messageWindowSF',editable=False,wordWrap=True,text=msg)
 	closeB = mc.button('messageWindowB',l='Close',c='mc.deleteUI("'+window+'")')
-	
+
 	# Form Layout
 	mc.formLayout(FL,e=True,af=[(reportSF,'top',5),(reportSF,'left',5),(reportSF,'right',5)])
 	mc.formLayout(FL,e=True,af=[(closeB,'bottom',5),(closeB,'left',5),(closeB,'right',5)])
 	mc.formLayout(FL,e=True,ac=[(reportSF,'bottom',5,closeB)])
-	
+
 	# Display Window
 	mc.showWindow(window)

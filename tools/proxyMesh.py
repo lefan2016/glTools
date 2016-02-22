@@ -28,7 +28,7 @@ def isProxyBound(proxy):
 	if not glTools.utils.mesh.isMesh(proxy): return False
 	# Return Result
 	return True
-	
+
 def proxyParent(proxyMesh,joint):
 	'''
 	Parent a proxy mesh shape to a specified parent joint
@@ -42,28 +42,28 @@ def proxyParent(proxyMesh,joint):
 		raise Exception('Proxy mesh "'+proxyMesh+'" does not exist!')
 	if not mc.objExists(joint):
 		raise Exception('Joint "'+joint+'" does not exist!')
-	
+
 	# Get Proxy Shape(s)
 	proxyShapes = []
 	if glTools.utils.transform.isTransform(proxyMesh):
 		proxyShapes = mc.listRelatives(proxyMesh,s=True,ni=True,pa=True)
 	elif str(mc.objectType(proxyMesh)) in ['mesh','nurbsSurface']:
 		proxyShapes = [str(proxyMesh)]
-	
+
 	# Parent Proxy Shapes to Joint
 	for i in range(len(proxyShapes)):
 		proxyShapes[i] = glTools.utils.shape.parent(proxyShapes[i],joint)[0]
 		glTools.utils.base.displayOverride(proxyShapes[i],overrideEnable=1,overrideDisplay=2,overrideLOD=0)
 	# Delete Old Transform
 	mc.delete(proxyMesh)
-	
+
 	# Tag Shapes
 	proxyAttr = 'proxyJoint'
 	for shape in proxyShapes:
 		if not mc.objExists(shape+'.'+proxyAttr):
 			mc.addAttr(shape,ln=proxyAttr,dt='string')
 			mc.setAttr(shape+'.'+proxyAttr,joint,type='string',l=True)
-	
+
 	# Return Result
 	return proxyShapes
 
@@ -76,16 +76,16 @@ def proxyConstraint(proxyGeo,deleteConstraint=False):
 	# Checks
 	if not isProxyBound(proxyGeo):
 		raise Exception('Object "'+proxyGeo+'" is not a valid proxy bounds object!')
-	
+
 	# Get Target Joint
 	joint = mc.getAttr(proxyGeo+'.jointProxy')
 	# Get Proxy Parent
 	proxyGrp = mc.listRelatives(proxyGeo,p=True,pa=True)[0]
-	
+
 	# Create Constraint
 	pCon = mc.parentConstraint(joint,proxyGrp,n=proxyGeo+'_parentConstraint')
 	if deleteConstraint: mc.delete(pCon)
-	
+
 	# Return Result
 	return pCon
 
@@ -110,26 +110,26 @@ def proxyCylinder(joint,axis='x',radius=1.0,divisions=10,cutGeo=[]):
 	else: jntLen = 0.1
 	if jntLen < 0.1: jntLen = 0.1
 	axis = glTools.utils.lib.axis_dict()[axis]
-	
+
 	# Build Cylinder Mesh
 	proxy_cyl = mc.polyCylinder(ch=False,r=radius,h=abs(jntLen)*1.1,sx=divisions,sy=1,sz=0,ax=axis,rcp=0,cuv=0,n=joint+'_PROXY')
 	proxy_cyl = proxy_cyl[0]
-	
+
 	# Adjust Pivot And Freeze Transforms
 	mc.move(axis[0]*jntLen*0.5,axis[1]*jntLen*0.5,axis[2]*jntLen*0.5,proxy_cyl)
 	mc.makeIdentity(proxy_cyl,apply=True,t=True)
 	mc.xform(proxy_cyl,piv=[0,0,0])
-	
+
 	# Create Proxy Group
 	proxy_grp = glTools.utils.base.group(proxy_cyl)
 	makeProxyBounds(proxy_cyl,joint=joint,cutGeo=cutGeo)
-	
+
 	# Constrain To Joint
 	proxyConstraint(proxy_cyl)
-	
+
 	# Return Result
 	return [proxy_grp,proxy_cyl]
-	
+
 def proxyCylinder_subDiv(proxy_cyl,numV=5,numU=1):
 	'''
 	Subdivide proxy cylinder mesh.
@@ -151,13 +151,13 @@ def makeProxyBounds(mesh,joint=None,cutGeo=None):
 	# Check Mesh
 	if not glTools.utils.mesh.isMesh(mesh):
 		raise Exception('Object "'+mesh+'" is nat avalid mesh! Unable to create proxy bounds object...')
-	
+
 	# Add Joint Tag
 	jointProxyAttr = 'jointProxy'
 	if not mc.attributeQuery(jointProxyAttr,n=mesh,ex=True):
 		mc.addAttr(mesh,ln=jointProxyAttr,dt='string')
 	if joint: mc.setAttr(mesh+'.jointProxy',joint,type='string')
-	
+
 	# Set Display Override - Shading OFF
 	shadingAttr = 'shading'
 	if not mc.attributeQuery(shadingAttr,n=mesh,ex=True):
@@ -166,16 +166,16 @@ def makeProxyBounds(mesh,joint=None,cutGeo=None):
 	mc.setAttr(mesh+'.overrideEnabled',1)
 	mc.setAttr(mesh+'.doubleSided',0)
 	mc.setAttr(mesh+'.opposite',0)
-	
+
 	# Cut Geometry Attribute
 	cutGeoAttr = 'shading'
 	if not mc.attributeQuery(cutGeoAttr,n=mesh,ex=True):
 		mc.addAttr(mesh,ln=cutGeoAttr,dt='string')
 	if cutGeo: mc.setAttr(mesh+'.'+cutGeoAttr,str(cutGeo),type='string')
-	
+
 	# Set Colour
 	glTools.utils.colorize.setColour(mesh)
-	
+
 	# Return Result
 	return mesh
 
@@ -187,19 +187,19 @@ def cutGeoAttr(proxyList):
 	'''
 	# Define Attribute
 	attr = 'cutGeometry'
-	
+
 	# Check Proxy List
 	if not proxyList:
 		raise Exception('Empty or invalid proxy list!')
-	
+
 	for proxy in proxyList:
 		if mc.attributeQuery(attr,n=proxy,ex=True):
 			print('Proxy bounds object "'+proxy+'" already has a "'+attr+'" attribute! Skipping...')
 			continue
-		
+
 		# Add Cut Geometry Attribute
 		mc.addAttr(proxy,ln=attr,dt='string')
-	
+
 	# Return Result
 	return proxyList
 
@@ -211,19 +211,19 @@ def addGeoAttr(proxyList):
 	'''
 	# Define Attribute
 	attr = 'addGeometry'
-	
+
 	# Check Proxy List
 	if not proxyList:
 		raise Exception('Empty or invalid proxy list!')
-	
+
 	for proxy in proxyList:
 		if mc.attributeQuery(attr,n=proxy,ex=True):
 			print('Proxy bounds object "'+proxy+'" already has a "'+attr+'" attribute! Skipping...')
 			continue
-	
+
 		# Add Cut Geometry Attribute
 		mc.addAttr(proxy,ln=attr,dt='string')
-	
+
 	# Return Result
 	return proxyList
 
@@ -235,20 +235,20 @@ def initialShadingGroupAttr(proxyList):
 	'''
 	# Define Attribute
 	attr = 'applyInitialShadingGroup'
-	
+
 	# Check Proxy List
 	if not proxyList:
 		raise Exception('Empty or invalid proxy list!')
-	
+
 	for proxy in proxyList:
-		
+
 		# Add InitialShadingGroup Attribute
 		if not mc.attributeQuery(attr,n=proxy,ex=True):
 			mc.addAttr(proxy,ln=attr,at='bool')
-		
+
 		# Apply InitialShadingGroup Attribute
 		mc.setAttr(proxy+'.'+attr,1)
-	
+
 	# Return Result
 	return proxyList
 
@@ -264,13 +264,13 @@ def skeletonProxyCage(jntList,cutGeo=[]):
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Check Boundary
 	if not jntList: return
 	for jnt in jntList:
 		if not mc.objExists(jnt):
 			raise Exception('Joint "'+jnt+'" does not exist!')
-	
+
 	# Check Cut Geometry
 	if not cutGeo:
 		result = mc.promptDialog(	title='Set Cut Geo List',
@@ -279,7 +279,7 @@ def skeletonProxyCage(jntList,cutGeo=[]):
 									defaultButton='Set',
 									cancelButton='Cancel',
 									dismissString='Cancel'	)
-	
+
 		if result == 'Set':
 			cutGeoStr = mc.promptDialog(q=True,text=True)
 			if cutGeoStr.count(','):
@@ -289,23 +289,23 @@ def skeletonProxyCage(jntList,cutGeo=[]):
 		else:
 			print 'No cut geometry provided! Exiting...'
 			return
-	
+
 	# ========================
 	# - Build Proxy Geometry -
 	# ========================
-	
+
 	proxyMainGrp = 'PROXY_grp'
 	if not mc.objExists(proxyMainGrp):
 		proxyMainGrp = mc.group(em=True,n='PROXY_grp')
-	
+
 	# For Each Joint
 	proxyGeoList = []
 	for jnt in jntList:
-		
+
 		# Check End Joint
 		jntChildren = mc.ls(mc.listRelatives(jnt,ad=True),type='joint')
 		#if not jntChildren: continue
-		
+
 		# Create Proxy Geo
 		proxy = proxyCylinder(	joint = jnt,
 								axis = 'x',
@@ -314,13 +314,13 @@ def skeletonProxyCage(jntList,cutGeo=[]):
 								cutGeo = cutGeo )
 		proxyGrp = proxy[0]
 		proxyGeo = proxy[1]
-		
+
 		# Parent to main Proxy Group
 		mc.parent(proxyGrp,proxyMainGrp)
-		
+
 		# Append To Return List
 		proxyGeoList.append(proxyGeo)
-	
+
 	# Return Result
 	return proxyGeoList
 
@@ -328,77 +328,77 @@ def proxyFitJoint(proxyGeo,joint='',axis='x'):
 	'''
 	Fit the specified proxy geometry (mesh cylinder) to a given joint.
 	If no joint is specified, use the joint specified by the proxy "jointProxy" attribute.
-	@param proxyGeo: Proxy geometry to to fit to the joint 
+	@param proxyGeo: Proxy geometry to to fit to the joint
 	@type proxyGeo: str
-	@param joint: Joint to fit the proxy geometry to. If empty, use the "jointProxy" string attribute value. 
+	@param joint: Joint to fit the proxy geometry to. If empty, use the "jointProxy" string attribute value.
 	@type joint: str
-	@param axis: Length-wise axis of the joint. 
+	@param axis: Length-wise axis of the joint.
 	@type axis: str
 	'''
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Proxy Geo
 	if not isProxyBound(proxyGeo):
 		raise Exception('Object "'+proxyGeo+'" is not a valid proxy bound object!')
-	
+
 	# Joint
 	if not joint:
 		joint = mc.getAttr(proxyGeo+'.jointProxy')
 	if not glTools.utils.joint.isJoint(joint):
 		raise Exception('Object "'+joint+'" is not a valid joint!')
-	
+
 	# Axis
 	axis = axis.lower()
 	axisList = ['x','y','z']
 	if not axisList.count(axis):
 		raise Exception('Invalid axis value! ("'+axis+'")')
 	axisInd = axisList.index(axis)
-	
+
 	# ================
 	# - Fit To Joint -
 	# ================
-	
+
 	# Get Joint Length
 	jntLen = glTools.utils.joint.length(joint)
 	#jntLen = glTools.utils.mathUtils.mag(mc.getAttr(joint+'.t')[0])
 	jntEnd = mc.listRelatives(joint,c=True)
 	if jntEnd: jntLen = mc.getAttr(jntEnd[0]+'.t'+axis)
 	jntMat = glTools.utils.matrix.getMatrix(joint,local=False,time=None)
-	
+
 	print(jntLen)
-	
+
 	# For Each Vertex
 	for i in range(mc.polyEvaluate(proxyGeo,v=True)):
 		vtx = proxyGeo+'.vtx['+str(i)+']'
-		
+
 		# Get Position
 		pos = mc.pointPosition(vtx)
 		localPos = glTools.utils.matrix.vectorMatrixMultiply(pos,jntMat,transformAsPoint=True,invertMatrix=True)
-		
-		# Check joint relative position 
+
+		# Check joint relative position
 		if localPos[axisInd] < (jntLen*0.5):
 			localPos[axisInd] = -jntLen*0.1
 		elif localPos[axisInd] > (jntLen*0.5):
 			localPos[axisInd] = jntLen*1.1
-		
+
 		# Get new world position
 		pos = glTools.utils.matrix.vectorMatrixMultiply(localPos,jntMat,transformAsPoint=True,invertMatrix=False)
-		
+
 		# Set Position
 		mc.move(pos[0],pos[1],pos[2],vtx,ws=True,a=True)
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return joint
 
 def proxyFitMesh(proxyGeo,boundaryMesh,boundaryOffset=0.0):
 	'''
 	Fit the specified proxy geometry (mesh cylinder) to a given boundary mesh.
-	@param proxyGeo: Proxy geometry to to fit to mesh 
+	@param proxyGeo: Proxy geometry to to fit to mesh
 	@type proxyGeo: str
 	@param boundaryMesh: Boundary mesh to fit proxy geo to.
 	@type boundaryMesh: str
@@ -408,16 +408,16 @@ def proxyFitMesh(proxyGeo,boundaryMesh,boundaryOffset=0.0):
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	if not isProxyBound(proxyGeo):
 		raise Exception('Object "'+proxyGeo+'" is not a valid proxy bound object!')
 	if not mc.objExists(boundaryMesh):
 		raise Exception('Boundary mesh "'+boundaryMesh+'" does not exist!')
-	
+
 	# Check Vertex Count
 	vtxCount = mc.polyEvaluate(proxyGeo,v=True)
 	#if vtxCount%2: raise Exception('Uneven number of vertices!')
-	
+
 	# Get Joint Details
 	jntSt = mc.getAttr(proxyGeo+'.jointProxy')
 	jntStPos = mc.xform(jntSt,q=True,ws=True,rp=True)
@@ -427,24 +427,24 @@ def proxyFitMesh(proxyGeo,boundaryMesh,boundaryOffset=0.0):
 	else:
 		jntAxis = glTools.utils.transform.axisVector(jntSt,'x',normalize=True)
 		jntEnPos = map(sum,zip(jntStPos,jntAxis))
-	
+
 	# ===============
 	# - Fit To Mesh -
 	# ===============
-	
+
 	# Get Vertex Position List
 	pntList = glTools.utils.base.getPointArray(proxyGeo)
-	
+
 	for i in range(vtxCount):
-		
+
 		# Get intersection source point
 		#srcPt = jntEnPos
 		#if i < (vtxCount/2): srcPt = jntStPos
 		srcPt = glTools.utils.mathUtils.closestPointOnLine(pntList[i],jntStPos,jntEnPos,clampSegment=False)
-		
+
 		# Get intersection direction
 		intersectVec = glTools.utils.mathUtils.normalizeVector(glTools.utils.mathUtils.offsetVector(srcPt,pntList[i]))
-		
+
 		# Get intersection point
 		intersectPnt = glTools.utils.mesh.allIntersections(	mesh = boundaryMesh,
 															source = srcPt,
@@ -452,20 +452,20 @@ def proxyFitMesh(proxyGeo,boundaryMesh,boundaryOffset=0.0):
 															testBothDirections = False,
 															maxDist = 9999,
 															sort = True	)
-		
+
 		# Get intersection distance
 		intersectDist = glTools.utils.mathUtils.distanceBetween(srcPt,intersectPnt[0])
-		
+
 		# Offset Point
 		#mc.move(	intersectPnt[0][0],intersectPnt[0][1],intersectPnt[0][2],proxyGeo+'.vtx['+str(i)+']',ws=True,a=True	)
 		#continue
-		
+
 		# Check intersection distance
 		if len(intersectPnt) > 1:
 			nextDistance = glTools.utils.mathUtils.distanceBetween(srcPt,intersectPnt[1])
 			if (nextDistance-intersectDist) < boundaryOffset:
 				intersectDist = (intersectDist+nextDistance)/2
-		
+
 		# Offset Point
 		mc.move(	srcPt[0] + (intersectVec[0]*(intersectDist+boundaryOffset)),
 					srcPt[1] + (intersectVec[1]*(intersectDist+boundaryOffset)),
@@ -486,7 +486,7 @@ def splitGeoToProxies(proxyList,meshList=[],close=True,offset=0.0):
 	@type proxyList: list
 	@param meshList: List of meshes that the proxy geometry will be extracted from
 	@type meshList: list
-	@param close: Close proxy mesh border edges. 
+	@param close: Close proxy mesh border edges.
 	@type close: bool
 	@param offset: The amount of normal offset to apply before creating each cut.
 	@type offset: float
@@ -494,7 +494,7 @@ def splitGeoToProxies(proxyList,meshList=[],close=True,offset=0.0):
 	# =====================
 	# - Combine Mesh List -
 	# =====================
-	
+
 	combinedMesh = ''
 	if len(meshList) == 1:
 		# Duplicate Mesh
@@ -512,53 +512,53 @@ def splitGeoToProxies(proxyList,meshList=[],close=True,offset=0.0):
 			meshIntShapes = glTools.utils.shape.listIntermediates(meshDup)
 			if meshIntShapes: mc.delete(meshIntShapes)
 			meshDupList.append(meshDup)
-		
+
 		# Combine Duplicated Meshes
 		combinedMesh = mc.polyUnite(meshDupList,ch=False,mergeUVSets=True)[0]
-	
+
 	# ====================
 	# - Split To Proxies -
 	# ====================
-	
+
 	proxyShapeList = []
 	for proxy in proxyList:
-		
+
 		# Duplicate Mesh
 		cutMesh = mc.duplicate(combinedMesh,n=proxy+'Geo')[0]
 		meshIntShapes = glTools.utils.shape.listIntermediates(cutMesh)
 		if meshIntShapes: mc.delete(meshIntShapes)
-		
+
 		# Cut Mesh
 		proxyMesh = cutToMesh(cutMesh,proxy,offset)
-		
+
 		# !!! - Boolean Method is Very SLOW, reverting back to cut method - !!! #
 		#proxyDup = mc.duplicate(proxy,n=proxy+'_dup')[0]
 		#proxyMesh = cutMeshBool(cutMesh,proxyDup)
-		
+
 		# Parent Shape to Joint
 		proxyJoint = mc.getAttr(proxy+'.jointProxy')
 		proxyShapes = proxyParent(proxyMesh,proxyJoint)
-		
+
 		# Encode Original Geometry
 		proxyGeoAttr = 'proxyGeometry'
 		for proxyShape in proxyShapes:
 			if not mc.objExists(proxyShape+'.'+proxyGeoAttr):
 				mc.addAttr(proxyShape,ln=proxyGeoAttr,dt='string')
 				mc.setAttr(proxyShape+'.'+proxyGeoAttr,str(meshList),type='string',l=True)
-		
+
 		# Append Return List
 		proxyShapeList.extend(proxyShapes)
-	
+
 	# ============
 	# - Clean Up -
 	# ============
-	
+
 	mc.delete(combinedMesh)
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return proxyShapeList
 
 def addGeoToProxies(proxyList,meshList=[]):
@@ -572,9 +572,9 @@ def addGeoToProxies(proxyList,meshList=[]):
 	# =====================
 	# - Combine Mesh List -
 	# =====================
-	
+
 	combinedMesh = None
-	
+
 	if len(meshList) == 1:
 		# Duplicate Mesh
 		meshDup = mc.duplicate(meshList[0],n='duplicateMesh')[0]
@@ -591,41 +591,41 @@ def addGeoToProxies(proxyList,meshList=[]):
 			meshIntShapes = glTools.utils.shape.listIntermediates(meshDup)
 			if meshIntShapes: mc.delete(meshIntShapes)
 			meshDupList.append(meshDup)
-		
+
 		# Combine Duplicated Meshes
 		combinedMesh = mc.polyUnite(meshDupList,ch=False,mergeUVSets=True)[0]
-	
+
 	# ==================
 	# - Add To Proxies -
 	# ==================
-	
+
 	proxyShapeList = []
 	for proxy in proxyList:
-		
+
 		# Duplicate Mesh
 		proxyMesh = mc.duplicate(combinedMesh,n=proxy+'Geo')[0]
-		
+
 		# Parent Shape to Joint
 		proxyJoint = mc.getAttr(proxy+'.jointProxy')
 		proxyShapes = proxyParent(proxyMesh,proxyJoint)
-		
+
 		# Encode Original Geometry
 		proxyGeoAttr = 'proxyGeometry'
 		for proxyShape in proxyShapes:
 			if not mc.objExists(proxyShape+'.'+proxyGeoAttr):
 				mc.addAttr(proxyShape,ln=proxyGeoAttr,dt='string')
 				mc.setAttr(proxyShape+'.'+proxyGeoAttr,str(meshList),type='string',l=True)
-	
+
 	# ============
 	# - Clean Up -
 	# ============
-	
+
 	mc.delete(combinedMesh)
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return proxyShapeList
 
 def applyProxies(proxyList,offset=0.0):
@@ -639,66 +639,66 @@ def applyProxies(proxyList,offset=0.0):
 	# Check proxy list
 	if not proxyList: proxyList = mc.ls('*.jointProxy',o=True)
 	if not proxyList: return
-	
+
 	# Initialize Return List
 	proxyShapeList = []
-	
+
 	# Print Opening Message
 	print '# --------- Applying Proxies (Cutting Geometry) -'
-	
+
 	# Build Each Proxy
 	for proxy in proxyList:
-		
+
 		# Check Proxy
 		if not mc.objExists(proxy):
 			raise Exception('Proxy bound object "'+proxy+'" does not exist!')
 		if not isProxyBound(proxy):
 			print ('Object "'+proxy+'" is not a valid proxy bounds object! Skipping...')
 			continue
-		
+
 		# Get Cut Geometry List
 		cutGeo = mc.getAttr(proxy+'.cutGeometry')
 		try: cutGeo = ast.literal_eval(cutGeo)
 		except: pass
 		if not cutGeo:
 			raise Exception('No valid cut geometry list for proxy "'+proxy+'"!')
-		
+
 		# Get Add Geometry List
 		addGeo = None
 		if mc.attributeQuery('addGeometry',n=proxy,ex=True):
 			addGeo = mc.getAttr(proxy+'.addGeometry')
 		try: addGeo = ast.literal_eval(addGeo)
 		except: pass
-		
+
 		# Get Joint Proxy
 		joint = mc.getAttr(proxy+'.jointProxy')
 		if not mc.objExists(joint):
 			raise Exception('Joint "'+joint+'" does not exist!')
-		
+
 		print '# ------------ Generating Proxy Geometry for Joint "'+joint+'"'
 		print '# --------------- Cutting Geometry: '+str(cutGeo)
 		if addGeo: print '# --------------- Adding Geometry: '+str(addGeo)
-		
+
 		# Cut Geometry and Add Shapes to Joint
 		proxyCutShapes = splitGeoToProxies([proxy],cutGeo,close=True,offset=offset)
 		proxyShapeList.extend(proxyCutShapes)
-		
+
 		# Apply Initial Shading Group
 		sgAttr = 'applyInitialShadingGroup'
 		if mc.attributeQuery(sgAttr,n=proxy,ex=True):
 			mc.sets(proxyCutShapes,fe='initialShadingGroup')
-		
+
 		# Add Geometry Shapes to Joint
 		if addGeo:
 			proxyAddShapes = addGeoToProxies([proxy],addGeo)
 			proxyShapeList.extend(proxyAddShapes)
-			
+
 			if mc.attributeQuery(sgAttr,n=proxy,ex=True):
 				mc.sets(proxyAddShapes,fe='initialShadingGroup')
-	
+
 	# Print Closing Message
 	print '# --------- Proxy Geometry Generation Complete -'
-	
+
 	# Return Result
 	return proxyShapeList
 
@@ -712,15 +712,15 @@ def proxySkinWeights(mesh,tolerance=0.001):
 	# Get mesh vertex list
 	ptArray = glTools.utils.base.getMPointArray(mesh)
 	ptCount = ptArray.length()
-	
+
 	# Get skinCluster
 	skinCluster = glTools.utils.skinCluster.findRelatedSkinCluster(mesh)
 	influenceList = mc.skinCluster(skinCluster,q=True,inf=True)
-	
+
 	# =========================
 	# - Generate Weights List -
 	# =========================
-	
+
 	# Initialize progress bar
 	interupt = False
 	gMainProgressBar = mm.eval('$tmp = $gMainProgressBar')
@@ -730,99 +730,99 @@ def proxySkinWeights(mesh,tolerance=0.001):
 					isInterruptable=True,
 					status='Generating Skin Weights for skinCluster "'+skinCluster+'"...',
 					maxValue=len(influenceList)	)
-	
+
 	# Initialize Weight Dict
 	infWtList = {}
 	pt = OpenMaya.MPointOnMesh()
 	for influence in influenceList:
-		
+
 		# Check progress escape
 		if mc.progressBar(gMainProgressBar,q=True,isCancelled=True):
 			interupt = True
 			break
 		mc.progressBar(	gMainProgressBar,e=True,status='Generating Skin Weights for "'+skinCluster+'" influence: '+influence)
-		
+
 		# Find mesh shapes under influence
 		infShapes = mc.listRelatives(influence,s=True,type='mesh',ni=True,pa=True)
 		if not infShapes:
 			print('No mesh shape found under influence joint "'+influence+'"!')
 			mc.progressBar(gMainProgressBar,e=True,step=1)
 			continue
-		
+
 		# Initialize influence weight array
 		infWtList[influence] = [0.0 for i in range(ptCount)]
-		
+
 		# For Each Shape
 		for infShape in infShapes:
-			
+
 			# Initialize influence shape intersector
 			infIntersector = OpenMaya.MMeshIntersector()
-			
+
 			# Run Intersector create() method
 			meshObj = glTools.utils.base.getMObject(infShape)
 			meshMatrix = glTools.utils.matrix.getMatrix(influence)
 			infIntersector.create(meshObj,meshMatrix)
-			
+
 			# Build influence weight array
 			for p in range(ptCount):
-				
+
 				# Check weight
 				if infWtList[influence][p]: continue
-				
+
 				# Get distance to closest vertex
 				try: infIntersector.getClosestPoint(ptArray[p],pt,tolerance)
 				except: continue
-				
+
 				# Set weight if below tolerance distance
 				infWtList[influence][p] = 1.0
-		
+
 		# Update progress bar
 		mc.progressBar(gMainProgressBar,e=True,step=1)
-	
+
 	# End pregress bar
 	mc.progressBar(gMainProgressBar,e=True,endProgress=True)
-	
+
 	# ====================
 	# - Set Skin Weights -
 	# ====================
-	
+
 	if not interupt:
-		
+
 		# Get component list
 		mc.select(mesh)
 		componentList = glTools.utils.component.getComponentStrList(mesh)
 		componentSel = glTools.utils.selection.getSelectionElement(componentList,0)
-		
+
 		# Build influence index array
 		infIndexArray = OpenMaya.MIntArray()
 		influenceSetList = [i for i in influenceList if infWtList.keys().count(i)]
 		for i in range(len(influenceSetList)):
 			infIndex = glTools.utils.skinCluster.getInfluencePhysicalIndex(skinCluster,influenceSetList[i])
 			infIndexArray.append(infIndex)
-		
+
 		# Build master weight array
 		wtArray = OpenMaya.MDoubleArray()
 		oldWtArray = OpenMaya.MDoubleArray()
 		for p in range(ptCount):
 			for i in range(len(influenceSetList)):
 				wtArray.append(infWtList[influenceSetList[i]][p])
-		
+
 		# Get skinCluster function set
 		skinFn = glTools.utils.skinCluster.getSkinClusterFn(skinCluster)
-		
+
 		# Clear Weights
 		glTools.utils.skinCluster.clearWeights(mesh)
-		
+
 		# Set skinCluster weights
 		skinFn.setWeights(componentSel[0],componentSel[1],infIndexArray,wtArray,False,oldWtArray)
-		
+
 		# Normalize Weights
 		mc.skinPercent(skinCluster,normalize=True)
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return skinCluster
 
 def proxySkinClusters(proxyList=[]):
@@ -834,25 +834,25 @@ def proxySkinClusters(proxyList=[]):
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Check Proxy List
 	if not proxyList:
 		proxyList = mc.ls('*.proxyJoint',o=True)
-	
+
 	if not proxyList:
 		raise Exception('Invalid or empty proxy list!')
-	
+
 	# ====================================
 	# - Build SkinCluster Influence List -
 	# ====================================
-	
+
 	influenceList = {}
-	
+
 	for proxy in proxyList:
-		
+
 		# Get Influence from Proxy
 		joint = mc.getAttr(proxy+'.proxyJoint')
-		
+
 		# Get Cut Geometry List
 		proxyGeoAttr = 'proxyGeometry'
 		proxyGeo = mc.getAttr(proxy+'.'+proxyGeoAttr)
@@ -860,34 +860,34 @@ def proxySkinClusters(proxyList=[]):
 		except: pass
 		if not proxyGeo:
 			raise Exception('No valid proxy geometry list for proxy "'+proxy+'"!')
-		
+
 		# For Each Geometry
 		for geo in proxyGeo:
-			
+
 			# Check Influence List for Geo
 			if not influenceList.has_key(geo):
 				influenceList[geo] = []
-			
+
 			# Append to Influence List
 			influenceList[geo].append(str(joint))
-	
+
 	# ======================
 	# - Build SkinClusters -
 	# ======================
-	
+
 	# For Each Geometry
 	for geo in influenceList.iterkeys():
-		
+
 		# Create SkinCluster
 		mc.skinCluster(geo,influenceList[geo],tsb=True,mi=1,omi=False,n=geo+'_skinCluster')
-		
+
 		# Set Initial Weights
 		proxySkinWeights(geo,tolerance=0.001)
-	
+
 	# ===========
 	# - Cleanup -
 	# ===========
-	
+
 	dagPose = mc.ls(type='dagPose')
 	if dagPose: mc.delete(dagPose)
 
@@ -907,7 +907,7 @@ def setCutGeometry(proxyList,cutGeo=[]):
 		if not mc.objExists(proxy+'.cutGeometry'):
 			print('Adding "cutGeometry" attribute to proxy bounds object "'+proxy+'"')
 			cutGeoAttr([proxy])
-	
+
 	# Check Cut Geometry List
 	if not cutGeo:
 		result = mc.promptDialog(	title='Set Cut Geometry',
@@ -916,12 +916,12 @@ def setCutGeometry(proxyList,cutGeo=[]):
 									defaultButton='Set',
 									cancelButton='Cancel',
 									dismissString='Cancel'	)
-		
+
 		if result == 'Set':
 			cutGeo = mc.promptDialog(q=True,text=True)
 		if not cutGeo:
 			print('No valid cut geometry list provided!')
-	
+
 	# Set Cut Geometry List
 	for proxy in proxyList:
 		mc.setAttr(proxy+'.cutGeometry',str(cutGeo),type='string')
@@ -942,7 +942,7 @@ def setAddGeometry(proxyList,addGeo=[]):
 		if not mc.objExists(proxy+'.addGeometry'):
 			print('Adding "addGeometry" attribute to proxy bounds object "'+proxy+'"')
 			addGeoAttr([proxy])
-	
+
 	# Check Add Geometry List
 	if not addGeo:
 		result = mc.promptDialog(	title='Set Add Geometry',
@@ -951,12 +951,12 @@ def setAddGeometry(proxyList,addGeo=[]):
 									defaultButton='Set',
 									cancelButton='Cancel',
 									dismissString='Cancel'	)
-		
+
 		if result == 'Set':
 			addGeo = mc.promptDialog(q=True,text=True)
 		if not addGeo:
 			print('No valid add geometry list provided!')
-	
+
 	# Set Add Geometry List
 	for proxy in proxyList:
 		mc.setAttr(proxy+'.addGeometry',str(addGeo),type='string')
@@ -969,7 +969,7 @@ def setCutGeoFromSel():
 	proxyList = []
 	cutGeoList = []
 	sel = mc.ls(sl=True)
-	
+
 	# For Each Object in Selection
 	for obj in sel:
 		# Check Proxy Bounds Object
@@ -981,10 +981,10 @@ def setCutGeoFromSel():
 				cutGeoList.append(str(obj))
 			else:
 				print ('WARNING: Object "'+obj+'" is not a proxy bounds object or a valid mesh!')
-	
+
 	# Set Cut Geometry
 	setCutGeometry(proxyList,cutGeoList)
-	
+
 	# Return Result
 	print ('Proxy List -')
 	for proxy in proxyList: print ('\t'+proxy)
@@ -999,7 +999,7 @@ def setAddGeoFromSel():
 	proxyList = []
 	addGeoList = []
 	sel = mc.ls(sl=True)
-	
+
 	# For Each Object in Selection
 	for obj in sel:
 		# Check Proxy Bounds Object
@@ -1011,10 +1011,10 @@ def setAddGeoFromSel():
 				addGeoList.append(str(obj))
 			else:
 				print ('WARNING: Object "'+obj+'" is not a proxy bounds object or a valid mesh!')
-	
+
 	# Set Cut Geometry
 	setAddGeometry(proxyList,addGeoList)
-	
+
 	# Return Result
 	print ('Proxy List -')
 	for proxy in proxyList: print ('\t'+proxy)
@@ -1029,7 +1029,7 @@ def setApplyInitialSGFromSel():
 	proxyList = []
 	addGeoList = []
 	sel = mc.ls(sl=True)
-	
+
 	# For Each Object in Selection
 	for obj in sel:
 		# Check Proxy Bounds Object
@@ -1041,10 +1041,10 @@ def setApplyInitialSGFromSel():
 				addGeoList.append(str(obj))
 			else:
 				print ('WARNING: Object "'+obj+'" is not a proxy bounds object or a valid mesh!')
-	
+
 	# Set Cut Geometry
 	initialShadingGroupAttr(proxyList)
-	
+
 	# Return Result
 	print ('Apply initialShadingGroup for -')
 	for proxy in proxyList: print ('\t'+proxy)
@@ -1062,31 +1062,31 @@ def cutToBoundingBox(mesh,boundingObject,offset=0.0):
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	if not mc.objExists(mesh):
 		raise Exception('Mesh "'+mesh+'" does not exist!')
 	if not glTools.utils.mesh.isMesh(mesh):
 		raise Exception('Object "'+mesh+'" is not a valid mesh!')
-	
+
 	if not mc.objExists(boundingObject):
 		raise Exception('Bounding object "'+boundingObject+'" does not exist!')
-	
+
 	# =========================
 	# - Get Bounding Box Info -
 	# =========================
-	
+
 	bBox = glTools.utils.base.getMBoundingBox(boundingObject)
-	
+
 	center = bBox.center()
 	minPt = bBox.min()
 	min = [minPt[0]-offset,minPt[1]-offset,minPt[2]-offset]
 	maxPt = bBox.max()
 	max = [maxPt[0]+offset,maxPt[1]+offset,maxPt[2]+offset]
-	
+
 	# ============
 	# - Cut Mesh -
 	# ============
-	
+
 	# -Z
 	mc.polyCut(mesh,ch=False,df=True,pc=[center[0],center[1],min[2]],ro=[0,0,0])
 	# +Z
@@ -1114,49 +1114,49 @@ def cutToMesh(mesh,boundingObject,offset=0.0):
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Check Mesh
 	if not mc.objExists(mesh):
 		raise Exception('Mesh "'+mesh+'" does not exist!')
 	if not glTools.utils.mesh.isMesh(mesh):
 		raise Exception('Object "'+mesh+'" is not a valid mesh!')
-	
+
 	# Check Bounding Mesh
 	if not mc.objExists(boundingObject):
 		raise Exception('Bounding object "'+boundingObject+'" does not exist!')
 	if not glTools.utils.mesh.isMesh(boundingObject):
 		raise Exception('Bounding object "'+boundingObject+'" is not a valid mesh!')
-	
+
 	# ============
 	# - Cut Mesh -
 	# ============
-	
+
 	# Undo OFF
 	mc.undoInfo(state=False)
-	
+
 	# Get face iterator
 	faceIt = glTools.utils.mesh.getMeshFaceIter(boundingObject)
-	
+
 	# Cut Mesh at each Face
 	faceIt.reset()
 	while not faceIt.isDone():
-		
+
 		# Get Face position and normal
 		pt = faceIt.center(OpenMaya.MSpace.kWorld)
 		n = OpenMaya.MVector()
 		faceIt.getNormal(n,OpenMaya.MSpace.kWorld)
-		
+
 		faceIt.next()
-		
+
 		# Offset Cut Point
 		n.normalize()
 		pt += (n*offset)
 		cutPt = [pt[0],pt[1],pt[2]]
-		
+
 		# ==============================
 		# - Convert Normal to Rotation -
 		# ==============================
-		
+
 		up = OpenMaya.MVector(0,1,0)
 		# Check upVector
 		if abs(n*up) > 0.9: up = OpenMaya.MVector(0,0,1)
@@ -1166,21 +1166,21 @@ def cutToMesh(mesh,boundingObject,offset=0.0):
 															aimAxis = '-z',
 															upAxis = 'y'	)
 		rotate = glTools.utils.matrix.getRotation(rotateMatrix)
-		
+
 		# Cut Mesh
 		mc.polyCut(mesh,ch=False,df=True,pc=cutPt,ro=rotate)
 		mc.polyCloseBorder(mesh,ch=False)
-		
+
 		# Set Selection
 		mc.select(mesh)
-	
+
 	# Undo ON
 	mc.undoInfo(state=True)
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return mesh
 
 def cutMeshBool(mesh,boundingObject):
@@ -1194,41 +1194,41 @@ def cutMeshBool(mesh,boundingObject):
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Check Mesh
 	if not mc.objExists(mesh):
 		raise Exception('Mesh "'+mesh+'" does not exist!')
 	if not glTools.utils.mesh.isMesh(mesh):
 		raise Exception('Object "'+mesh+'" is not a valid mesh!')
-	
+
 	# Check Bounding Mesh
 	if not mc.objExists(boundingObject):
 		raise Exception('Bounding object "'+boundingObject+'" does not exist!')
 	if not glTools.utils.mesh.isMesh(boundingObject):
 		raise Exception('Bounding object "'+boundingObject+'" is not a valid mesh!')
-	
+
 	# ============
 	# - Cut Mesh -
 	# ============
-	
+
 	# Get Prefix
 	prefix = glTools.utils.stringUtils.stripSuffix(boundingObject)
-	
+
 	# Triangulate Bounding Mesh
 	mc.polyTriangulate(boundingObject,ch=False)
-	
+
 	# Cut Mesh
 	cutMesh = mc.polyBoolOp(mesh,boundingObject,op=3,n=prefix+'Cut')
 	if not cutMesh: raise Exception('Boolean intersection failed!')
 	cutMesh = mc.rename(cutMesh[0],prefix+'Geo')
-	
+
 	# Cleanup
 	mc.polyCloseBorder(cutMesh,ch=False)
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return cutMesh
 
 def freezeToJoint(proxyGeo):
@@ -1240,24 +1240,24 @@ def freezeToJoint(proxyGeo):
 	# Checks
 	if not isProxyBound(proxyGeo):
 		raise Exception('Object "'+proxyGeo+'" is not a valid proxy bounds object!')
-	
+
 	# Get Target Joint
 	joint = mc.getAttr(proxyGeo+'.jointProxy')
 	# Get Proxy Parent
 	proxyGrp = mc.listRelatives(proxyGeo,p=True,pa=True)[0]
-	
+
 	# Match Joint Pivot
 	piv = mc.xform(joint,q=True,ws=True,rp=True)
 	mc.xform(proxyGrp,ws=True,piv=piv)
 	mc.xform(proxyGeo,ws=True,piv=piv)
-	
+
 	# Freeze Transforms
 	grpParent = mc.listRelatives(proxyGrp,p=True,pa=True)
 	mc.parent(proxyGrp,joint)
 	mc.makeIdentity(proxyGrp,apply=True,t=True,r=True,s=True)
 	if grpParent: mc.parent(proxyGrp,grpParent[0])
 	else: mc.parent(proxyGrp,w=True)
-		
+
 	# Return Result
 	return joint
 
@@ -1272,7 +1272,7 @@ def mirrorProxy(proxy,axis='x'):
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	if not mc.objExists(proxy):
 		raise Exception('Proxy object "'+proxy+'" does not exist!')
 	if not isProxyBound(proxy):
@@ -1280,16 +1280,16 @@ def mirrorProxy(proxy,axis='x'):
 	# Check Side Prefix
 	if not proxy.startswith('lf') and not proxy.startswith('rt'):
 		raise Exception('Proxy object "'+proxy+'" does not have a valid side prefix! ("lf_" or "rt_")')
-	
+
 	# Check Axis
 	axis = axis.lower()[0]
 	if not ['x','y','z'].count(axis):
 		raise Exception('Invalid mirror axis! ("'+axis+'")')
-	
+
 	# ===================
 	# - Duplicate Proxy -
 	# ===================
-	
+
 	search = ''
 	replace = ''
 	if proxy.startswith('lf'):
@@ -1300,14 +1300,14 @@ def mirrorProxy(proxy,axis='x'):
 		replace = 'lf'
 	else:
 		raise Exception('Proxy object "'+proxy+'" does not have a valid side prefix! ("lf_" or "rt_")')
-	
+
 	# Duplicate Proxy
 	mProxy = mc.duplicate(proxy)[0]
-	
+
 	# Duplicate Proxy Group
 	proxyGrp = mc.listRelatives(proxy,p=True)[0]
 	mProxyGrp = mc.duplicate(proxyGrp,po=True)[0]
-	
+
 	# Rename
 	mProxyNew = proxy.replace(search,replace)
 	if mc.objExists(mProxyNew): mc.delete(mProxyNew)
@@ -1315,12 +1315,12 @@ def mirrorProxy(proxy,axis='x'):
 	mProxyGrpNew = proxyGrp.replace(search,replace)
 	if mc.objExists(mProxyGrpNew): mc.delete(mProxyGrpNew)
 	mProxyGrp = mc.rename(mProxyGrp,mProxyGrpNew)
-	
+
 	# Retarget Joint
 	joint = mc.getAttr(proxy+'.jointProxy')
 	joint = joint.replace(search,replace)
 	mc.setAttr(mProxy+'.jointProxy',joint,type='string')
-	
+
 	# Retarget Cut and Add Geo
 	cutGeo = mc.getAttr(proxy+'.cutGeometry')
 	addGeo = '[]'
@@ -1336,16 +1336,16 @@ def mirrorProxy(proxy,axis='x'):
 		addGeo = [geo.replace(search,replace) for geo in addGeo]
 		if cutGeo: mc.setAttr(mProxy+'.cutGeometry',str(cutGeo),type='string')
 		if addGeo: mc.setAttr(mProxy+'.addGeometry',str(addGeo),type='string')
-	
+
 	# ================
 	# - Mirror Proxy -
 	# ================
-	
+
 	# Position Proxy Grp to Joint
 	if mc.objExists(joint):
 		mirrorCon = mc.parentConstraint(joint,mProxyGrp)
 		mc.delete(mirrorCon)
-	
+
 	# Mirror Proxy
 	mProxy = mc.parent(mProxy,w=True)[0]
 	mc.reorder(mProxy,f=True)
@@ -1357,21 +1357,21 @@ def mirrorProxy(proxy,axis='x'):
 	mc.setAttr(mProxy+'.opposite',0)
 	piv = mc.xform(mProxyGrp,q=True,ws=True,sp=True)
 	mc.xform(mProxy,ws=True,piv=piv)
-	
+
 	# Reverse Normal
 	mc.polyNormal(mProxy,ch=0,normalMode=0)
 	mc.polyNormalPerVertex(mProxy,unFreezeNormal=True)
-	
+
 	# Set Colour
 	glTools.utils.colorize.setColour(mProxy)
-	
+
 	# Reconnect Shading Toggle
 	mc.connectAttr(mProxy+'.shading',mProxy+'.overrideShading')
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return mProxy
 
 def activeProxy(geo,joint):
@@ -1381,76 +1381,76 @@ def activeProxy(geo,joint):
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	if not mc.objExists(geo):
 		raise Exception('Geometry "'+geo+'" does not exist!')
 	if not mc.objExists(joint):
 		raise Exception('Joint "'+joint+'" does not exist!')
-	
+
 	# ======================
 	# - Duplicate Geometry -
 	# ======================
-	
+
 	geoName = geo.split(':')[-1]
 	prxGeo = mc.duplicate(geo)[0]
 	prxGeo = mc.rename(prxGeo,geoName+'_proxy')
-	
+
 	# Delete Intermediate Shapes
 	intShapes = glTools.utils.shape.listIntermediates(prxGeo)
 	if intShapes: mc.delete(intShapes)
-	
+
 	# Unlock Attrs
 	attrList = glTools.utils.lib.xform_list()
 	for attr in attrList: mc.setAttr(prxGeo+'.'+attr,l=False)
-	
+
 	# Reset Local Space to Joint
 	mc.parent(prxGeo,joint)
 	mc.makeIdentity(prxGeo,apply=True,t=True,r=True,s=True)
 	mc.parent(prxGeo,w=True)
-	
+
 	# Delete History
 	mc.delete(prxGeo,ch=True)
-	
+
 	# =======================
 	# - Connect to Original -
 	# =======================
-	
+
 	proxyBS = mc.blendShape(geo,prxGeo,origin='world',n=prxGeo+'_blendShape')[0]
 	proxyTarget = mc.listAttr(proxyBS+'.w',m=True)[0]
 	mc.setAttr(proxyBS+'.'+proxyTarget,1.0,l=True)
-	
+
 	# =========================
 	# - Parent Shape to Joint -
 	# =========================
-	
+
 	proxyShapes = glTools.utils.shape.getShapes(prxGeo)
 	for i in range(len(proxyShapes)):
 		proxyShapes[i] = mc.parent(proxyShapes[i],joint,s=True,r=True)[0]
 		glTools.utils.base.displayOverride(proxyShapes[i],overrideEnable=1,overrideDisplay=2,overrideLOD=0)
-	
+
 	# Delete old transform
 	mc.delete(prxGeo)
-	
+
 	# ======================
 	# - Tag Proxy Geometry -
 	# ======================
-	
+
 	# Proxy Joint
 	proxyJntAttr = 'proxyJoint'
 	for proxyShape in proxyShapes:
 		if not mc.objExists(proxyShape+'.'+proxyJntAttr):
 			mc.addAttr(proxyShape,ln=proxyJntAttr,dt='string')
 			mc.setAttr(proxyShape+'.'+proxyJntAttr,joint,type='string',l=True)
-	
+
 	# Proxy Geometry
 	proxyGeoAttr = 'proxyGeometry'
 	for proxyShape in proxyShapes:
 		if not mc.objExists(proxyShape+'.'+proxyGeoAttr):
 			mc.addAttr(proxyShape,ln=proxyGeoAttr,dt='string')
 			mc.setAttr(proxyShape+'.'+proxyGeoAttr,geo,type='string',l=True)
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return proxyShapes

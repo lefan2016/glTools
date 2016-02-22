@@ -17,8 +17,8 @@ def moduleTemplateDialog( buildMethod ):
 								defaultButton='Create',
 								cancelButton='Cancel',
 								dismissString='Cancel'	)
-	
-	
+
+
 	if result == 'Create':
 		moduleName = mc.promptDialog(q=True,text=True)
 		if moduleName: buildMethod(moduleName)
@@ -38,54 +38,54 @@ def moduleTemplate(	moduleName,
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	moduleTemplateName = moduleName+'_moduleTemplate'
 	if mc.objExists(moduleTemplateName):
 		raise Exception('Module template group "'+moduleTemplateName+'" already exists!!')
-	
+
 	# ================================
 	# - Create Module Template Group -
 	# ================================
-	
+
 	moduleTemplateGrp = mc.group(em=True,n=moduleTemplateName)
-	
+
 	# ==================================
 	# - Add Module Template Attributes -
 	# ==================================
-	
+
 	# Module Type
 	mc.addAttr(moduleTemplateGrp,ln='moduleTemplate',dt='string')
 	mc.setAttr(moduleTemplateGrp+'.moduleTemplate',moduleType,type='string')
 	mc.setAttr(moduleTemplateGrp+'.moduleTemplate',l=True)
-	
+
 	# Module Name
 	mc.addAttr(moduleTemplateGrp,ln='moduleName',dt='string')
 	mc.setAttr(moduleTemplateGrp+'.moduleName',moduleName,type='string')
-	
+
 	# Module Parent
 	mc.addAttr(moduleTemplateGrp,ln='moduleParent',dt='string')
 	mc.setAttr(moduleTemplateGrp+'.moduleParent','module',type='string')
-	
+
 	# Module Scale (allScale)
 	mc.addAttr(moduleTemplateGrp,ln='allScale',dt='string')
 	mc.setAttr(moduleTemplateGrp+'.allScale','all.uniformScale',type='string')
-	
+
 	# Template Overrides
 	mc.addAttr(moduleTemplateGrp,ln='overrides',dt='string')
 	mc.setAttr(moduleTemplateGrp+'.overrides','{}',type='string')
-	
+
 	# =======================
 	# - Parent Module Nodes -
 	# =======================
-	
+
 	if moduleNodes:
 		moduleNodes = mc.ls(moduleNodes,dag=True)
 		mc.parent(moduleNodes,moduleTemplateGrp)
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return moduleTemplateGrp
 
 def moduleTemplateOverrideNotes(moduleTemplateGrp,templateData):
@@ -99,11 +99,11 @@ def moduleTemplateOverrideNotes(moduleTemplateGrp,templateData):
 	# ============================
 	# - Template Overrides Notes -
 	# ============================
-	
+
 	# Add Notes Attribute
 	if not mc.objExists(moduleTemplateGrp+'.notes'):
 		mc.addAttr(moduleTemplateGrp,ln='notes',sn='nts',dt='string',hidden=True)
-	
+
 	# Template Overrides - Notes
 	templateNotes = ''
 	templateNotes += '# ==============================\n'
@@ -111,19 +111,19 @@ def moduleTemplateOverrideNotes(moduleTemplateGrp,templateData):
 	templateNotes += '# ==============================\n'
 	templateNotes += '\n'
 	templateNotes += 'overrides = {\n'
-	
+
 	# Add Key/Value Notes
 	keyList = templateData.keys()
 	keyList.sort()
 	for key in keyList:
 		templateNotes += '\t'+str(key)+':'+str(templateData[key])+'\n'
-	
+
 	# Close Notes
 	templateNotes += '}\n'
-	
+
 	# Set Notes value
 	mc.setAttr(moduleTemplateGrp+'.notes',templateNotes,type='string')
-	
+
 	# Return Result
 	return templateNotes
 
@@ -139,7 +139,7 @@ def checkModuleTemplate( moduleTemplateGrp ):
 		raise Exception('Module template group "'+moduleTemplateGrp+'" does not exist!')
 	if not mc.attributeQuery('moduleTemplate',n=moduleTemplateGrp,ex=True):
 		raise Exception('Module template attribute "'+moduleTemplateGrp+'.moduleTemplate'+'" does not exist!')
-	
+
 	# Check Module Template Attributes
 	if not mc.attributeQuery('moduleName',n=moduleTemplateGrp,ex=True):
 		raise Exception('Module template attribute "'+moduleTemplateGrp+'.moduleName'+'" does not exist!')
@@ -185,63 +185,63 @@ def baseModuleTemplate(		moduleName,
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	#
-	
+
 	# ================================
 	# - Create Module Template Group -
 	# ================================
-	
+
 	moduleTemplateGrp = moduleTemplate(	moduleName = moduleName,
 										moduleType = 'base',
 										moduleNodes = moduleNodes	)
-	
+
 	# ==================================
 	# - Add Module Template Attributes -
 	# ==================================
-	
+
 	# Asset Name
 	mc.addAttr(moduleTemplateGrp,ln='asset_name',dt='string')
 	mc.setAttr(moduleTemplateGrp+'.asset_name',asset_name,type='string')
-	
+
 	# Asset Type
 	mc.addAttr(moduleTemplateGrp,ln='asset_type',dt='string')
 	mc.setAttr(moduleTemplateGrp+'.asset_type',asset_type,type='string')
-	
+
 	# Scale
 	mc.addAttr(moduleTemplateGrp,ln='rigScale',at='float',min=0.0,dv=1.0)
 	mc.setAttr(moduleTemplateGrp+'.rigScale',scale)
 	mc.setAttr(moduleTemplateGrp+'.rigScale',cb=False)
-	
+
 	# Config Control
 	mc.addAttr(moduleTemplateGrp,ln='configCtrl',at='bool')
 	mc.setAttr(moduleTemplateGrp+'.configCtrl',configCtrl)
 	mc.setAttr(moduleTemplateGrp+'.configCtrl',cb=False)
-	
+
 	# Follow Control
 	mc.addAttr(moduleTemplateGrp,ln='followCtrl',at='bool')
 	mc.setAttr(moduleTemplateGrp+'.followCtrl',followCtrl)
 	mc.setAttr(moduleTemplateGrp+'.followCtrl',cb=False)
-	
+
 	# Constraint Control
 	mc.addAttr(moduleTemplateGrp,ln='constraintCtrl',at='bool')
 	mc.setAttr(moduleTemplateGrp+'.constraintCtrl',constraintCtrl)
 	mc.setAttr(moduleTemplateGrp+'.constraintCtrl',cb=False)
-	
+
 	# Label
 	mc.addAttr(moduleTemplateGrp,ln='labelText',at='bool')
 	mc.setAttr(moduleTemplateGrp+'.labelText',labelText)
 	mc.setAttr(moduleTemplateGrp+'.labelText',cb=False)
-	
+
 	# Template Overrides
 	templateData = glTools.rig.module.base.BaseModule().templateData
 	moduleTemplateOverrideNotes(moduleTemplateGrp,templateData)
 	mc.setAttr(moduleTemplateGrp+'.overrides',str(templateData),type='string')
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return moduleTemplateGrp
 
 def fkChainModuleTemplate(	moduleName,
@@ -286,45 +286,45 @@ def fkChainModuleTemplate(	moduleName,
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Control Shape
 	ctrlShapeList = glTools.tools.controlBuilder.ControlBuilder().controlType
 	if not ctrlShapeList.count(controlShape):
 		raise Exception('Unsupported control shape! ("'+controlShape+'")')
-	
+
 	# ================================
 	# - Create Module Template Group -
 	# ================================
-	
+
 	moduleTemplateGrp = moduleTemplate(	moduleName = moduleName,
 										moduleType = 'fkChain',
 										moduleNodes = moduleNodes	)
-	
+
 	# ==================================
 	# - Add Module Template Attributes -
 	# ==================================
-	
+
 	# Attach Parent
 	mc.addAttr(moduleTemplateGrp,ln='attachParent',dt='string')
 	mc.setAttr(moduleTemplateGrp+'.attachParent',attachParent,type='string')
-	
+
 	# Start Joint
 	mc.addAttr(moduleTemplateGrp,ln='startJoint',dt='string')
 	mc.setAttr(moduleTemplateGrp+'.startJoint',startJoint,type='string')
-	
+
 	# End Joint
 	mc.addAttr(moduleTemplateGrp,ln='endJoint',dt='string')
 	mc.setAttr(moduleTemplateGrp+'.endJoint',startJoint,type='string')
-	
+
 	# Control Shape
 	mc.addAttr(moduleTemplateGrp,ln='controlShape',at='enum',en=':'.join(ctrlShapeList))
 	mc.setAttr(moduleTemplateGrp+'.controlShape',ctrlShapeList.index(controlShape))
-	
+
 	# End Control
 	mc.addAttr(moduleTemplateGrp,ln='endControl',at='bool')
 	mc.setAttr(moduleTemplateGrp+'.endControl',endCtrl)
 	mc.setAttr(moduleTemplateGrp+'.endControl',cb=False)
-	
+
 	# Control Position Offset
 	mc.addAttr(moduleTemplateGrp,ln='controlPositionOffset',at='double3')
 	mc.addAttr(moduleTemplateGrp,ln='controlPositionOffsetX',at='double',parent='controlPositionOffset')
@@ -332,7 +332,7 @@ def fkChainModuleTemplate(	moduleName,
 	mc.addAttr(moduleTemplateGrp,ln='controlPositionOffsetZ',at='double',parent='controlPositionOffset')
 	mc.setAttr(moduleTemplateGrp+'.controlPositionOffset',*ctrlPosition)
 	mc.setAttr(moduleTemplateGrp+'.controlPositionOffset',cb=False)
-	
+
 	# Control Rotate Offset
 	mc.addAttr(moduleTemplateGrp,ln='controlRotateOffset',at='double3')
 	mc.addAttr(moduleTemplateGrp,ln='controlRotateOffsetX',at='double',parent='controlRotateOffset')
@@ -340,31 +340,31 @@ def fkChainModuleTemplate(	moduleName,
 	mc.addAttr(moduleTemplateGrp,ln='controlRotateOffsetZ',at='double',parent='controlRotateOffset')
 	mc.setAttr(moduleTemplateGrp+'.controlRotateOffset',*ctrlRotate)
 	mc.setAttr(moduleTemplateGrp+'.controlRotateOffset',cb=False)
-	
+
 	# Control Orient
 	mc.addAttr(moduleTemplateGrp,ln='controlOrient',at='bool')
 	mc.setAttr(moduleTemplateGrp+'.controlOrient',ctrlOrient)
 	mc.setAttr(moduleTemplateGrp+'.controlOrient',cb=False)
-	
+
 	# Control Scale
 	mc.addAttr(moduleTemplateGrp,ln='controlScale',at='float',min=0.0,dv=1.0)
 	mc.setAttr(moduleTemplateGrp+'.controlScale',ctrlScale)
 	mc.setAttr(moduleTemplateGrp+'.controlScale',cb=False)
-	
+
 	# Control LOD
 	ctrlLodList = ['primary','secondary','tertiary']
 	mc.addAttr(moduleTemplateGrp,ln='controlLod',at='enum',en=':primary:secondary:tertiary:')
 	mc.setAttr(moduleTemplateGrp+'.controlLod',ctrlLodList.index(ctrlLod))
 	mc.setAttr(moduleTemplateGrp+'.controlLod',cb=False)
-	
+
 	# Template Override Defaults - Notes
 	templateData = glTools.rig.module.fkChain.FkChainModule().templateData
 	moduleTemplateOverrideNotes(moduleTemplateGrp,templateData)
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return moduleTemplateGrp
 
 def ikChainModuleTemplate(	moduleName,
@@ -406,74 +406,74 @@ def ikChainModuleTemplate(	moduleName,
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# IK Solver
 	ikSolverList = ['ikSCsolver','ikRPsolver']
 	if not ikSolverList.count(ikSolver):
 		raise Exception('Invalid IkSolver - "'+ikSolver+'"!')
-		
+
 	# ================================
 	# - Create Module Template Group -
 	# ================================
-	
+
 	moduleTemplateGrp = moduleTemplate(	moduleName = moduleName,
 										moduleType = 'ikChain',
 										moduleNodes = moduleNodes	)
-	
+
 	# ==================================
 	# - Add Module Template Attributes -
 	# ==================================
-	
+
 	# Attach Parent
 	mc.addAttr(moduleTemplateGrp,ln='attachParent',dt='string')
 	mc.setAttr(moduleTemplateGrp+'.attachParent',attachParent,type='string')
-	
+
 	# Start Joint
 	mc.addAttr(moduleTemplateGrp,ln='startJoint',dt='string')
 	mc.setAttr(moduleTemplateGrp+'.startJoint',startJoint,type='string')
-	
+
 	# End Joint
 	mc.addAttr(moduleTemplateGrp,ln='endJoint',dt='string')
 	mc.setAttr(moduleTemplateGrp+'.endJoint',startJoint,type='string')
-	
+
 	# Control Shape
 	mc.addAttr(moduleTemplateGrp,ln='ikSolver',at='enum',en=':'.join(ikSolverList))
 	mc.setAttr(moduleTemplateGrp+'.ikSolver',ikSolverList.index(ikSolver))
 	mc.setAttr(moduleTemplateGrp+'.ikSolver',cb=False)
-	
+
 	# Pole Vector
 	mc.addAttr(moduleTemplateGrp,ln='poleVectorTransform',dt='string')
 	mc.setAttr(moduleTemplateGrp+'.poleVectorTransform',poleVectorPos,type='string')
-	
+
 	# Orient IK Control
 	mc.addAttr(moduleTemplateGrp,ln='orientIkControl',at='bool')
 	mc.setAttr(moduleTemplateGrp+'.orientIkControl',orientIkCtrl)
 	mc.setAttr(moduleTemplateGrp+'.orientIkControl',cb=False)
-	
+
 	# FK Toggle
 	mc.addAttr(moduleTemplateGrp,ln='enableFKToggle',at='bool')
 	mc.setAttr(moduleTemplateGrp+'.enableFKToggle',fkToggle)
 	mc.setAttr(moduleTemplateGrp+'.enableFKToggle',cb=False)
-	
+
 	# IK/FK Blend Attribute
 	mc.addAttr(moduleTemplateGrp,ln='ikFkBlendAttribute',dt='string')
 	mc.setAttr(moduleTemplateGrp+'.ikFkBlendAttribute',blendAttr,type='string')
-	
+
 	# Control LOD
 	ctrlLodList = ['primary','secondary','tertiary']
 	mc.addAttr(moduleTemplateGrp,ln='controlLod',at='enum',en=':primary:secondary:tertiary:')
 	mc.setAttr(moduleTemplateGrp+'.controlLod',ctrlLodList.index(ctrlLod))
 	mc.setAttr(moduleTemplateGrp+'.controlLod',cb=False)
-	
+
 	# Template Overrides
 	templateData = glTools.rig.module.ikChain.IkChainModule().templateData
 	moduleTemplateOverrideNotes(moduleTemplateGrp,templateData)
 	#overrideStr = "{'ikCtrlScale': 0.2, 'ikCtrlShape': 'box', 'ikCtrlRotate': [0, 0, 0], 'fkCtrlShape': 'circle','fkCtrlScale': 0.3,'fkCtrlRotate': [0, 90, 0], 'blendAttr': 'ikFkBlend'}"
 	mc.setAttr(moduleTemplateGrp+'.overrides',str(templateData),type='string')
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return moduleTemplateGrp
 

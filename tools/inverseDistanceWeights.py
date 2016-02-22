@@ -25,10 +25,10 @@ def buildPointWeights(	points,
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Build Influence Points
 	influencePts = [glTools.utils.base.getPosition(i) for i in influenceList]
-	
+
 	# Add Missing Influences
 	skinInfList = mc.skinCluster(skinCluster,q=True,inf=True)
 	missingInfList = list(set(influenceList)-set(skinInfList)) or []
@@ -36,34 +36,34 @@ def buildPointWeights(	points,
 		mc.skinCluster(skinCluster,e=True,addInfluence=inf,lockWeights=True)
 	for inf in missingInfList:
 		mc.setAttr(inf+'.liw',0)
-	
+
 	# =======================
 	# - Build Point Weights -
 	# =======================
-	
+
 	#glTools.utils.progressBar.init('Beginning Weights', len(points)/10)
 
 	cmd = ''
 	ptWts = {}
 	for i, pt in enumerate(points):
-		
+
 		ptPos = glTools.utils.base.getPosition(pt)
 		wt, influenceID = calcPointWeights(ptPos,influencePts,maxInfluences)
 		ptWts[pt] = [influenceID, wt]
-		
+
 	cmd += buildSkinPercentCmd(pt, influenceList, wt, skinCluster, ptWts)
-		
+
 	#if not i%10: glTools.utils.progressBar.update(1,'Generating Weights')
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	#glTools.utils.progressBar.end()
-	
+
 	# Run Cmd
 	mm.eval(cmd)
-	
+
 def calcPointWeights(	pos,
 						influencePts,
 						maxInfluences,
@@ -81,20 +81,20 @@ def calcPointWeights(	pos,
 	'''
 	# Get Point Position
 	pt = glTools.utils.base.getPosition(pos)
-	
+
 	# Sort By Distance
 	dist = [glTools.utils.mathUtils.distanceBetween(pt,i) for i in influencePts]
 	distSorted = sorted(dist)
 	closestID = [dist.index(distSorted[i]) for i in range(maxInfluences)]
-	
+
 	# Calculate Inverse Distance Weight
 	ptArray = [influencePts[i] for i in closestID]
 	wt = glTools.utils.mathUtils.inverseDistanceWeight3D(ptArray,pt)
 	if smoothInterp:
 		wt = [ glTools.utils.mathUtils.smoothStep(x) for x in wt ]
 	infWt = [wt[closestID.index(i)] if i in closestID else 0.0 for i in range(len(influencePts))]
-	
-	
+
+
 	# Return Result
 	return infWt, closestID
 
@@ -124,7 +124,7 @@ def buildSkinPercentCmd(	pt,
 			transValues += '-transformValue "%s" %s ' % (influenceList[n], ptWts[vertex][1][n])
 		cmd += 'skinPercent %s "%s" "%s";\n' % (transValues, skinCluster, vertex)
 		x+=1
-	
+
 	print "vertices :: %s " % len(ptWts)
 	print "influences :: %s" % len(influenceList)
 	print "generated %s skinPercent cmds" % x

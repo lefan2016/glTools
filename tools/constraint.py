@@ -13,7 +13,7 @@ import glTools.utils.transform
 
 import types
 
-def bake(	constraint,	
+def bake(	constraint,
 			start		= None,
 			end			= None,
 			sampleBy	= 1,
@@ -34,31 +34,31 @@ def bake(	constraint,
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Check Constraint
 	if not glTools.utils.constraint.isConstraint(constraint):
 		raise Exception('Object "'+constraint+'" is not a valid constraint node!')
-	
+
 	# Check Start/End Frames
 	if start == None: start = mc.playbackOptions(q=True,min=True)
 	if end == None: end = mc.playbackOptions(q=True,max=True)
-	
+
 	# ====================================
 	# - Get Slave Transform and Channels -
 	# ====================================
-	
+
 	# Get Slave Transform
 	slave = glTools.utils.constraint.slave(constraint)
-	
+
 	# Get Slave Channels
 	attrList = mc.listConnections(constraint,s=False,d=True,p=True) or []
 	slaveAttrs = [i.split('.')[-1] for i in attrList if i.startswith(slave+'.')] or []
 	if not slaveAttrs: raise Exception('No slave channels to bake!')
-	
+
 	# ===================
 	# - Bake Constraint -
 	# ===================
-	
+
 	mc.refresh(suspend=True)
 	mc.bakeResults(	slave,
 					at = slaveAttrs,
@@ -67,11 +67,11 @@ def bake(	constraint,
 					simulation = simulation,
 					sampleBy = sampleBy )
 	mc.refresh(suspend=False)
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return [slave+'.'+i for i in slaveAttrs]
 
 def aimConstraint(	target,
@@ -105,34 +105,34 @@ def aimConstraint(	target,
 	'''
 	# Build Axis Dict
 	axis = {'x':(1,0,0),'y':(0,1,0),'z':(0,0,1),'-x':(-1,0,0),'-y':(0,-1,0),'-z':(0,0,-1)}
-	
+
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Check Master
 	if not mc.objExists(target):
 		raise Exception('Constraint target "'+target+'" does not exist!')
 	if not glTools.utils.transform.isTransform(target):
 		raise Exception('Constraint target "'+target+'" is not a valid transform!')
-	
+
 	# Check Slave
 	if not mc.objExists(slave):
 		raise Exception('Constraint slave "'+slave+'" does not exist!')
 	if not glTools.utils.transform.isTransform(slave):
 		raise Exception('Constraint slave "'+slave+'" is not a valid transform!')
-	
+
 	# Check Settable Channels
 	sk = []
 	if not mc.getAttr(slave+'.rx',se=True): sk.append('x')
 	if not mc.getAttr(slave+'.ry',se=True): sk.append('y')
 	if not mc.getAttr(slave+'.rz',se=True): sk.append('z')
 	if not sk: sk = 'none'
-	
+
 	# =====================
 	# - Create Constraint -
 	# =====================
-	
+
 	constraint = ''
 	try:
 		if worldUpObject:
@@ -158,11 +158,11 @@ def aimConstraint(	target,
 											mo=mo)[0]
 	except Exception, e:
 		raise Exception('Error creating constraint from "'+target+'" to "'+slave+'"! Exception msg: '+str(e))
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return constraint
 
 def pointConstraint(master,slave,mo=False,attrList=['tx','ty','tz']):
@@ -181,7 +181,7 @@ def pointConstraint(master,slave,mo=False,attrList=['tx','ty','tz']):
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Check Target (Master)
 	if isinstance(master,types.StringTypes):
 		if not mc.objExists(master):
@@ -194,38 +194,38 @@ def pointConstraint(master,slave,mo=False,attrList=['tx','ty','tz']):
 				raise Exception('Constraint target "'+target+'" does not exist!')
 			if not glTools.utils.transform.isTransform(target):
 				raise Exception('Constraint target "'+target+'" is not a valid transform!')
-	
+
 	# Check Slave
 	if not mc.objExists(slave):
 		raise Exception('Constraint slave "'+slave+'" does not exist!')
 	if not glTools.utils.transform.isTransform(slave):
 		raise Exception('Constraint slave "'+slave+'" is not a valid transform!')
-	
+
 	# Check Settable Channels
 	st = []
 	if not 'tx' in attrList or not mc.getAttr(slave+'.tx',se=True): st.append('x')
 	if not 'ty' in attrList or not mc.getAttr(slave+'.ty',se=True): st.append('y')
 	if not 'tz' in attrList or not mc.getAttr(slave+'.tz',se=True): st.append('z')
 	if not st: st = 'none'
-	
+
 	# Skip All Check
 	if len(st) == 3:
 		print('No axis to constrain! Unable to create constraint...')
 		return None
-	
+
 	# =====================
 	# - Create Constraint -
 	# =====================
-	
+
 	constraint = ''
 	try: constraint = mc.pointConstraint(master,slave,sk=st,mo=mo)[0]
 	except Exception, e:
 		raise Exception('Error creating constraint from "'+master+'" to "'+slave+'"! Exception msg: '+str(e))
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return constraint
 
 def orientConstraint(master,slave,mo=False,attrList=['rx','ry','rz']):
@@ -244,7 +244,7 @@ def orientConstraint(master,slave,mo=False,attrList=['rx','ry','rz']):
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Check Target (Master)
 	if isinstance(master,types.StringTypes):
 		if not mc.objExists(master):
@@ -257,38 +257,38 @@ def orientConstraint(master,slave,mo=False,attrList=['rx','ry','rz']):
 				raise Exception('Constraint target "'+target+'" does not exist!')
 			if not glTools.utils.transform.isTransform(target):
 				raise Exception('Constraint target "'+target+'" is not a valid transform!')
-	
+
 	# Check Slave
 	if not mc.objExists(slave):
 		raise Exception('Constraint slave "'+slave+'" does not exist!')
 	if not glTools.utils.transform.isTransform(slave):
 		raise Exception('Constraint slave "'+slave+'" is not a valid transform!')
-	
+
 	# Check Settable Channels
 	sr = []
 	if not 'rx' in attrList or not mc.getAttr(slave+'.rx',se=True): sr.append('x')
 	if not 'ry' in attrList or not mc.getAttr(slave+'.ry',se=True): sr.append('y')
 	if not 'rz' in attrList or not mc.getAttr(slave+'.rz',se=True): sr.append('z')
 	if not st: st = 'none'
-	
+
 	# Skip All Check
 	if len(sr) == 3:
 		print('No axis to constrain! Unable to create constraint...')
 		return None
-	
+
 	# =====================
 	# - Create Constraint -
 	# =====================
-	
+
 	constraint = ''
 	try: constraint = mc.orientConstraint(master,slave,sk=sr,mo=mo)[0]
 	except Exception, e:
 		raise Exception('Error creating constraint from "'+master+'" to "'+slave+'"! Exception msg: '+str(e))
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return constraint
 
 def parentConstraint(master,slave,mo=False,attrList=['tx','ty','tz','rx','ry','rz']):
@@ -307,7 +307,7 @@ def parentConstraint(master,slave,mo=False,attrList=['tx','ty','tz','rx','ry','r
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Check Target (Master)
 	if isinstance(master,types.StringTypes):
 		if not mc.objExists(master):
@@ -320,13 +320,13 @@ def parentConstraint(master,slave,mo=False,attrList=['tx','ty','tz','rx','ry','r
 				raise Exception('Constraint target "'+target+'" does not exist!')
 			if not glTools.utils.transform.isTransform(target):
 				raise Exception('Constraint target "'+target+'" is not a valid transform!')
-	
+
 	# Check Slave
 	if not mc.objExists(slave):
 		raise Exception('Constraint slave "'+slave+'" does not exist!')
 	if not glTools.utils.transform.isTransform(slave):
 		raise Exception('Constraint slave "'+slave+'" is not a valid transform!')
-	
+
 	# Check Settable Channels
 	st = []
 	sr = []
@@ -338,20 +338,20 @@ def parentConstraint(master,slave,mo=False,attrList=['tx','ty','tz','rx','ry','r
 	if not 'rz' in attrList or not mc.getAttr(slave+'.rz',se=True): sr.append('z')
 	if not st: st = 'none'
 	if not sr: sr = 'none'
-	
+
 	# =====================
 	# - Create Constraint -
 	# =====================
-	
+
 	constraint = ''
 	try: constraint = mc.parentConstraint(master,slave,st=st,sr=sr,mo=mo)[0]
 	except Exception, e:
 		raise Exception('Error creating constraint from "'+master+'" to "'+slave+'"! Exception msg: '+str(e))
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return constraint
 
 def scaleConstraint(master,slave,mo=False,force=False,attrList=['sx','sy','sz']):
@@ -372,48 +372,48 @@ def scaleConstraint(master,slave,mo=False,force=False,attrList=['sx','sy','sz'])
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Check Master
 	if not mc.objExists(master):
 		raise Exception('Constraint master "'+master+'" does not exist!')
 	if not glTools.utils.transform.isTransform(master):
 		raise Exception('Constraint master "'+master+'" is not a valid transform!')
-	
+
 	# Check Slave
 	if not mc.objExists(slave):
 		raise Exception('Constraint slave "'+slave+'" does not exist!')
 	if not glTools.utils.transform.isTransform(slave):
 		raise Exception('Constraint slave "'+slave+'" is not a valid transform!')
-	
+
 	# Check Settable Channels
 	sk = []
 	if not 'sx' in attrList or not mc.getAttr(slave+'.sx',se=True): sk.append('x')
 	if not 'sy' in attrList or not mc.getAttr(slave+'.sy',se=True): sk.append('y')
 	if not 'sz' in attrList or not mc.getAttr(slave+'.sz',se=True): sk.append('z')
 	if not sk: st = 'none'
-	
+
 	# Check All
 	if len(sk) == 3:
 		print('All scale channels locked! Unable to add constraint')
 		return None
-	
+
 	# =====================
 	# - Create Constraint -
 	# =====================
-	
+
 	if force: mc.cutKey(slave,at=attrList)
-	
+
 	constraint = ''
 	try: constraint = mc.scaleConstraint(master,slave,sk=sk,mo=mo)[0]
 	except Exception, e:
 		#raise Exception('Error creating constraint from "'+master+'" to "'+slave+'"! Exception msg: '+str(e))
 		print('Error creating constraint from "'+master+'" to "'+slave+'"! Exception msg: '+str(e))
 		constraint = None
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return constraint
 
 def nonReferencedConstraints(slaveNSfilter=None,targetNSfilter=None):
@@ -428,21 +428,21 @@ def nonReferencedConstraints(slaveNSfilter=None,targetNSfilter=None):
 	# =========================
 	# - Get Scene Constraints -
 	# =========================
-	
+
 	sceneConstraints = mc.ls(type='constraint')
 	if not sceneConstraints: return []
-	
+
 	# Filter Nonreferenced Constraints
 	nonRefConstraints = []
 	for constraint in sceneConstraints:
 		if not glTools.utils.reference.isReferenced(constraint):
 			if not constraint in nonRefConstraints:
 				nonRefConstraints.append(constraint)
-	
+
 	# =================
 	# - Filter Result -
 	# =================
-	
+
 	# Slave Namespace Filter
 	if slaveNSfilter:
 		for constraint in nonRefConstraints:
@@ -454,7 +454,7 @@ def nonReferencedConstraints(slaveNSfilter=None,targetNSfilter=None):
 				if slaveNS in slaveNSfilter: filterOut = False
 			if filterOut:
 				nonRefConstraints.remove(constraint)
-			
+
 	# Master Namespace Filter
 	if targetNSfilter:
 		for constraint in nonRefConstraints:
@@ -466,11 +466,11 @@ def nonReferencedConstraints(slaveNSfilter=None,targetNSfilter=None):
 				if targetNS in targetNSfilter: filterOut = False
 			if filterOut:
 				nonRefConstraints.remove(constraint)
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return nonRefConstraints
 
 def listReferenceDependents():
@@ -500,44 +500,44 @@ def translateOffsetTarget(target,offset,slave,prefix=None):
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Target
 	if not mc.objExists(target):
 		raise Exception('Target transform "'+target+'" does not exist!')
 	if not glTools.utils.transform.isTransform(target):
 		raise Exception('Target object "'+target+'" is not a valid tranform!')
-	
+
 	# Offset
 	if not mc.objExists(offset):
 		raise Exception('Offset transform "'+offset+'" does not exist!')
 	if not glTools.utils.transform.isTransform(offset):
 		raise Exception('Offset object "'+offset+'" is not a valid tranform!')
-	
+
 	# Slave
 	if not mc.objExists(slave):
 		raise Exception('Slave transform "'+slave+'" does not exist!')
 	if not glTools.utils.transform.isTransform(slave):
 		raise Exception('Slave object "'+slave+'" is not a valid tranform!')
-	
+
 	# Prefix
 	if not prefix: prefix = glTools.utils.stringUtils.stripSuffix(slave)
-	
+
 	# ====================
 	# - Build Constraint -
 	# ====================
-	
+
 	# Parent Slave to Target
 	mc.delete(parentConstraint(target,slave))
 	mc.parent(slave,target)
-	
+
 	# Create Offset Constraint
 	offsetConstraint = mc.pointConstraint(offset,slave,mo=True)[0]
 	offsetConstraint = mc.rename(offsetConstraint,prefix+'_offset_pointConstraint')
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return offsetConstraint
 
 def pointOnPolyConstraintCmd(pt):
@@ -549,34 +549,34 @@ def pointOnPolyConstraintCmd(pt):
 	# ==================
 	# - Initialize Cmd -
 	# ==================
-	
+
 	cmd = ''
-	
+
 	# ===============================
 	# - Get Mesh from Point on Poly -
 	# ===============================
-	
+
 	fullname = mc.ls(pt,o=True)[0]
 	mesh = fullname.split(':')[-1]
 	meshSN = mesh.split('|')[-1]
-	
+
 	# Get Mesh Component ID
 	meshID = glTools.utils.component.index(pt)
-	
+
 	prevID = OpenMaya.MScriptUtil()
 	prevID.createFromInt(0)
 	prevIDPtr = prevID.asIntPtr()
-	
+
 	# =======================
 	# - Constrain to Vertex -
 	# =======================
-	
+
 	if '.vtx[' in pt:
-		
+
 		# Initialize MItMeshVertex
 		meshIt = glTools.utils.mesh.getMeshVertexIter(mesh)
 		meshIt.setIndex(meshID,prevIDPtr)
-		
+
 		# Get Vertex UV
 		uv = OpenMaya.MScriptUtil()
 		uv.createFromDouble(0.0)
@@ -584,17 +584,17 @@ def pointOnPolyConstraintCmd(pt):
 		meshIt.getUV(uvPtr)
 		uv = [ OpenMaya.MScriptUtil.getFloat2ArrayItem(uvPtr,0,j) for j in [0,1] ]
 		cmd += '; setAttr ($constraint[0]+".%sU%d") %f; setAttr ($constraint[0]+".%sV%d") %f' % ( meshSN, 0, uv[0], meshSN, 0, uv[1] )
-	
+
 	# =====================
 	# - Constrain to Edge -
 	# =====================
-	
+
 	elif '.e[' in pt:
-		
+
 		# Initialize MItMeshEdge
 		meshIt = glTools.utils.mesh.getMeshEdgeIter(mesh)
 		meshIt.setIndex(meshID,prevIDPtr)
-		
+
 		# Get Edge/Vertices UV
 		vtx = [ meshIt.index( j ) for j in [0,1] ]
 		vtxIt = glTools.utils.mesh.getMeshVertexIter(mesh)
@@ -608,27 +608,27 @@ def pointOnPolyConstraintCmd(pt):
 			uvs.append( [ OpenMaya.MScriptUtil.getFloat2ArrayItem(uvPtr,0,j) for j in [0,1] ] )
 		uv = [ 0.5*(uvs[0][j]+uvs[1][j]) for j in [0,1] ]
 		cmd += '; setAttr ($constraint[0]+".%sU%d") %f; setAttr ($constraint[0]+".%sV%d") %f' % ( meshSN, 0, uv[0], meshSN, 0, uv[1] )
-			
+
 	# =====================
 	# - Constrain to Face -
 	# =====================
-	
+
 	elif '.f[' in pt:
-		
+
 		# Initialize MItMeshface
 		meshIt = glTools.utils.mesh.getMeshFaceIter(mesh)
 		meshIt.setIndex(meshID,prevIDPtr)
-		
+
 		# Get Face UV
 		u, v = OpenMaya.MFloatArray(), OpenMaya.MFloatArray()
 		meshIt.getUVs( u, v )
 		uv = ( sum(u)/len(u), sum(v)/len(v) )
 		cmd += '; setAttr ($constraint[0]+".%sU%d") %f; setAttr ($constraint[0]+".%sV%d") %f' % ( meshSN, 0, uv[0], meshSN, 0, uv[1] )
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return cmd
 
 

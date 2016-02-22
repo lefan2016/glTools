@@ -9,14 +9,14 @@ def init():
 	'''
 	# Get Maya App Location
 	MAYA_LOCATION = os.environ['MAYA_LOCATION']
-	
+
 	# Source Mel Files
 	mm.eval('source "'+MAYA_LOCATION+'/scripts/others/hikGlobalUtils.mel"')
 	mm.eval('source "'+MAYA_LOCATION+'/scripts/others/hikCharacterControlsUI.mel"')
 	mm.eval('source "'+MAYA_LOCATION+'/scripts/others/hikDefinitionOperations.mel"')
 	mm.eval('source "'+MAYA_LOCATION+'/scripts/others/CharacterPipeline.mel"')
 	mm.eval('source "'+MAYA_LOCATION+'/scripts/others/characterSelector.mel"')
-	
+
 	# Load Plugins
 	if not mc.pluginInfo('mayaHIK',q=True,l=True):
 		mc.loadPlugin('mayaHIK')
@@ -24,7 +24,7 @@ def init():
 		mc.loadPlugin('mayaCharacterization')
 	if not mc.pluginInfo('retargeterNodes',q=True,l=True):
 		mc.loadPlugin('retargeterNodes')
-	
+
 	# HIK Character Controls Tool
 	mm.eval('HIKCharacterControlsTool')
 
@@ -33,10 +33,10 @@ def isCharacterDefinition(char):
 	'''
 	# Check Node Exists
 	if not mc.objExists(char): return False
-	
+
 	# Check Node Type
 	if mc.objectType(char) != 'HIKCharacterNode': return False
-	
+
 	# Return Result
 	return True
 
@@ -46,10 +46,10 @@ def isCharacterDefinitionLocked(char):
 	# Check Character Definition
 	if not isCharacterDefinition(char):
 		raise Exception('Invalid character definition node! Object "'+char+'" does not exist or is not a valid HIKCharacterNode!')
-	
+
 	# Check Lock
 	lock = mc.getAttr(char+'.InputCharacterizationLock')
-	
+
 	# Return Result
 	return lock
 
@@ -59,14 +59,14 @@ def characterDefinitionLock(char,lockState=True,saveStance=True):
 	# Check Character Definition
 	if not isCharacterDefinition(char):
 		raise Exception('Invalid character definition node! Object "'+char+'" does not exist or is not a valid HIKCharacterNode!')
-	
+
 	# Check Lock State
 	isLocked = isCharacterDefinitionLocked(char)
-	
+
 	# Set Lock State
 	if lockState != isLocked: mm.eval('hikToggleLockDefinition')
 	#mm.eval('mayaHIKcharacterLock("'+char+'",'+str(int(lockState))+','+str(int(saveStance))+')')
-	
+
 	# Return State
 	return int(lockState)
 
@@ -76,22 +76,22 @@ def create(charNS,charName,lock=True):
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	if charNS: charNS+=':'
-	
+
 	# ===============================
 	# - Create Character Definition -
 	# ===============================
-	
+
 	charDef = mm.eval('CreateHIKCharacterWithName "'+charName+'"')
 	setCurrentCharacter(charDef)
-	
+
 	try:
 		mm.eval('hikUpdateCharacterList()')
 		mm.eval('hikSelectDefinitionTab()')
 	except:
 		pass
-	
+
 	# Apply Temmplate
 	setCharacterObject(charDef,charNS+'Hips',1,0)
 	setCharacterObject(charDef,charNS+'Head',15,0)
@@ -162,14 +162,14 @@ def create(charNS,charName,lock=True):
 	setCharacterObject(charDef,charNS+'Spine',8,0)
 	setCharacterObject(charDef,charNS+'Spine1',23,0)
 	setCharacterObject(charDef,charNS+'Spine2',24,0)
-	
+
 	# =======================================
 	# - Set Character Definition Properties -
 	# =======================================
-	
+
 	# Get Character Definition Properties Node
 	propertyNode = getPropertiesNode(charDef)
-	
+
 	# Match Source
 	mc.setAttr(propertyNode+'.ForceActorSpace',0) # OFF
 	# Action Space Comp Mode
@@ -184,19 +184,19 @@ def create(charNS,charName,lock=True):
 	mc.setAttr(propertyNode+'.AnkleHeightCompensationMode',0) # OFF
 	# Mass Center Comp Mode
 	mc.setAttr(propertyNode+'.MassCenterCompensationMode',1) # ON
-	
+
 	# ===================
 	# - Lock Definition -
 	# ===================
-	
+
 	if lock:
 		#characterDefinitionLock(charDef,lockState=True,saveStance=True)
 		mm.eval('hikToggleLockDefinition')
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return charDef
 
 def setCharacterObject(charDef,charBone,boneId,deleteBone=False):
@@ -224,10 +224,10 @@ def getCharacterNodes(char):
 	# Check Node
 	if not isCharacterDefinition(char):
 		raise Exception('Invalid character definition node! Object "'+char+'" does not exist or is not a valid HIKCharacterNode!')
-	
+
 	# Get Character Nodes
 	charNodes = mm.eval('hikGetSkeletonNodes "'+char+'"')
-	
+
 	# Return Result
 	return charNodes
 
@@ -236,20 +236,20 @@ def setCharacterSource(char,source):
 	'''
 	# HIK Character Controls Tool
 	mm.eval('HIKCharacterControlsTool')
-	
+
 	# Get Current Character
 	currChar = getCurrentCharacter()
-	
+
 	# Set Current Character
 	setCurrentCharacter(char)
-	
+
 	# Set Character Source
 	mm.eval('hikSetCurrentSource("'+source+'")')
 	mm.eval('hikUpdateSourceList()')
 	mm.eval('hikUpdateCurrentSourceFromUI()')
 	mm.eval('hikUpdateContextualUI()')
 	mm.eval('hikControlRigSelectionChangedCallback')
-	
+
 	# Restore Current Character
 	if char != currChar: setCurrentCharacter(currChar)
 
@@ -259,24 +259,24 @@ def getPropertiesNode(char):
 	# Check Node
 	if not isCharacterDefinition(char):
 		raise Exception('Invalid character definition node! Object "'+char+'" does not exist or is not a valid HIKCharacterNode!')
-			
+
 	propertyNode = ''
 	try:
 		propertyNode = mm.eval('getProperty2StateFromCharacter("'+char+'")')
 	except:
-	
+
 		# Get propertyState Connections
 		conn = mc.listConnections(char+'.propertyState',s=True,d=False)
 		if not conn:
 			raise Exception('Unable to determine HIKProperty2State node from character definition node "'+char+'"!')
-		
+
 		# Check Number of Results
 		if len(conn) > 1:
 			print('Multiple HIKProperty2State nodes found for character definition "'+char+'"! Returning first item only...')
-		
+
 		# Assign Property Node
 		propertyNode = conn[0]
-	
+
 	# Return Result
 	return propertyNode
 
@@ -286,16 +286,16 @@ def getSolverNode(char):
 	# Check Node
 	if not isCharacterDefinition(char):
 		raise Exception('Invalid character definition node! Object "'+char+'" does not exist or is not a valid HIKCharacterNode!')
-	
+
 	# Get OutputPropertySetState Connections
 	conn = mc.ls(mc.listConnections(char+'.OutputPropertySetState',d=True,s=False) or [],type='HIKSolverNode')
 	if not conn:
 		raise Exception('Unable to determine HIKSolverNode node from character definition node "'+char+'"!')
-	
+
 	# Check Number of Results
 	if len(conn) > 1:
 		print('Multiple HIKSolverNode nodes found for character definition "'+char+'"! Returning first item only...')
-	
+
 	# Return Result
 	return conn[0]
 
@@ -305,16 +305,16 @@ def getRetargetNode(char):
 	# Check Node
 	if not isCharacterDefinition(char):
 		raise Exception('Invalid character definition node! Object "'+char+'" does not exist or is not a valid HIKCharacterNode!')
-	
+
 	# Get OutputPropertySetState Connections
 	conn = mc.ls(mc.listConnections(char+'.OutputPropertySetState',d=True,s=False) or [],type='HIKRetargeterNode')
 	if not conn:
 		raise Exception('Unable to determine HIKRetargeterNode node from character definition node "'+char+'"!')
-	
+
 	# Check Number of Results
 	if len(conn) > 1:
 		print('Multiple HIKRetargeterNode nodes found for character definition "'+char+'"! Returning first item only...')
-	
+
 	# Return Result
 	return conn[0]
 
@@ -323,7 +323,7 @@ def bakeAnim(char):
 	'''
 	# Get Character Bones
 	bones = getCharacterNodes(char)
-	
+
 	# Bake Animation
 	mc.bakeResults(	bones,
 					simulation=True,
@@ -336,7 +336,7 @@ def bakeAnim(char):
 					bakeOnOverrideLayer=False,
 					minimizeRotation=False,
 					at=['tx','ty','tz','rx','ry','rz'] )
-	
+
 	# Return Result
 	return bones
 

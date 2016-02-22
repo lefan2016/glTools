@@ -12,11 +12,11 @@ def connectionListToAttr(toNode,toAttr):
 	# Verify
 	if not mc.objExists(toNode+'.'+toAttr):
 		raise Exception('Attribute ' + toNode+'.'+toAttr + ' does not exist!')
-	
+
 	# Get MPlug to toAttr
 	toNodeObj = glTools.utils.base.getMObject(toNode)
 	toAttrPlug = OpenMaya.MFnDependencyNode(toNodeObj).findPlug(toAttr)
-	
+
 	# Get MPlugArray of connected plugs
 	connectionList = {}
 	connectedPlugArray = OpenMaya.MPlugArray()
@@ -40,10 +40,10 @@ def connectionListToAttr(toNode,toAttr):
 				attr += elem
 				if (len(elem) > 1) and (elem != plugElem[-1]): attr += '.'
 			connectionList[node] = (attr,-(i+1))
-	
+
 	# Return Result
 	return connectionList
-	
+
 def connectionListFromAttr(fromNode,fromAttr):
 	'''
 	Return a dictionary containing outgoing connection information for a specific attribute
@@ -53,11 +53,11 @@ def connectionListFromAttr(fromNode,fromAttr):
 	# Verify
 	if not mc.objExists(fromNode+'.'+fromAttr):
 		raise Exception('Attribute ' + fromNode+'.'+fromAttr + ' does not exist!')
-	
+
 	# Get MPlug to fromAttr
 	fromNodeObj = glTools.utils.base.getMObject(fromNode)
 	fromAttrPlug = OpenMaya.MFnDependencyNode(fromNodeObj).findPlug(fromAttr)
-	
+
 	# Get MPlugArray of connected plugs
 	connectionList = {}
 	connectedPlugArray = OpenMaya.MPlugArray()
@@ -81,14 +81,14 @@ def connectionListFromAttr(fromNode,fromAttr):
 				attr += elem
 				if (len(elem) > 1) and (elem != plugElem[-1]): attr += '.'
 			connectionList[node] = (attr,-(i+1))
-	
+
 	# Return Result
 	return connectionList
 
 def combineSingleAttrConnections(targetAttr,inputAttr1='',inputAttr2='',inputAttr1Value=None,inputAttr2Value=None,combineMode='add',enableAttributeOverride=False,blendAttr=''):
 	'''
 	Connect the combined result of 2 input attributes/values to a target attribute.
-	
+
 	@param targetAttr: Target attribute to receive the combined values result
 	@type targetAttr: str
 	@param inputAttr1: First attribute to be used to obtain the combined result
@@ -108,7 +108,7 @@ def combineSingleAttrConnections(targetAttr,inputAttr1='',inputAttr2='',inputAtt
 	'''
 	# Check existing connections
 	existingConn = mc.listConnections(targetAttr,s=True,d=False,p=True)
-	
+
 	# Check target attributes
 	if not mc.objExists(targetAttr): raise Exception('Target attribute '+targetAttr+' does not exist!')
 	# Check inputs
@@ -117,11 +117,11 @@ def combineSingleAttrConnections(targetAttr,inputAttr1='',inputAttr2='',inputAtt
 	# Check input attributes
 	if inputAttr1 and not mc.objExists(inputAttr1): raise Exception('Input attribute 1 '+inputAttr1+' does not exist!')
 	if inputAttr2 and not mc.objExists(inputAttr2): raise Exception('Input attribute 2 '+inputAttr2+' does not exist!')
-	
+
 	# Get target node name
 	if not targetAttr.count('.'): raise Exception(targetAttr+' is not a valid attribute!')
 	targetNode = targetAttr.split('.')[0]
-	
+
 	# Combine inputs
 	combineNode = ''
 	combineAttr1 = 'input1'
@@ -137,7 +137,7 @@ def combineSingleAttrConnections(targetAttr,inputAttr1='',inputAttr2='',inputAtt
 		combineNode = mc.createNode('blendTwoAttr',n=combineNode)
 		combineAttr1 = 'input[0]'
 		combineAttr2 = 'input[1]'
-	
+
 	# Set Input 1
 	if inputAttr1:
 		mc.connectAttr(inputAttr1,combineNode+'.'+combineAttr1,f=True)
@@ -152,10 +152,10 @@ def combineSingleAttrConnections(targetAttr,inputAttr1='',inputAttr2='',inputAtt
 			mc.setAttr(inputAttr2,inputAttr2Value)
 	else:
 		mc.setAttr(combineNode+'.'+combineAttr2,inputAttr2Value)
-	
+
 	# Connect to target attribute
 	mc.connectAttr(combineNode+'.output',targetAttr,f=True)
-	
+
 	# Connect blend attribute
 	if combineMode == 'blend' and blendAttr:
 		# Check blend attribute
@@ -167,7 +167,7 @@ def combineSingleAttrConnections(targetAttr,inputAttr1='',inputAttr2='',inputAtt
 			mc.addAttr(blendAttrName[0],ln=blendAttrName[1],at='float',min=0,max=1,dv=0)
 			mc.setAttr(blendAttr,k=True)
 		mc.connectAttr(blendAttr,blendNode+'.attributesBlender',f=True)
-	
+
 	# Return result
 	return combineNode
 
@@ -190,11 +190,11 @@ def replace(original,new,inputs=True,outputs=True):
 	# Check new
 	if not mc.objExists(new): raise Exception('Object "'+new+'" does not exist!!')
 	newAttr = bool(new.count('.'))
-	
+
 	# Check argument types
 	if origAttr != newAttr: raise Exception('Specify 2 nodes or node attributes! Cannot mix nodes and attributes!!')
 	asAttr = origAttr
-	
+
 	# INPUTS
 	if inputs:
 		if asAttr:
@@ -213,7 +213,7 @@ def replace(original,new,inputs=True,outputs=True):
 					try: mc.connectAttr(inputList[(i*2)+1],newDest,f=True)
 					except: raise Exception('FAILED: '+inputList[(i*2)+1]+' -> '+newDest+'!')
 					else: print ('Connected: '+inputList[(i*2)+1]+' -> '+newDest)
-	
+
 	# OUTPUTS
 	if outputs:
 		if asAttr:
@@ -239,48 +239,48 @@ def swap(node1,node2):
 	# ========================
 	# - Get Node Connections -
 	# ========================
-	
+
 	node1conn_src = mc.listConnections(node1,s=True,d=False,p=True,c=True,sh=True) or []
 	node1conn_dst = mc.listConnections(node1,s=False,d=True,p=True,c=True,sh=True) or []
 	node2conn_src = mc.listConnections(node2,s=True,d=False,p=True,c=True,sh=True) or []
 	node2conn_dst = mc.listConnections(node2,s=False,d=True,p=True,c=True,sh=True) or []
-	
+
 	# ====================
 	# - Disconnect Attrs -
 	# ====================
-	
+
 	# Disconnect Node 1 Source
 	for i in range(0,len(node1conn_src),2):
 		try: mc.disconnectAttr(node1conn_src[i+1],node1conn_src[i])
 		except: print ('FAILED: '+node1conn_src[i+1]+' X '+node1conn_src[i]+'!')
 		else: print ('Disconnected: '+node1conn_src[i+1]+' X '+node1conn_src[i]+'!')
-	
+
 	# Disconnect Node 1 Destination
 	for i in range(0,len(node1conn_dst),2):
 		try: mc.disconnectAttr(node1conn_dst[i],node1conn_dst[i+1])
 		except: print ('FAILED: '+node1conn_dst[i]+' X '+node1conn_dst[i+1]+'!')
 		else: print ('Disconnected: '+node1conn_dst[i]+' X '+node1conn_dst[i+1]+'!')
-		
+
 	# -
-	
+
 	# Disconnect Node 2 Source
 	for i in range(0,len(node2conn_src),2):
 		try: mc.disconnectAttr(node2conn_src[i+1],node2conn_src[i])
 		except: print ('FAILED: '+node2conn_src[i+1]+' X '+node2conn_src[i]+'!')
 		else: print ('Disconnected: '+node2conn_src[i+1]+' X '+node2conn_src[i]+'!')
-	
+
 	# Disconnect Node 2 Destination
 	for i in range(0,len(node2conn_dst),2):
 		try: mc.disconnectAttr(node2conn_dst[i],node2conn_dst[i+1])
 		except: print ('FAILED: '+node2conn_dst[i]+' X '+node2conn_dst[i+1]+'!')
 		else: print ('Disconnected: '+node2conn_dst[i]+' X '+node2conn_dst[i+1]+'!')
-	
+
 	# =================
 	# - Connect Attrs -
 	# =================
-	
+
 	# - Connect Node 1 ---
-	
+
 	# Connect Node 1 Source
 	for i in range(0,len(node1conn_src),2):
 		dst = node1conn_src[i].replace(node1,node2)
@@ -288,7 +288,7 @@ def swap(node1,node2):
 		try: mc.connectAttr(src,dst,f=True)
 		except: print ('FAILED: '+src+' -> '+dst+'!')
 		else: print ('Connected: '+src+' -> '+dst+'...')
-	
+
 	# Connect Node 1 Destination
 	for i in range(0,len(node1conn_dst),2):
 		src = node1conn_dst[i].replace(node1,node2)
@@ -296,9 +296,9 @@ def swap(node1,node2):
 		try: mc.connectAttr(src,dst,f=True)
 		except: print ('FAILED: '+src+' -> '+dst+'!')
 		else: print ('Connected: '+src+' -> '+dst+'...')
-	
+
 	# - Connect Node 2 ---
-	
+
 	# Connect Node 2 Source
 	for i in range(0,len(node2conn_src),2):
 		dst = node2conn_src[i].replace(node2,node1)
@@ -306,7 +306,7 @@ def swap(node1,node2):
 		try: mc.connectAttr(src,dst,f=True)
 		except: print ('FAILED: '+src+' -> '+dst+'!')
 		else: print ('Connected: '+src+' -> '+dst+'...')
-	
+
 	# Connect Node 2 Destination
 	for i in range(0,len(node2conn_dst),2):
 		src = node2conn_dst[i].replace(node2,node1)
@@ -314,9 +314,9 @@ def swap(node1,node2):
 		try: mc.connectAttr(src,dst,f=True)
 		except: print ('FAILED: '+src+' -> '+dst+'!')
 		else: print ('Connected: '+src+' -> '+dst+'...')
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return

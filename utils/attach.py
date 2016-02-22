@@ -41,7 +41,7 @@ def attachToCurve(	curve,
 	@type upType: string
 	@param upObject: Object whose local space will be used to calculate the orient upVector
 	@type upObject: str
-	@param uAttr: Attribute name on the constrained transform that will be connected to the target curve U parameter. 
+	@param uAttr: Attribute name on the constrained transform that will be connected to the target curve U parameter.
 	@type uAttr: str
 	@param prefix: Name prefix for created nodes
 	@type prefix: str
@@ -49,21 +49,21 @@ def attachToCurve(	curve,
 	# ===========================
 	# - Build Data Dictionaries -
 	# ===========================
-	
+
 	# Build axis dictionary
 	axisDict = {'x':(1,0,0),'y':(0,1,0),'z':(0,0,1),'-x':(-1,0,0),'-y':(0,-1,0),'-z':(0,0,-1)}
-	
+
 	# Build upType dictionary
 	upTypeDict = {'scene':0, 'object':1, 'objectUp':2, 'vector':3, 'none': 4}
-	
+
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Check curve
 	if not glTools.utils.curve.isCurve(curve):
 		raise Exception('Object '+curve+' is not a valid curve!!')
-	
+
 	# Check curve shape
 	curveShape=''
 	if mc.objectType(curve) == 'transform':
@@ -71,88 +71,88 @@ def attachToCurve(	curve,
 	else:
 		curveShape = curve
 		curve = mc.listRelatives(curve,p=1)[0]
-	
+
 	# Check uValue
 	minu = mc.getAttr(curve+'.minValue')
 	maxu = mc.getAttr(curve+'.maxValue')
 	if not useClosestPoint:
 		if uValue < minu or uValue > maxu:
 			raise Exception('U paramater '+str(uValue)+' is not within the parameter range for '+curve+'!!')
-	
+
 	# Check object
 	if not mc.objExists(transform): raise Exception('Object '+transform+' does not exist!!')
 	if not glTools.utils.transform.isTransform(transform): raise Exception('Object '+transform+' is not a valid transform!!')
-	
+
 	# Check constraint axis'
 	if not axisDict.has_key(tangentAxis):
 		raise Exception('Invalid tangent axis "'+tangentAxis+'"!')
 	if not axisDict.has_key(upAxis):
 		raise Exception('Invalid up axis "'+upAxis+'"!')
-	
+
 	# Check constraint upType
 	if not upTypeDict.has_key(upType):
 		raise Exception('Invalid upVector type "'+upType+'"!')
-	
+
 	# Check worldUp object
 	if upObject:
 		if not mc.objExists(upObject): raise Exception('WorldUp object '+upObject+' does not exist!!')
 		if not glTools.utils.transform.isTransform(upObject): raise Exception('WorldUp object '+upObject+' is not a valid transform!!')
-	
+
 	# Check prefix
 	if not prefix: prefix = glTools.utils.stringUtils.stripSuffix(transform)
-	
+
 	# ===================
 	# - Attach to Curve -
 	# ===================
-	
+
 	# Get closest curve point
 	if useClosestPoint:
 		uPos = mc.xform(transform,q=True,ws=True,rp=True)
 		uValue = glTools.utils.curve.closestPoint(curve,uPos)
-	
+
 	# Add U parameter attribute
 	if not mc.objExists(transform+'.'+uAttr):
 		mc.addAttr(transform,ln=uAttr,at='float',min=minu,max=maxu,dv=uValue,k=True)
 	else:
 		try: mc.setAttr(transform+'.'+uAttr,uValue)
 		except: print('Unable to set existing attr "'+transform+'.'+uAttr+'" to specified value ('+str(uValue)+')!')
-	
+
 	# Create pointOnCurveInfo node
 	poc = prefix+'_pointOnCurveInfo'
 	poc = mc.createNode('pointOnCurveInfo',n=poc)
-	
+
 	# Attach pointOnCurveInfo node
 	mc.connectAttr(curve+'.worldSpace[0]',poc+'.inputCurve',f=True)
 	mc.connectAttr(transform+'.'+uAttr,poc+'.parameter',f=True)
-	
+
 	# Create pointConstraint node
 	pntCon = mc.createNode('pointConstraint',n=prefix+'_pointConstraint')
-	
+
 	# Attach pointConstraint node
 	mc.connectAttr(poc+'.position',pntCon+'.target[0].targetTranslate',f=True)
 	mc.connectAttr(transform+'.parentInverseMatrix[0]',pntCon+'.constraintParentInverseMatrix',f=True)
 	mc.connectAttr(transform+'.rotatePivot',pntCon+'.constraintRotatePivot',f=True)
 	mc.connectAttr(transform+'.rotatePivotTranslate',pntCon+'.constraintRotateTranslate',f=True)
-	
+
 	# Attach to constrained transform
 	mc.connectAttr(pntCon+'.constraintTranslateX',transform+'.tx',f=True)
 	mc.connectAttr(pntCon+'.constraintTranslateY',transform+'.ty',f=True)
 	mc.connectAttr(pntCon+'.constraintTranslateZ',transform+'.tz',f=True)
-	
+
 	# Parent constraint node
 	mc.parent(pntCon,transform)
-	
+
 	# ==========
 	# - Orient -
 	# ==========
-	
+
 	aimCon = ''
 	if orient:
-		
+
 		# Create aimConstraint node
 		aimCon = prefix+'aimConstraint'
 		aimCon = mc.createNode('aimConstraint',n=aimCon)
-		
+
 		# Attach aimConstraint node
 		mc.connectAttr(poc+'.tangent',aimCon+'.target[0].targetTranslate',f=True)
 		mc.setAttr(aimCon+'.aimVector',*axisDict[tangentAxis])
@@ -160,15 +160,15 @@ def attachToCurve(	curve,
 		mc.setAttr(aimCon+'.worldUpVector',*upVector)
 		mc.setAttr(aimCon+'.worldUpType',upTypeDict[upType])
 		if upObject: mc.connectAttr(upObject+'.worldMatrix[0]',aimCon+'.worldUpMatrix',f=True)
-		
+
 		# Attach to constrained transform
 		mc.connectAttr(aimCon+'.constraintRotateX',transform+'.rx',f=True)
 		mc.connectAttr(aimCon+'.constraintRotateY',transform+'.ry',f=True)
 		mc.connectAttr(aimCon+'.constraintRotateZ',transform+'.rz',f=True)
-		
+
 		# Parent constraint node
 		mc.parent(aimCon,transform)
-	
+
 	# Return result
 	return [poc,pntCon,aimCon]
 
@@ -201,37 +201,37 @@ def attachToMesh(	mesh,
 	'''
 	# Create axis value dictionary
 	axis = {'x':(1,0,0),'y':(0,1,0),'z':(0,0,1),'-x':(-1,0,0),'-y':(0,-1,0),'-z':(0,0,-1)}
-	
+
 	# Check mesh
 	if not glTools.utils.mesh.isMesh(mesh): raise Exception('Object '+mesh+' is not a valid mesh!!')
-	
+
 	# Check transform
 	if not mc.objExists(transform): raise Exception('Object '+transform+' does not exist!!')
 	if not glTools.utils.transform.isTransform(transform): raise Exception('Object '+transform+' is not a valid transform!!')
 	pos = mc.xform(transform,q=True,ws=True,rp=True)
-	
+
 	# Check prefix
 	if not prefix: prefix = glTools.utils.stringUtils.stripSuffix(transform)
-	
+
 	# Create int pointer for mesh iter classes
 	indexUtil = OpenMaya.MScriptUtil()
 	indexUtil.createFromInt(0)
 	indexUtilPtr = indexUtil.asIntPtr()
-	
+
 	# Check closest face
 	if useClosestPoint: faceId = glTools.utils.mesh.closestFace(mesh,pos)
-	
+
 	# Get MItMeshPolygon
 	faceIter = glTools.utils.mesh.getMeshFaceIter(mesh)
-	
+
 	# Get face
 	faceIter.setIndex(faceId,indexUtilPtr)
-	
+
 	# Get face edge list
 	edgeIntList = OpenMaya.MIntArray()
 	faceIter.getEdges(edgeIntList)
 	edgeList = list(edgeIntList)
-	
+
 	# Get opposing edges
 	edgeIter = glTools.utils.mesh.getMeshEdgeIter(mesh)
 	edge1 = edgeList[0]
@@ -246,10 +246,10 @@ def attachToMesh(	mesh,
 		if eDist > dist:
 			edge2 = i
 			dist = eDist
-	
+
 	# Check opposing edge
 	if not (edge2+1): raise Exception('Unable to determine opposing face edges!!')
-	
+
 	# Create mesh edge loft
 	edge1_cme = prefix+'_edge01_curveFromMeshEdge'
 	edge1_cme = mc.createNode('curveFromMeshEdge',n=edge1_cme)
@@ -264,7 +264,7 @@ def attachToMesh(	mesh,
 	mc.connectAttr(edge1_cme+'.outputCurve',mesh_lft+'.inputCurve[0]',f=True)
 	mc.connectAttr(edge2_cme+'.outputCurve',mesh_lft+'.inputCurve[1]',f=True)
 	mc.setAttr(mesh_lft+'.degree',1)
-	
+
 	# Create temporary surface
 	tempSrf = mc.createNode('nurbsSurface')
 	mc.connectAttr(mesh_lft+'.outputSurface',tempSrf+'.create')
@@ -276,12 +276,12 @@ def attachToMesh(	mesh,
 	if len(tangentAxis)==2: offsetVal = 90.0
 	offsetAx = str.upper(tangentAxis[-1])
 	mc.setAttr(surfAttach[2]+'.offset'+offsetAx,offsetVal)
-	
+
 	# Bypass temporary nurbsSurface node
 	mc.connectAttr(mesh_lft+'.outputSurface',surfAttach[0]+'.inputSurface',f=True)
 	# Delete temporary surface
 	mc.delete(tempSrf)
-	
+
 	# Return result
 	return (surfAttach[0],surfAttach[1],surfAttach[2],mesh_lft,edge1_cme,edge2_cme)
 
@@ -326,7 +326,7 @@ def attachToSurface(	surface,
 	'''
 	# Create axis value dictionary
 	axis = {'x':(1,0,0),'y':(0,1,0),'z':(0,0,1),'-x':(-1,0,0),'-y':(0,-1,0),'-z':(0,0,-1)}
-	
+
 	# Check surface
 	if not glTools.utils.surface.isSurface(surface):
 		raise Exception('Surface '+surface+' is not a valid nurbsSurface!!')
@@ -337,7 +337,7 @@ def attachToSurface(	surface,
 	else:
 		surfaceShape = surface
 		surface = mc.listRelatives(surface,p=1)[0]
-	
+
 	# Check uValue
 	minu = mc.getAttr(surface+'.minValueU')
 	maxu = mc.getAttr(surface+'.maxValueU')
@@ -346,35 +346,35 @@ def attachToSurface(	surface,
 	if not useClosestPoint:
 		if uValue < minu or uValue > maxu: raise Exception('U paramater '+str(uValue)+' is not within the parameter range for '+surface+'!!')
 		if vValue < minv or vValue > maxv: raise Exception('V paramater '+str(vValue)+' is not within the parameter range for '+surface+'!!')
-	
+
 	# Check transform
 	if not mc.objExists(transform): raise Exception('Object '+transform+' does not exist!!')
 	if not glTools.utils.transform.isTransform(transform): raise Exception('Object '+transform+' is not a valid transform!!')
 	# Check closest point
-	if useClosestPoint: 
+	if useClosestPoint:
 		uv = glTools.utils.surface.closestPoint(surface,mc.xform(transform,q=True,ws=True,rp=True))
 		uValue = uv[0]
 		vValue = uv[1]
-	
+
 	# Check prefix
 	if not prefix: prefix = glTools.utils.stringUtils.stripSuffix(transform)
-	
+
 	# Attach to surface
 	# ==
-	
+
 	# Add parameter attributes
 	if not mc.objExists(transform+'.'+uAttr):
 		mc.addAttr(transform,ln=uAttr,at='float',min=minu,max=maxu,dv=uValue,k=True)
 	if not mc.objExists(transform+'.'+vAttr):
 		mc.addAttr(transform,ln=vAttr,at='float',min=minv,max=maxv,dv=vValue,k=True)
-	
+
 	# Create pointOnSurfaceInfo node
 	pos = mc.createNode('pointOnSurfaceInfo',n=prefix+'_pointOnSurfaceInfo')
 	# Attach pointOnSurfaceInfo node
 	mc.connectAttr(surface+'.worldSpace[0]',pos+'.inputSurface',f=True)
 	mc.connectAttr(transform+'.'+uAttr,pos+'.parameterU',f=True)
 	mc.connectAttr(transform+'.'+vAttr,pos+'.parameterV',f=True)
-	
+
 	# Create pointConstraint node
 	pntCon = mc.createNode('pointConstraint',n=prefix+'_pointConstraint')
 	# Attach pointConstraint node
@@ -386,7 +386,7 @@ def attachToSurface(	surface,
 	mc.connectAttr(pntCon+'.constraintTranslateY',transform+'.ty',f=True)
 	mc.connectAttr(pntCon+'.constraintTranslateZ',transform+'.tz',f=True)
 	mc.parent(pntCon,transform)
-	
+
 	# Orient
 	aimCon = ''
 	if orient:
@@ -410,6 +410,6 @@ def attachToSurface(	surface,
 		mc.connectAttr(aimCon+'.constraintRotateY',transform+'.ry',f=True)
 		mc.connectAttr(aimCon+'.constraintRotateZ',transform+'.rz',f=True)
 		mc.parent(aimCon,transform)
-	
+
 	# Return result
 	return [pos,pntCon,aimCon]

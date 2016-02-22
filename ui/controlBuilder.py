@@ -37,20 +37,20 @@ def controlBuilderFromUI(close=True):
 	# Window
 	window = 'controlBuilderUI'
 	if not mc.window(window,q=True,ex=1): raise UIError('Control Builder UI does not exist!!')
-	
+
 	# Get UI data
 	cName = mc.textFieldGrp('controlNameTFG',q=True,text=True)
 	cType = mc.optionMenuGrp('controlTypeOMG',q=True,v=True)
 	cType = str.lower(str(cType[0]))+cType[1:]
 	cBuffer = mc.checkBoxGrp('controlBufferCBG',q=True,v1=True)
-	
+
 	# Get Active Selection
 	tSel = []
 	sel = mc.ls(sl=1)
 	for obj in sel:
 		if glTools.utils.transform.isTransform(obj):
 			tSel.append(obj)
-	
+
 	# Execute
 	if tSel:
 		for obj in tSel:
@@ -60,6 +60,6 @@ def controlBuilderFromUI(close=True):
 		# Buffer
 		if cBuffer:
 			glTools.utils.base.group(ctrl,groupType=1,center=1,orient=1)
-	
+
 	# Cleanup
 	if close: mc.deleteUI(window)

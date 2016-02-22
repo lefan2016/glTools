@@ -14,13 +14,13 @@ def checkTemplateElements(template):
 	# =================================
 	# - Check Template Elements Exist -
 	# =================================
-	
+
 	for key in template.iterkeys():
-		
+
 		# Get template component list
 		templateList = template[key]
 		for item in templateList:
-			
+
 			# Check template item exists
 			if not mc.objExists(item):
 				raise Exception('Template component "'+str(key)+'" item "'+item+'" does not exist!')
@@ -43,15 +43,15 @@ def checkJointAxis(joint,axis='x',vector='x',warnThreshold=0.5,errorThreshold=0.
 	# Check Joint
 	if not mc.objExists(joint):
 		raise Exception('Joint "'+joint+'" does not exist!')
-	
+
 	# Get Joint Axis as World Vector
 	axisVec = glTools.utils.transform.axisVector(joint,axis,normalize=True)
 	# Get Camparison World Vector
 	refVec = glTools.utils.lib.axis_dict()[vector]
-	
+
 	# Compare Vectors
 	dot = glTools.utils.mathUtils.dotProduct(axisVec,refVec)
-	
+
 	# Check Thresholds
 	if dot < errorThreshold:
 		print ('Template Check ERROR: Joint "'+joint+'" axis "'+axis+'" is below the maximum comparison threshold to its target world vector ('+str(refVec)+')!')
@@ -69,10 +69,10 @@ def checkZeroJointOrient(joint,fix=False):
 	# Check Joint Orient
 	jointOri = mc.getAttr(joint+'.jo')
 	if (jointOri[0] + jointOri[1] + jointOri[2]) > 0.001:
-		
+
 		# Print Warning
 		print('Template Check Warning: Joint "'+joint+'" has non zero joint orients! ('str(jointOri[0])'+'str(jointOri[1])'+'str(jointOri[2])')')
-		
+
 		# Zero Joint Orient
 		if fix:
 			mc.setAttr(joint+'.jo',0,0,0)
@@ -90,7 +90,7 @@ def checkInverseScaleConnection(joint,fix=False):
 	parentJoint = mc.listRelatives(joint,p=True)
 	if not parentJoint: return
 	if not mc.objectType(parentJoint[0]) == 'joint': return
-	
+
 	# Get Existing Inverse Scale Connection
 	invScalConn = mc.listConnections(joint+'.inverseScale',s=True,d=False)
 	if not invScalConn: invScalConn = []
@@ -113,14 +113,14 @@ def checkJointTranslation(joint,offsetAxis='',ignoreMultipleSibling=False):
 	if not mc.objectType(parentJoint[0]) == 'joint':
 		print('Template Check: Parent transform ("'+parentJoint[0]+'") of joint ("'+joint+'") is not a joint! Offset axis is being ignored for translation check.')
 		offsetAxis=''
-	
+
 	# Get List of Joint Siblings
 	jointSiblings = mc.ls(mc.listRelatives(parentJoint[0],c=True,pa=True),type='joint')
 	jointSiblings.remove(joint)
 	if jointSiblings and ignoreMultipleSibling:
 		print('Template Check: Joint ("'+joint+'") has one or more joint siblings! Joint translation is expected for joints with siblings. Skipping check...')
 		return
-	
+
 	# Check Joint Translation
 	tSum = 0
 	t = mc.getAttr(joint+'.t')[0]
@@ -136,7 +136,7 @@ def checkBipedTemplate(fix=False):
 	# ============================
 	# - Define Template Elements -
 	# ============================
-	
+
 	template = {}
 	template['body'] = ['cn_bodyA_jnt','cn_bodyEnd_jnt']
 	template['spine'] = ['cn_spineA_jnt','cn_spineB_jnt','cn_spineC_jnt','cn_spineEnd_jnt']
@@ -164,37 +164,37 @@ def checkBipedTemplate(fix=False):
 	template['rt_foot'] = ['rt_footA_jnt','rt_footB_jnt','rt_footEnd_jnt']
 	template['lf_foot_loc'] = ['lf_foot_loc', 'lf_heel_loc', 'lf_toe_loc', 'lf_footInner_loc', 'lf_footOuter_loc']
 	template['rt_foot_loc'] = ['rt_foot_loc', 'rt_heel_loc', 'rt_toe_loc', 'rt_footInner_loc', 'rt_footOuter_loc']
-	
+
 	# =================================
 	# - Check Template Elements Exist -
 	# =================================
-	
+
 	checkTemplateElements(template)
-	
+
 	# =======================
 	# - Check Joint Orients -
 	# =======================
-	
+
 	# Body
 	for joint in template['body'][:-1]:
 		checkJointAxis(joint=joint,axis='z',vector='z',warnThreshold=0.999,errorThreshold=0.9)
 		checkJointAxis(joint=joint,axis='y',vector='y',warnThreshold=0.999,errorThreshold=0.9)
-	
+
 	# Spine
 	for joint in template['spine'][:-1]:
 		checkJointAxis(joint=joint,axis='z',vector='x',warnThreshold=0.999,errorThreshold=0.9)
 		checkJointAxis(joint=joint,axis='x',vector='y',warnThreshold=0.8,errorThreshold=0.5)
-	
+
 	# Neck
 	for joint in template['neck'][:-1]:
 		checkJointAxis(joint=joint,axis='z',vector='x',warnThreshold=0.999,errorThreshold=0.9)
 		checkJointAxis(joint=joint,axis='x',vector='y',warnThreshold=0.5,errorThreshold=0.0)
-	
+
 	# Head
 	for joint in template['head'][:-1]:
 		checkJointAxis(joint=joint,axis='z',vector='x',warnThreshold=0.999,errorThreshold=0.9)
 		checkJointAxis(joint=joint,axis='x',vector='y',warnThreshold=0.8,errorThreshold=0.5)
-	
+
 	# Clavicles
 	for joint in template['lf_clav'][:-1]:
 		checkJointAxis(joint=joint,axis='x',vector='x',warnThreshold=0.75,errorThreshold=0.25)
@@ -202,7 +202,7 @@ def checkBipedTemplate(fix=False):
 	for joint in template['rt_clav'][:-1]:
 		checkJointAxis(joint=joint,axis='x',vector='x',warnThreshold=0.75,errorThreshold=0.25)
 		checkJointAxis(joint=joint,axis='z',vector='y',warnThreshold=0.9,errorThreshold=0.8)
-	
+
 	# Arms
 	for joint in template['lf_arm'][:-1]:
 		checkJointAxis(joint=joint,axis='x',vector='x',warnThreshold=0.75,errorThreshold=0.25)
@@ -210,7 +210,7 @@ def checkBipedTemplate(fix=False):
 	for joint in template['rt_arm'][:-1]:
 		checkJointAxis(joint=joint,axis='x',vector='x',warnThreshold=0.75,errorThreshold=0.25)
 		checkJointAxis(joint=joint,axis='z',vector='y',warnThreshold=0.9,errorThreshold=0.8)
-	
+
 	# Legs
 	for joint in template['lf_leg'][:-1]:
 		checkJointAxis(joint=joint,axis='x',vector='-y',warnThreshold=0.75,errorThreshold=0.5)
@@ -218,7 +218,7 @@ def checkBipedTemplate(fix=False):
 	for joint in template['rt_leg'][:-1]:
 		checkJointAxis(joint=joint,axis='x',vector='y',warnThreshold=0.75,errorThreshold=0.5)
 		checkJointAxis(joint=joint,axis='z',vector='x',warnThreshold=0.9,errorThreshold=0.8)
-	
+
 	# Feet
 	for joint in template['lf_foot'][:-1]:
 		checkJointAxis(joint=joint,axis='x',vector='z',warnThreshold=0.75,errorThreshold=0.25)
@@ -226,7 +226,7 @@ def checkBipedTemplate(fix=False):
 	for joint in template['rt_foot'][:-1]:
 		checkJointAxis(joint=joint,axis='x',vector='-z',warnThreshold=0.75,errorThreshold=0.25)
 		checkJointAxis(joint=joint,axis='z',vector='x',warnThreshold=0.9,errorThreshold=0.8)
-	
+
 	# Hands
 	for joint in template['lf_hand']:
 		checkJointAxis(joint=joint,axis='x',vector='x',warnThreshold=0.75,errorThreshold=0.25)
@@ -234,7 +234,7 @@ def checkBipedTemplate(fix=False):
 	for joint in template['rt_hand']:
 		checkJointAxis(joint=joint,axis='x',vector='x',warnThreshold=0.75,errorThreshold=0.25)
 		checkJointAxis(joint=joint,axis='z',vector='y',warnThreshold=0.9,errorThreshold=0.8)
-	
+
 	# Fingers
 	lf_fingerList = template['lf_index'] + template['lf_middle'] + template['lf_ring'] + template['lf_pinky']
 	rt_fingerList = template['rt_index'] + template['rt_middle'] + template['rt_ring'] + template['rt_pinky']
@@ -250,34 +250,34 @@ def checkBipedTemplate(fix=False):
 	for joint in template['rt_thumb'][:-1]:
 		checkJointAxis(joint=joint,axis='x',vector='x',warnThreshold=0.25,errorThreshold=0.0)
 		checkJointAxis(joint=joint,axis='z',vector='y',warnThreshold=0.25,errorThreshold=0.0)
-	
+
 	# ==========================
 	# - Check Joint Properties -
 	# ==========================
-	
+
 	# For Each Joint
 	for joint in mc.ls(type='joint'):
-		
+
 		# ==========================
 		# - Zero End Joint Orients -
 		# ==========================
-		
+
 		# Check End Joint
 		if glTools.utils.joint.isEndJoint(joint):
-			
+
 			# Check Joint Orient
 			checkZeroJointOrient(joint,fix=fix)
-	
+
 		# ===================================
 		# - Check Inverse Scale Connections -
 		# ===================================
-		
+
 		checkInverseScaleConnection(joint,fix=fix)
-		
+
 		# ==========================
 		# - Check Joint Transforms -
 		# ==========================
-		
+
 		checkJointTranslation(joint,'x',ignoreMultipleSibling=True)
 
 def checkBoxtrollTemplate():
@@ -286,7 +286,7 @@ def checkBoxtrollTemplate():
 	# ============================
 	# - Define Template Elements -
 	# ============================
-	
+
 	template = {}
 	template['body'] = ['cn_bodyA_jnt','cn_bodyEnd_jnt']
 	template['box'] = ['cn_boxA_jnt','cn_boxEnd_jnt']
@@ -314,22 +314,22 @@ def checkBoxtrollTemplate():
 	template['rt_ear'] = ['rt_earA_jnt','rt_earB_jnt','rt_earEnd_jnt']
 	template['lf_foot_loc'] = ['lf_foot_loc', 'lf_heel_loc', 'lf_toe_loc', 'lf_footInner_loc', 'lf_footOuter_loc']
 	template['rt_foot_loc'] = ['rt_foot_loc', 'rt_heel_loc', 'rt_toe_loc', 'rt_footInner_loc', 'rt_footOuter_loc']
-	
+
 	# =================================
 	# - Check Template Elements Exist -
 	# =================================
-	
+
 	checkTemplateElements(template)
-	
+
 	# =======================
 	# - Check Joint Orients -
 	# =======================
-	
+
 		# Zero End Joint Orients
-	
+
 	# Check Inverse Scale Connections
-	
+
 	# Check Transforms
-	
+
 		# Translation in Single Axis for Lone Sibling
-	
+

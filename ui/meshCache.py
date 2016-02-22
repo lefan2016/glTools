@@ -7,18 +7,18 @@ def meshCacheUI():
 	'''
 	Main UI for the meshCache module
 	'''
-	# Get current frame range 
+	# Get current frame range
 	startFrame = mc.playbackOptions(q=True,min=True)
 	endFrame = mc.playbackOptions(q=True,max=True)
-	
+
 	# Window
 	window = 'meshCacheUI'
 	if mc.window(window,q=True,ex=True): mc.deleteUI(window)
 	window = mc.window(window,t='Export Mesh Cache',s=True)
-	
+
 	# Layout
 	CL = mc.columnLayout(adj=True)
-	
+
 	# UI Elements
 	pathTBG = mc.textFieldButtonGrp('meshCache_pathTBG',label='Path',buttonLabel='...')
 	nameTFG = mc.textFieldGrp('meshCache_nameTFG',label='Combine Cache Name',text='')
@@ -32,17 +32,17 @@ def meshCacheUI():
 	exportObjB = mc.button('meshCache_exportObjB',label='Export OBJ',c='glTools.ui.meshCache.exportObjFromUI()')
 	exportObjCombineB = mc.button('meshCache_exportObjCombineB',label='Export OBJ Combined',c='glTools.ui.meshCache.exportObjCombinedFromUI()')
 	closeB = mc.button('meshCache_closeB',label='Close',c='mc.deleteUI("'+window+'")')
-	
+
 	# UI Callbacks
 	mc.textFieldButtonGrp(pathTBG,e=True,bc='glTools.ui.utils.exportFolderBrowser("'+pathTBG+'")')
-	
+
 	# Show Window
 	mc.window(window,e=True,w=450,h=262)
 	mc.showWindow(window)
 
 def exportGeoFromUI():
 	'''
-	writeGeoCache from UI 
+	writeGeoCache from UI
 	'''
 	# Get UI info
 	path = mc.textFieldButtonGrp('meshCache_pathTBG',q=True,text=True)
@@ -52,22 +52,22 @@ def exportGeoFromUI():
 	uvSet = mc.textFieldGrp('meshCache_uvSetTFG',q=True,text=True)
 	worldSpace = bool(mc.radioButtonGrp('meshCache_spaceRBG',q=True,sl=True)-1)
 	gz = mc.checkBoxGrp('meshCache_gzipCBG',q=True,v1=True)
-	
+
 	# Check UV Set
 	if uvSet == 'default': uvSet = ''
-	
+
 	# Get selection
 	sel = [i for i in mc.ls(sl=True,fl=True,o=True) if glTools.utils.mesh.isMesh(i)]
 	if not sel:
 		print 'No valid mesh objects selected for export!!'
 		return
-	
+
 	# Export each mesh
 	for mesh in sel:
-		
+
 		# Generate file name
 		mesh_name = mesh.replace(':','_')
-		
+
 		# Export
 		glTools.tools.meshCache.writeGeoCache(path,mesh_name,mesh,start,end,pad,uvSet,worldSpace,gz)
 
@@ -84,21 +84,21 @@ def exportGeoCombinedFromUI():
 	uvSet = mc.textFieldGrp('meshCache_uvSetTFG',q=True,text=True)
 	worldSpace = bool(mc.radioButtonGrp('meshCache_spaceRBG',q=True,sl=True)-1)
 	gz = mc.checkBoxGrp('meshCache_gzipCBG',q=True,v1=True)
-	
+
 	# Check Name
 	if not name:
 		print 'Provide valid cache name and try again!'
 		return
-	
+
 	# Check UV Set
 	if uvSet == 'default': uvSet = ''
-	
+
 	# Get selection
 	sel = [i for i in mc.ls(sl=True,fl=True,o=True) if glTools.utils.mesh.isMesh(i)]
 	if not sel:
 		print 'No valid mesh objects selected for export!!'
 		return
-	
+
 	# Write Combine Cache
 	glTools.tools.meshCache.writeGeoCombineCache(path,name,sel,start,end,pad,uvSet,worldSpace,gz)
 
@@ -114,22 +114,22 @@ def exportObjFromUI():
 	uvSet = mc.textFieldGrp('meshCache_uvSetTFG',q=True,text=True)
 	worldSpace = bool(mc.radioButtonGrp('meshCache_spaceRBG',q=True,sl=True)-1)
 	gz = mc.checkBoxGrp('meshCache_gzipCBG',q=True,v1=True)
-	
+
 	# Check UV Set
 	if uvSet == 'default': uvSet = ''
-	
+
 	# Get selection
 	sel = [i for i in mc.ls(sl=True,fl=True,o=True) if glTools.utils.mesh.isMesh(i)]
 	if not sel:
 		print 'No valid mesh objects selected for export!!'
 		return
-	
+
 	# Export each mesh
 	for mesh in sel:
-		
+
 		# Generate file name
 		mesh_name = mesh.replace(':','_')
-		
+
 		# Export
 		glTools.tools.meshCache.writeObjCache(path,mesh_name,mesh,start,end,pad,uvSet,worldSpace,gz)
 
@@ -146,21 +146,21 @@ def exportObjCombinedFromUI():
 	uvSet = mc.textFieldGrp('meshCache_uvSetTFG',q=True,text=True)
 	worldSpace = bool(mc.radioButtonGrp('meshCache_spaceRBG',q=True,sl=True)-1)
 	gz = mc.checkBoxGrp('meshCache_gzipCBG',q=True,v1=True)
-	
+
 	# Check Name
 	if not name:
 		print 'Provide valid cache name and try again!'
 		return
-	
+
 	# Check UV Set
 	if uvSet == 'default': uvSet = None
-	
+
 	# Get selection
 	sel = [i for i in mc.ls(sl=True,fl=True,o=True) if glTools.utils.mesh.isMesh(i)]
 	if not sel:
 		print 'No valid mesh objects selected for export!!'
 		return
-	
+
 	# Write Combine Cache
 	glTools.tools.meshCache.writeObjCombineCache(path,name,sel,start,end,pad,uvSet,worldSpace,gz)
 

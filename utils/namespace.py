@@ -13,15 +13,15 @@ def getNS(obj,topOnly=True):
 	# Check Object
 	if not mc.objExists(obj):
 		raise Exception('Object "'+obj+'" does not exist!')
-	
+
 	# Check namespace
 	NS = ''
 	if not obj.count(':'): return NS
-	
+
 	# Get Namespace
 	if topOnly: NS = obj.split(':')[0]
 	else: NS = obj.replace(':'+obj.split(':')[-1],'')
-	
+
 	# Return namespace
 	return NS
 
@@ -41,12 +41,12 @@ def getNSList(objList,topOnly=True):
 		NS = getNS(obj,topOnly=topOnly)
 		if not NS in NSlist:
 			NSlist.append(NS)
-	
+
 	# Remove Duplicates (Done Above!)
 	#returnNSlist = []
 	#[returnNSlist.append(NS) for NS in NSlist if not NS in returnNSlist]
 	#NSlist = list(set(NSlist)) - Set does not return corrent order!
-	
+
 	# Return result
 	return NSlist
 
@@ -58,16 +58,16 @@ def getAllNS(excludeList=['UI','shared']):
 	'''
 	# Get all scene namespaces
 	nsList = mc.namespaceInfo(lon=True)
-	
+
 	# Remove exclude list items
 	[nsList.remove(ns) for ns in excludeList if nsList.count(ns)]
-	
+
 	# Return result
 	return nsList
 
 def resetNS():
 	'''
-	Reset to global namespace (':') 
+	Reset to global namespace (':')
 	'''
 	# Reset scene namespace
 	mc.namespace(set=':')
@@ -83,10 +83,10 @@ def deleteNS(NS):
 		raise Exception('Invalid namespace specified!')
 	if not mc.namespace(ex=NS):
 		raise Exception('Namespace "'+NS+'" does not exist!')
-	
+
 	# Print Message
 	print('Deleting Namespace: '+NS)
-	
+
 	# Delete namespace
 	mc.namespace(mv=[NS,':'],f=True)
 	mc.namespace(rm=NS)
@@ -102,16 +102,16 @@ def moveNS(srcNS,dstNS):
 	# Check NS
 	if not mc.namespace(exists=srcNS):
 		raise Exception('Source namespace "'+srcNS+'" does not exist!')
-	
+
 	# Check Destination NS
 	if not mc.namespace(exists=dstNS):
-		
+
 		# Create newNS
 		dstNS = mc.namespace(add=dstNS,f=True)
-		
+
 	# Move namespace
 	mc.namespace(mv=(srcNS,dstNS),f=True)
-	
+
 	# Return newNS
 	return newNS
 
@@ -130,11 +130,11 @@ def renameNS(NS,newNS,parentNS=None):
 		raise Exception('Namespace "'+NS+'" does not exist!')
 	if mc.namespace(exists=newNS):
 		raise Exception('Namespace "'+newNS+'" already exist!')
-	
+
 	# Rename NS
 	if not parentNS: mc.namespace(rename=[NS,newNS])
 	else: mc.namespace(rename=[NS,newNS],parent=parentNS)
-	
+
 	# Return newNS
 	return newNS
 
@@ -155,19 +155,19 @@ def getAllInNS(ns):
 	# Check namespace
 	if not mc.namespace(ex=ns):
 		raise Exception('Namespace "'+ns+'" does not exist!')
-	
+
 	# Get Current Namespace
 	currNS = mc.namespaceInfo(currentNamespace=True)
-	
+
 	# Set Namespace
 	mc.namespace(set=ns)
-	
+
 	# List all objects in namespace
 	nsNodeList = mc.namespaceInfo(lod=True,dagPath=True)
-	
+
 	# Reset Namespace
 	mc.namespace(set=currNS)
-	
+
 	# Return result
 	return nsNodeList
 
@@ -184,25 +184,25 @@ def addHierarchyToNS(root,NS,replaceNS=True):
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Check namespace
 	if not mc.namespace(ex=NS): mc.namespace(add=NS)
-	
+
 	# Check Hierarchy Root
 	if not mc.objExists(root):
 		raise Exception('Hierarchy root object "'+root+'" does not exist!')
-	
+
 	# ======================
 	# - Get Hierarchy List -
 	# ======================
-	
+
 	hier = mc.ls(mc.listRelatives(root,ad=True,pa=True),transforms=True)
 	hier.append(root)
-	
+
 	# ====================
 	# - Add to Namespace -
 	# ====================
-	
+
 	for i in range(len(hier)):
 		item = hier[i]
 		currNS = getNS(item,topOnly=False)
@@ -211,9 +211,9 @@ def addHierarchyToNS(root,NS,replaceNS=True):
 		else:
 			mc.rename(item,NS+':'+item)
 		hier[i] = item
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return hier

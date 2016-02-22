@@ -28,7 +28,7 @@ def objectsAreAligned(obj1,obj2,axis,tol=0.00001):
 	if not mc.objExists(obj2):
 		print('Object "'+obj2+'" does not exist! Returning False...')
 		return False
-	
+
 	# Get World Axis
 	if isinstance(axis,types.StringTypes):
 		if str(axis).lower() == 'x': axis = (1,0,0)
@@ -39,16 +39,16 @@ def objectsAreAligned(obj1,obj2,axis,tol=0.00001):
 			return False
 	# Normalize Axis Vector
 	axis = glTools.utils.mathUtils.normalizeVector(axis)
-	
+
 	# Get Object World Positions
 	pos1 = glTools.utils.base.getPosition(obj1)
 	pos2 = glTools.utils.base.getPosition(obj2)
-	
+
 	# Check Align Axis
 	alignAxis = glTools.utils.mathUtils.offsetVector(pos1,pos2)
 	alignAxis = glTools.utils.mathUtils.normalizeVector(alignAxis)
 	alignDot = abs(glTools.utils.mathUtils.dotProduct(axis,alignAxis))
-	
+
 	# Return Result
 	if (1.0-alignDot) > abs(tol): return False
 	else: return True
@@ -72,7 +72,7 @@ def axisIsAligned(obj,objAxis,axis,tol=0.00001):
 	if not glTools.utils.transform.isTransform(obj):
 		print('Object "'+obj+'" is not a valid transform! Returning False...')
 		return False
-	
+
 	# Get World Axis
 	if isinstance(axis,types.StringTypes):
 		if str(axis).lower() == 'x': axis = (1,0,0)
@@ -86,7 +86,7 @@ def axisIsAligned(obj,objAxis,axis,tol=0.00001):
 			return False
 	# Normalize World Axis Vector
 	axis = glTools.utils.mathUtils.normalizeVector(axis)
-	
+
 	# Get Transform Axis
 	if isinstance(objAxis,types.StringTypes):
 		if str(objAxis).lower() == 'x': objAxis = (1,0,0)
@@ -98,17 +98,17 @@ def axisIsAligned(obj,objAxis,axis,tol=0.00001):
 		else:
 			print('Invalid axis value! Returning False...')
 			return False
-	
+
 	# Transform Axis to World Space
 	objMatrix = glTools.utils.matrix.getMatrix(obj)
 	objAxis = glTools.utils.matrix.vectorMatrixMultiply(objAxis,objMatrix)
-	
+
 	# Normalize Transform Axis Vector
 	objAxis = glTools.utils.mathUtils.normalizeVector(objAxis)
-	
+
 	# Check Axis Alignment
 	alignDot = glTools.utils.mathUtils.dotProduct(axis,objAxis)
-	
+
 	# Return Result
 	if (1.0-alignDot) > abs(tol): return False
 	else: return True
@@ -128,13 +128,13 @@ def inverseScaleConnected(joint,connectedTo=None):
 	if not glTools.utils.joint.isJoint(joint):
 		print('Object "'+joint+'" is not a valid joint! Returning False...')
 		return False
-	
+
 	# Check Inv Scale Connection
 	invScaleConn = mc.listConnections(joint+'.inverseScale',s=True,d=False,p=True) or []
 	if not invScaleConn: return False
 	invScaleConn = mc.ls(invScaleConn[0])[0]
 	invScaleObj = mc.ls(invScaleConn[0],o=True)[0]
-	
+
 	# Check Connection Source
 	if connectedTo:
 		if not mc.objExists(connectedTo):
@@ -146,7 +146,7 @@ def inverseScaleConnected(joint,connectedTo=None):
 		else:
 			# Check As Object
 			if not connectedTo == invScaleObj: return False
-	
+
 	# Return Result
 	return True
 
@@ -162,24 +162,24 @@ def attrsAtDefault(obj,attrList=None,tol=0.000001):
 	if not mc.objExists(obj):
 		print('Object "'+obj+'" does not exist! Returning False...')
 		return False
-	
+
 	# Check Attribute List
 	if not attrList:
 		attrList = []
 		attrList += mc.listAttr(obj,k=True) or []
 		attrList += mc.listAttr(obj,cb=True) or []
-	
+
 	# Get List of User Defined Attributes
 	udAttrList = [mc.attributeName(obj+'.'+at,s=True) for at in mc.listAttr(obj,ud=True) or []]
-	
+
 	# Check Attribute Values
 	for at in attrList:
-		
+
 		# Check Attribute Exists
 		if not mc.attributeQuery(at,n=obj,ex=True):
 			print('Object attribute "'+obj+'.'+at+'" not found!')
 			continue
-		
+
 		# Check Value
 		attr = mc.attributeName(obj+'.'+at,s=True)
 		if attr in ['tx','ty','tz','rx','ry','rz']:
@@ -196,11 +196,11 @@ def attrsAtDefault(obj,attrList=None,tol=0.000001):
 				defVal = mc.addAttr(obj+'.'+attr,q=True,dv=True)
 				if abs(defVal - mc.getAttr(obj+'.'+attr)) > tol:
 					return False
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return True
 
 def childJointOffset():

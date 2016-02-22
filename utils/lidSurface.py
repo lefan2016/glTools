@@ -37,32 +37,32 @@ def lidSurface_create(curveList,spans=4,attributeObject='',collisionObject='',si
 	topAttr = 'topLid'
 	lowAttr = 'lowLid'
 	splitAttr = 'lidCentre'
-	
+
 	# NameUtil
 	nameUtil = glTools.tools.namingConvention.NamingConvention()
 	# Check prefix
 	if not prefix: prefix = nameUtil.stripSuffix(crvList[0],'_')
 	# Check side
 	if not side: side = prefix.split('_')[0]
-	
+
 	# Check curveList
 	for crv in curveList:
 		if not mc.objExists(crv):
 			raise UserInputError('Curve "'+crv+'" does not exist!')
 		if not glTools.utils.curve.isCurve(crv):
 			raise UserInputError('Object "'+crv+'" is not a valid nurbs curve!')
-	
+
 	# Create lidSurface node
 	lidSurface = prefix+'_lidSurface'
 	lidSurface = mc.createNode('lidSurface',n=lidSurface)
-	
+
 	# Set spans
 	mc.setAttr(lidSurface+'.spans',spans)
-	
+
 	# Connect curevList
 	for i in range(len(curveList)):
 		mc.connectAttr(curveList[i]+'.worldSpace',lidSurface+'.inputCurve['+str(i)+']',f=True)
-	
+
 	# Check Attribute Object
 	if mc.objExists(attributeObject):
 		# Check attributes
@@ -76,23 +76,23 @@ def lidSurface_create(curveList,spans=4,attributeObject='',collisionObject='',si
 		mc.connectAttr(attributeObject+'.'+topAttr,lidSurface+'.top',f=True)
 		mc.connectAttr(attributeObject+'.'+lowAttr,lidSurface+'.bottom',f=True)
 		mc.connectAttr(attributeObject+'.'+splitAttr,lidSurface+'.split',f=True)
-	
+
 	# Check Collision Object
 	if mc.objExists(collisionObject):
 		if not glTools.utils.surface.isSurface(collisionObject):
 			raise UserInputError('Collision object "'+crv+'" is not a valid nurbs surface!')
 		mc.connectAttr(collisionObject+'.worldSpace',lidSurface+'.collisionGeometry',f=True)
-	
+
 	# Create lid surfaces
 	topLid_srf = prefix+'_tp01_surface'
 	topLid_srf = mc.nurbsPlane(ch=0,n=topLid_srf)[0]
 	lowLid_srf = prefix+'_lw01_surface'
 	lowLid_srf = mc.nurbsPlane(ch=0,n=lowLid_srf)[0]
-	
+
 	# Attach lid surfaces
 	mc.connectAttr(lidSurface+'.topLidSurface',topLid_srf+'.create',f=True)
 	mc.connectAttr(lidSurface+'.lowLidSurface',lowLid_srf+'.create',f=True)
-	
+
 	# Return result
 	return (topLid_srf,lowLid_srf)
 
@@ -109,12 +109,12 @@ def setup_threeCtrl(lf_lidrails,rt_lidrails):
 	lf_dn = ['lf_lid01_dn01_ccc','lf_lid01_dn02_ccc','lf_lid01_dn03_ccc']
 	rt_up = ['rt_lid01_tp01_ccc','rt_lid01_tp02_ccc','rt_lid01_tp03_ccc']
 	rt_dn = ['rt_lid01_dn01_ccc','rt_lid01_dn02_ccc','rt_lid01_dn03_ccc']
-	
+
 	# Connect lidRails ramps to lid profile controls
-	
+
 	#========
 	# lf_up
-	
+
 	# inner
 	mc.connectAttr(lf_up[0]+'.tx',lf_lidrails+'.offsettop[0].offsettop_Position',f=True)
 	mc.connectAttr(lf_up[0]+'.ty',lf_lidrails+'.offsettop[0].offsettop_FloatValue',f=True)
@@ -130,10 +130,10 @@ def setup_threeCtrl(lf_lidrails,rt_lidrails):
 	mc.setAttr(lf_lid01_uo01_adn+'.input2',1.0)
 	mc.connectAttr(lf_lid01_uo01_adn+'.output',lf_lidrails+'.offsettop[2].offsettop_Position',f=True)
 	mc.connectAttr(lf_up[2]+'.ty',lf_lidrails+'.offsettop[2].offsettop_FloatValue',f=True)
-	
+
 	#========
 	# lf_dn
-	
+
 	# Reverse node
 	lf_dn_rvn = mc.createNode('reverse',n='lf_lid01_dn01_reverse')
 	# inner
@@ -154,7 +154,7 @@ def setup_threeCtrl(lf_lidrails,rt_lidrails):
 	mc.connectAttr(lf_lid01_do01_adn+'.output',lf_lidrails+'.offsetbottom[2].offsetbottom_Position',f=True)
 	mc.connectAttr(lf_dn[2]+'.ty',lf_dn_rvn+'.inputZ',f=True)
 	mc.connectAttr(lf_dn_rvn+'.outputZ',lf_lidrails+'.offsetbottom[2].offsetbottom_FloatValue',f=True)
-	
+
 	#========
 	# rt_up
 
@@ -180,10 +180,10 @@ def setup_threeCtrl(lf_lidrails,rt_lidrails):
 	mc.setAttr(rt_lid01_uo_mdn+'.input2',-1.0)
 	mc.connectAttr(rt_lid01_uo_mdn+'.output',rt_lidrails+'.offsettop[0].offsettop_Position',f=True)
 	mc.connectAttr(rt_up[2]+'.ty',rt_lidrails+'.offsettop[0].offsettop_FloatValue',f=True)
-	
+
 	#========
 	# rt_dn
-	
+
 	# Reverse node
 	rt_dn_rvn = mc.createNode('reverse',n='rt_lid01_dn01_reverse')
 	# inner
@@ -223,11 +223,11 @@ def setup_fourCtrl(lf_lidrails,rt_lidrails):
 	lf_dn = ['L_lowerLid1_ctrl','L_lowerLid2_ctrl','L_lowerLid3_ctrl','L_lowerLid4_ctrl']
 	rt_up = ['R_upperLid1_ctrl','R_upperLid2_ctrl','R_upperLid3_ctrl','R_upperLid4_ctrl']
 	rt_dn = ['R_lowerLid1_ctrl','R_lowerLid2_ctrl','R_lowerLid3_ctrl','R_lowerLid4_ctrl']
-	
+
 	# Connect lidRails ramps to lid profile controls
-	
+
 	# lf_up =========
-	
+
 	# inner
 	mc.connectAttr(lf_up[0]+'.tx',lf_lidrails+'.offsettop[0].offsettop_Position',f=True)
 	mc.connectAttr(lf_up[0]+'.ty',lf_lidrails+'.offsettop[0].offsettop_FloatValue',f=True)
@@ -249,9 +249,9 @@ def setup_fourCtrl(lf_lidrails,rt_lidrails):
 	mc.setAttr(lf_lid01_uo01_adn+'.input2',1.0)
 	mc.connectAttr(lf_lid01_uo01_adn+'.output',lf_lidrails+'.offsettop[3].offsettop_Position',f=True)
 	mc.connectAttr(lf_up[3]+'.ty',lf_lidrails+'.offsettop[3].offsettop_FloatValue',f=True)
-	
+
 	# lf_dn =========
-	
+
 	lf_dn_rvn = mc.createNode('reverse',n='lf_lid01_dn01_reverse')
 	lf_dn02_rvn = mc.createNode('reverse',n='lf_lid01_dn02_reverse')
 	# inner
@@ -279,9 +279,9 @@ def setup_fourCtrl(lf_lidrails,rt_lidrails):
 	mc.connectAttr(lf_lid01_do01_adn+'.output',lf_lidrails+'.offsetbottom[3].offsetbottom_Position',f=True)
 	mc.connectAttr(lf_dn[3]+'.ty',lf_dn02_rvn+'.inputY')
 	mc.connectAttr(lf_dn02_rvn+'.outputY',lf_lidrails+'.offsetbottom[3].offsetbottom_FloatValue',f=True)
-	
+
 	# rt_up =========
-	
+
 	# inner
 	rt_lid01_ui01_asn = mc.createNode('plusMinusAverage',n='rt_lid01_ui01_plusMinusAverage')
 	mc.setAttr(rt_lid01_ui01_asn+'.input1D[0]',1.0)
@@ -297,7 +297,7 @@ def setup_fourCtrl(lf_lidrails,rt_lidrails):
 	mc.setAttr(rt_lid01_um01_adn+'.input2',0.333)
 	mc.connectAttr(rt_lid01_um01_adn+'.output',rt_lidrails+'.offsettop[2].offsettop_Position',f=True)
 	mc.connectAttr(rt_up[2]+'.ty',rt_lidrails+'.offsettop[2].offsettop_FloatValue',f=True)
-	
+
 	# mid - outer
 	rt_lid01_um02_mdn = mc.createNode('multDoubleLinear',n='rt_lid01_um02_multDoubleLinear')
 	rt_lid01_um02_adn = mc.createNode('addDoubleLinear',n='rt_lid01_um02_addDoubleLinear')
@@ -307,16 +307,16 @@ def setup_fourCtrl(lf_lidrails,rt_lidrails):
 	mc.setAttr(rt_lid01_um02_adn+'.input2',0.666)
 	mc.connectAttr(rt_lid01_um02_adn+'.output',rt_lidrails+'.offsettop[1].offsettop_Position',f=True)
 	mc.connectAttr(rt_up[1]+'.ty',rt_lidrails+'.offsettop[1].offsettop_FloatValue',f=True)
-	
+
 	# outer
 	rt_lid01_uo_mdn = mc.createNode('multDoubleLinear',n='rt_lid01_uo_multDoubleLinear')
 	mc.connectAttr(rt_up[3]+'.tx',rt_lid01_uo_mdn+'.input1',f=True)
 	mc.setAttr(rt_lid01_uo_mdn+'.input2',-1.0)
 	mc.connectAttr(rt_lid01_uo_mdn+'.output',rt_lidrails+'.offsettop[0].offsettop_Position',f=True)
 	mc.connectAttr(rt_up[3]+'.ty',rt_lidrails+'.offsettop[0].offsettop_FloatValue',f=True)
-	
+
 	# rt_dn =========
-	
+
 	rt_dn_rvn = mc.createNode('reverse',n='rt_lid01_dn01_reverse')
 	rt_dn02_rvn = mc.createNode('reverse',n='rt_lid01_dn02_reverse')
 	# inner

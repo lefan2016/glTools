@@ -19,31 +19,31 @@ def radialComponentSelection(mesh,center,radius=1.0):
 	# ==========
 	# - Checks -
 	# ==========
-		
+
 	# Check Mesh
 	if not mc.objExists(mesh):
 		raise Exception('Mesh object "'+mesh+'" does not exist!!')
-	
+
 	# Get Point
 	pt = glTools.utils.base.getMPoint(center)
-	
+
 	# ==========================
 	# - Build Radial Selection -
 	# ==========================
-	
+
 	# Get Component List
 	ptList = glTools.utils.base.getMPointArray(mesh)
-	
+
 	# Build Selection
 	sel = []
 	for i in range(ptList.length()):
 		dist = (pt - ptList[i]).length()
 		if dist <= radius: sel.append(mesh+'.vtx['+str(i)+']')
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return sel
 
 def volumeComponentSelection(mesh,volume):
@@ -57,15 +57,15 @@ def volumeComponentSelection(mesh,volume):
 	# ==========
 	# - Checks -
 	# ==========
-		
+
 	# Check Mesh
 	if not mc.objExists(mesh):
 		raise Exception('Mesh object "'+mesh+'" does not exist!!')
-		
+
 	# Check Volume
 	if not mc.objExists(volume):
 		raise Exception('Volume object "'+volume+'" does not exist!!')
-	
+
 	# Get Volume Type
 	volumeShape = volume
 	if mc.objectType(volumeShape) == 'transform':
@@ -73,27 +73,27 @@ def volumeComponentSelection(mesh,volume):
 		if not volumeShape: raise Exception('Volume object "'+mesh+'" does not exist!!')
 		else: volumeShape = volumeShape[0]
 	volumeType = mc.objectType(volumeShape)
-	
+
 	# Convert to Polygon Volume (if necessary)
 	nurbsToPolyConvert = None
 	if volumeType == 'nurbsSurface':
 		nurbsToPolyConvert = mc.nurbsToPoly(volumeShape,ch=0,f=1,pt=1,ft=0.01,mel=0.001,d=0.1)
 		nurbsToPolyShape = mc.listRelatives(nurbsToPolyConvert,s=True,ni=True)
 		volumeShape = nurbsToPolyShape[0]
-	
+
 	# ==========================
 	# - Build Volume Selection -
 	# ==========================
-	
+
 	# Create Funtion Set for Volume Mesh
 	volumeFn = glTools.utils.mesh.getMeshFn(volume)
-	
+
 	# Get Bounding Box
 	volumeBBox = glTools.utils.base.getMBoundingBox(volume)
-	
+
 	# Get Vertices
 	pntList = glTools.utils.base.getMPointArray(mesh)
-	
+
 	# Build Selection List
 	sel = []
 	point = OpenMaya.MPoint()
@@ -103,15 +103,15 @@ def volumeComponentSelection(mesh,volume):
 		volumeFn.getClosestPointAndNormal(pntList[i],point,normal)
 		dotVal = normal * (point-pntList[i]).normal()
 		if dotVal > 0.0: sel.append(mesh+'.vtx['+str(i)+']')
-	
+
 	# ===========
 	# - Cleanup -
 	# ===========
-	
+
 	if nurbsToPolyConvert: mc.delete(nurbsToPolyConvert)
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return sel

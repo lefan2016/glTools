@@ -28,32 +28,32 @@ def create(name,nodes=None,dagContainer=True):
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Asset Node
 	if mc.objExists(name):
 		raise Exception('Object "'+name+'" already exist! Unable to create container...')
-	
+
 	# Nodes
 	if nodes:
 		for node in nodes:
 			if not mc.objExists(node):
 				raise Exception('Object "'+node+'" does not exist! Unable to add to container...')
-	
+
 	# ==========================
 	# - Create Asset Container -
 	# ==========================
-	
+
 	# Create Node
 	if not dagContainer: containerNode = mc.container(n=name)
 	else: containerNode = mc.container(n=name,typ='dagContainer')
-	
+
 	# Add Nodes
 	if nodes: mc.container(containerNode,e=True,addNode=nodes,f=True)
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return containerNode
 
 def nodeList(containerNode):
@@ -65,12 +65,12 @@ def nodeList(containerNode):
 	# Check Asset Node
 	if not isContainer(containerNode):
 		raise Exception('Object "'+containerNode+'" is not a valid container node!')
-	
+
 	# Get Asset Container Nodes
 	nodeList = mc.container(containerNode,q=True,nodeList=True)
 	if not nodeList: nodeList = []
 	else: nodeList = [str(i) for i in nodeList]
-	
+
 	# Return Result
 	return nodeList
 
@@ -100,33 +100,33 @@ def publishAttr(attr,assetAttrName=None,bind=True):
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Attribute
 	if not mc.objExists(attr):
 		raise Exception('Attribute "'+attr+'" does not exist! Unable to publish attribute to asset...')
-	
+
 	# Asset Attribute Name
 	if not assetAttrName: assetAttrName = attr.replace('.','_')
-	
+
 	# ======================
 	# - Get Node and Asset -
 	# ======================
-	
+
 	node = mc.ls(attr,o=True)
 	containerNode = assetFromNode(node)
-	
+
 	# =====================
 	# - Publish Attribute -
 	# =====================
-	
+
 	# Publish Attribute (Unbound)
 	mc.container(containerNode,e=True,publishName=assetAttrName)
-	
+
 	# Bid to Attribute
 	if bind: mc.container(containerNode,e=True,bindAttr=[attr,assetAttrName])
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return containerNode+'.'+assetAttrName

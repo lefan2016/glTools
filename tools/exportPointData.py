@@ -30,42 +30,42 @@ def export2DPointData(path,pt,cam,start,end,width=2348,height=1152):
 	# Check path
 	dirpath = path.replace(path.split('/')[-1],'')
 	if not os.path.isdir(dirpath): os.makedirs(dirpath)
-	
+
 	# Open file for writing
 	file = open(path,"w")
-	
+
 	# -----------------------
 	# - Write Position Data -
 	# -----------------------
-	
+
 	# Cycle through frame range
 	for f in range(start,end+1):
-	
+
 		# Set current frame
 		mc.currentTime(f)
-		
+
 		# Get point world space position
 		pos = glTools.utils.base.getMPoint(pt)
-		
+
 		# Get camera details
 		cam_hfv = mc.camera(cam,q=True,hfv=True)
 		cam_vfv = mc.camera(cam,q=True,vfv=True)
 		cam_mat = glTools.utils.matrix.getMatrix(cam).inverse()
-		
+
 		# Calculate 2D point
 		ssPt = pos * cam_mat
 		ptx = ( ( ( ssPt.x / -ssPt.z ) / math.tan( math.radians(cam_hfv / 2) ) ) / 2.0) + 0.5
 		pty = ( ( ( ssPt.y / -ssPt.z ) / math.tan( math.radians(cam_vfv / 2) ) ) / 2.0) + 0.5
-		
+
 		# Write data to file
 		file.write(str(ptx * width) + ' ' + str(pty * height) + '\n')
-	
+
 	# End file with new line
 	file.write('')
-	
+
 	# Close file
 	file.close()
-	
+
 	# Print result
 	print('2D point data exported to '+path)
 
@@ -92,62 +92,62 @@ def export2DOffsetData(path,pt,cam,start,end,width=1,height=1,refFrame=1):
 	# Check path
 	dirpath = path.replace(path.split('/')[-1],'')
 	if not os.path.isdir(dirpath): os.makedirs(dirpath)
-	
+
 	# Open file for writing
 	file = open(path,"w")
-	
+
 	# ---------------------
 	# - Get Base Position -
 	# ---------------------
-	
+
 	# Set current frame
 	mc.currentTime(refFrame)
-	
+
 	# Get point world space position
 	pos = glTools.utils.base.getMPoint(pt)
-	
+
 	# Get camera data
 	cam_hfv = mc.camera(cam,q=True,hfv=True)
 	cam_vfv = mc.camera(cam,q=True,vfv=True)
 	cam_mat = glTools.utils.matrix.getMatrix(cam).inverse()
-	
+
 	# Calculate 2D point
 	ssPt = pos * cam_mat
 	basex = ( ( ( ssPt.x / -ssPt.z ) / math.tan( math.radians(cam_hfv / 2) ) ) / 2.0) + 0.5
 	basey = ( ( ( ssPt.y / -ssPt.z ) / math.tan( math.radians(cam_vfv / 2) ) ) / 2.0) + 0.5
-	
+
 	# ---------------------
 	# - Write Offset Data -
 	# ---------------------
-	
+
 	# Cycle through frame range
 	for f in range(start,end+1):
-	
+
 		# Set current frame
 		mc.currentTime(f)
-		
+
 		# Get point world space position
 		pos = glTools.utils.base.getMPoint(pt)
-		
+
 		# Get camera details
 		cam_hfv = mc.camera(cam,q=True,hfv=True)
 		cam_vfv = mc.camera(cam,q=True,vfv=True)
 		cam_mat = glTools.utils.matrix.getMatrix(cam).inverse()
-		
+
 		# Calculate 2D point
 		ssPt = pos * cam_mat
 		ptx = ( ( ( ssPt.x / -ssPt.z ) / math.tan( math.radians(cam_hfv / 2) ) ) / 2.0) + 0.5
 		pty = ( ( ( ssPt.y / -ssPt.z ) / math.tan( math.radians(cam_vfv / 2) ) ) / 2.0) + 0.5
-		
+
 		# Write data to file
 		file.write(str((ptx - basex) * width) + ' ' + str((pty - basey) * height) + '\n')
-	
+
 	# End file with new line
 	file.write('')
-	
+
 	# Close file
 	file.close()
-	
+
 	# Print result
 	print('2D point offset data exported to '+path)
 
@@ -166,32 +166,32 @@ def export3DPointData(path,pt,start,end):
 	# Check path
 	dirpath = path.replace(path.split('/')[-1],'')
 	if not os.path.isdir(dirpath): os.makedirs(dirpath)
-	
+
 	# Open file for writing
 	file = open(path,"w")
-	
+
 	# -----------------------
 	# - Write Position Data -
 	# -----------------------
-	
+
 	# Cycle through frame range
 	for f in range(start,end+1):
-		
+
 		# Set current frame
 		mc.currentTime(f)
-		
+
 		# Get point world space position
 		pos = glTools.utils.base.getPosition(pt)
-		
+
 		# Write data to file
 		file.write(str(pos[0]) + ' ' + str(pos[1]) + ' ' + str(pos[2]) + '\n')
-	
+
 	# End file with new line
 	file.write('')
-	
+
 	# Close file
 	file.close()
-	
+
 	# Print result
 	print('3D point data exported to '+path)
 
@@ -206,46 +206,46 @@ def export3DRotationData(path,pt,start,end,upVec=(0,1,0),rotateOrder='xyz',absol
 	@type start: int
 	@param end: The last frame of the data sequence
 	@type end: int
-	@param upVec: Up vector used to contruct rotation matrix for non-transform point. 
+	@param upVec: Up vector used to contruct rotation matrix for non-transform point.
 	@type upVec: list or tuple
-	@param rotateOrder: Output rotate order. 
+	@param rotateOrder: Output rotate order.
 	@type rotateOrder: str
-	@param absolute: Output absolute values.  
+	@param absolute: Output absolute values.
 	@type absolute: bool
 	'''
 	# Check path
 	dirpath = path.replace(path.split('/')[-1],'')
 	if not os.path.isdir(dirpath): os.makedirs(dirpath)
-	
+
 	# Open file for writing
 	file = open(path,"w")
-	
+
 	# -----------------------
 	# - Write Rotation Data -
 	# -----------------------
-	
+
 	# Cycle through frame range
 	for f in range(start,end+1):
-		
+
 		# Set current frame
 		mc.currentTime(f)
-		
+
 		if absolute:
 			# Get absolute local rotation values
 			rot = mc.getAttr(pt+'.r')[0]
 		else:
 			# Get object world space rotation
 			rot = getRotation(pt,upVec,rotateOrder)
-		
+
 		# Write data to file
 		file.write(str(rot[0]) + ' ' + str(rot[1]) + ' ' + str(rot[2]) + '\n')
-	
+
 	# End file with new line
 	file.write('')
-	
+
 	# Close file
 	file.close()
-	
+
 	# Print result
 	print('3D rotation data exported to '+path)
 
@@ -257,41 +257,41 @@ def getRotation(obj,upVec=(0,1,0),rotateOrder='xyz'):
 	'''
 	# Get Rotation Matrix
 	if ['transform','joint'].count(mc.objectType(obj)):
-		
+
 		# Get transform matrix
 		mat = glTools.utils.matrix.getMatrix(obj)
-		
+
 	else:
-		
+
 		# Check polyVert selection
 		mc.select(obj)
 		sel = mc.filterExpand(ex=True,sm=31)
 		if not sel: raise Exception('Invalid object selection! Supply a valid transform or polygon vertex!')
-		
+
 		# Get mesh object and component id
 		mesh = mc.ls(obj,o=True)[0]
 		vtxId = int(obj.split('[')[-1].split(']')[0])
-		
+
 		# Up Vector
 		upVecVec = OpenMaya.MVector(upVec[0],upVec[1],upVec[2]).normal()
-		
+
 		# Get component normal
 		norm = glTools.utils.mesh.getNormal(mesh,vtxId,worldSpace=True)
 		normVec = OpenMaya.MVector(norm[0],norm[1],norm[2]).normal()
-		
+
 		# Cross Vector
 		crossVec = (normVec * upVecVec).normal()
 		cross = [crossVec.x,crossVec.y,crossVec.z]
-		
+
 		# Allign Up Vector
 		upVecVec = (crossVec * normVec).normal()
 		upVec = [upVecVec.x,upVecVec.y,upVecVec.z]
-		
+
 		# Build rotation matrix
 		mat = glTools.utils.matrix.buildMatrix(xAxis=cross,yAxis=upVec,zAxis=norm)
-		
+
 	# Get matrix rotation based on input rotateOrder
 	rot = glTools.utils.matrix.getRotation(mat,rotateOrder)
-	
+
 	# Return result
 	return rot

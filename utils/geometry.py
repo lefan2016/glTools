@@ -10,16 +10,16 @@ def isGeometry(geometry):
 	'''
 	# Check Object Exists
 	if not mc.objExists(geometry): return False
-	
+
 	# Check Shape
 	if 'transform' in mc.nodeType(geometry,i=True):
 		geoShape = mc.ls(mc.listRelatives(mesh,s=True,ni=True,pa=True) or [],geometry=True)
 		if not geoShape: return False
 		geometry = geoShape[0]
-	
+
 	# Check Geometry
 	if 'geometryShape' in mc.nodeType(geometry,i=True): return True
-	
+
 	# Return Result
 	return False
 
@@ -32,17 +32,17 @@ def geometryType(geometry):
 	# Check Geometry
 	if not mc.objExists(geometry):
 		raise Exception('Geometry object "'+geometry+'" does not exist!!')
-	
+
 	# Get Shapes
 	shapeList = glTools.utils.shape.getShapes(geometry,intermediates=False)
 	if not shapeList:
 		shapeList = glTools.utils.shape.getShapes(geometry,intermediates=True)
 	if not shapeList:
 		raise Exception('Geometry object "'+geometry+'" has no shape children!!')
-	
+
 	# Get Geometry Type
 	geometryType = mc.objectType(shapeList[0])
-	
+
 	# Return Result
 	return geometryType
 
@@ -55,20 +55,20 @@ def componentType(geometry):
 	# Check geometry
 	if not mc.objExists(geometry):
 		raise Exception('Geometry object "'+geometry+'" does not exist!!')
-	
+
 	# Get geometry type
 	geoType = geometryType(geometry)
-	
+
 	# Define return values
 	compType = {'mesh':'vtx','nurbsSurface':'cv','nurbsCurve':'cv','lattice':'pt','particle':'pt'}
-	
+
 	# Return result
 	return compType[geoType]
 
 def replace(sourceGeometry,destinationGeometry):
 	'''
 	Replace the geometry of one object with another
-	@param sourceGeometry: The object that will provide the replacement geometry 
+	@param sourceGeometry: The object that will provide the replacement geometry
 	@type sourceGeometry: str
 	@param destinationGeometry: The object whose geometry will be replaced
 	@type destinationGeometry: str
@@ -78,7 +78,7 @@ def replace(sourceGeometry,destinationGeometry):
 		raise Exception('Destination geometry "'+destinationGeometry+'" does not exist!!')
 	if not mc.objExists(sourceGeometry):
 		raise Exception('Source geometry "'+sourceGeometry+'" does not exist!!')
-	
+
 	# Determine geometry types
 	sourceShape = sourceGeometry
 	sourceGeoType = geometryType(sourceGeometry)
@@ -101,7 +101,7 @@ def replace(sourceGeometry,destinationGeometry):
 							break
 			else:
 				raise Exception('Unknown geometry type "'+sourceGeoType+'" is not supported!!')
-		
+
 	destinationShape = destinationGeometry
 	destinationGeoType = geometryType(destinationGeometry)
 	if mc.objectType(destinationShape) == 'transform':
@@ -123,11 +123,11 @@ def replace(sourceGeometry,destinationGeometry):
 							break
 			else:
 				raise Exception('Unknown geometry type "'+destinationGeoType+'" is not supported!!')
-		
+
 	# Check geometry types
 	if destinationGeoType != sourceGeoType:
 		raise Exception('Destination and Source geometry types do not match!!')
-	
+
 	# Replace geometry
 	#-
 	# Mesh

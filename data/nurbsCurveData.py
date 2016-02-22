@@ -39,56 +39,56 @@ class NurbsCurveData( data.Data ):
 		# ==========
 		# - Checks -
 		# ==========
-		
+
 		# Check Curve
 		if not glTools.utils.curve.isCurve(curve):
 			raise Exception('Object "'+curve+'" is not a vaild NURBS curve node!')
-		
+
 		# World Space
 		space = OpenMaya.MSpace.kObject
 		if worldSpace: space = OpenMaya.MSpace.kWorld
-		
+
 		# ==============
 		# - Build Data -
 		# ==============
-		
+
 		# Start timer
 		timer = mc.timerX()
-		
+
 		# Get basic curve info
 		self._data['name'] = curve
 
 		# Get Curve Function Class
 		curveFn = glTools.utils.curve.getCurveFn(curve)
-		
+
 		# Get Curve Degree and Form
 		self._data['degree'] = curveFn.degreeU()
 		self._data['form'] = int(curveFn.formInU())
-		
+
 		# Get Curve Knots
 		knotArray = OpenMaya.MDoubleArray()
 		curveFn.getKnotsInU(knotArray)
 		self._data['knots'] = list(knotArray)
-		
+
 		# Get Control Vertices
 		cvArray = OpenMaya.MPointArray()
 		curveFn.getCVs(cvArray,space)
 		self._data['cv'] = [(cvArray[i].x,cvArray[i].y,cvArray[i].z) for i in range(cvArray.length())]
-		
+
 		# Get Edit Points
 		editPt = OPenMaya.MPoint()
 		for u in self._data['knots']:
 			curveFn.getPointAtParam(u,editPt,space)
 			self._data['editPt'].append((editPt.x,editPt.y,editPt.z))
-		
+
 		# =================
 		# - Return Result -
 		# =================
-		
+
 		# Print timer result
 		buildTime = mc.timerX(st=timer)
 		print('NurbsCurveData: Data build time for curve "'+curve+'": '+str(buildTime))
-		
+
 		return self._data['name']
 
 	def rebuild(self):
@@ -100,13 +100,13 @@ class NurbsCurveData( data.Data ):
 		# ========================
 		# - Rebuild Curve Data -
 		# ========================
-		
+
 		# Rebuild Control Vertices
 		numCVs = len(self._data['cv'])
 		cvArray = OpenMaya.MPointArray(numCVs,OpenMaya.MPoint.origin)
 		for i in range(numCVs):
 			cvArray.set(OpenMaya.MPoint(self._data['cv'][i][0],self._data['cv'][i][1],self._data['cv'][i][2],1.0),i)
-		
+
 		# Rebuild Curve Knot Arrays
 		numKnots = len(self._data['knots'])
 		knots = OpenMaya.MDoubleArray(numKnots,0)
@@ -127,11 +127,11 @@ class NurbsCurveData( data.Data ):
 		# =================
 		# - Return Result -
 		# =================
-		
+
 		# Print Timed Result
 		buildTime = mc.timerX(st=timer)
 		print('NurbsCurveData: Data rebuild time for curve "'+self._data['name']+'": '+str(buildTime))
-		
+
 		return curveObjHandle
 
 	def rebuildCurve(self):
@@ -139,22 +139,22 @@ class NurbsCurveData( data.Data ):
 		'''
 		# Start timer
 		timer = mc.timerX()
-		
+
 		# ========================
 		# - Rebuild Curve Data -
 		# ========================
-		
+
 		# Rebuild Control Vertices
 		numCVs = len(self._data['cv'])
 		cvArray = OpenMaya.MPointArray(numCVs,OpenMaya.MPoint.origin)
 		for i in range(numCVs):
 			cvArray.set(OpenMaya.MPoint(self._data['cv'][i][0],self._data['cv'][i][1],self._data['cv'][i][2],1.0),i)
-		
+
 		# Rebuild Curve Knot Arrays
 		numKnots = len(self._data['knots'])
 		knots = OpenMaya.MDoubleArray(numKnots,0)
 		for i in range(numKnots): knots.set(self._data['knots'][i],i)
-		
+
 		# Rebuild Curve
 		curveFn = OpenMaya.MFnMesh()
 		curveData = OpenMaya.MObject()
@@ -168,13 +168,13 @@ class NurbsCurveData( data.Data ):
 
 		# Rename Curve
 		curve = OpenMaya.MFnDependencyNode(curveObj).setName(self._data['name'])
-		
+
 		# =================
 		# - Return Result -
 		# =================
-		
+
 		# Print timer result
 		buildTime = mc.timerX(st=timer)
 		print('NurbsCurveData: Geometry rebuild time for mesh "'+curve+'": '+str(buildTime))
-		
+
 		return curve

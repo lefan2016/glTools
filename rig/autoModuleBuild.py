@@ -21,12 +21,12 @@ def checkModuleTemplate(moduleTemplateGrp,moduleType,moduleAttrs):
 		raise Exception('Module template group "'+moduleTemplateGrp+'" does not exist!')
 	if not mc.attributeQuery('moduleTemplate',n=moduleTemplateGrp,ex=True):
 		raise Exception('Module template attribute "'+moduleTemplateGrp+'.moduleTemplate'+'" does not exist!')
-	
+
 	# Check Module Type
 	moduleTemplateType = mc.getAttr(moduleTemplateGrp+'.moduleTemplate')
 	if moduleTemplateType != moduleType:
 		raise Exception('Expecting module type "'+moduleType+'", found "'+moduleTemplateType+'"!')
-	
+
 	# Check Module Attributes
 	for attr in moduleAttrs:
 		if not mc.attributeQuery(attr,n=moduleTemplateGrp,ex=True):
@@ -39,13 +39,13 @@ def moduleBuildAll():
 	'''
 	# Find All Module Template Groups
 	moduleTemplateList = mc.ls('*.moduleTemplate',o=True)
-	
+
 	# Build Modules
 	resultList = []
 	for moduleTemplateGrp in moduleTemplateList:
 		result = moduleBuild( moduleTemplateGrp )
 		resultList.append(result)
-	
+
 	# Return Result
 	return resultList
 
@@ -58,28 +58,28 @@ def moduleBuild( moduleTemplateGrp ):
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Module Type
 	if not mc.attributeQuery('moduleTemplate',n=moduleTemplateGrp,ex=True):
 		raise Exception('Module template attribute "'+moduleTemplateGrp+'.moduleTemplate'+'" does not exist!')
 	moduleType = mc.getAttr(moduleTemplateGrp+'.moduleTemplate')
-	
+
 	# ===================================
 	# - Build Module From Template Data -
 	# ===================================
-	
+
 	# Initialize Result
 	result = None
-	
+
 	# Build Module
 	if moduleType == 'base': result = baseModuleBuild(	moduleTemplateGrp )
 	elif moduleType == 'fkChain': result = fkChainModuleBuild(	moduleTemplateGrp )
 	elif moduleType == 'ikChain': result = ikChainModuleBuild(	moduleTemplateGrp )
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return result
 
 def baseModuleBuild( moduleTemplateGrp ):
@@ -91,7 +91,7 @@ def baseModuleBuild( moduleTemplateGrp ):
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Define Attribute List
 	attrList = [	'moduleName',
 					'moduleParent',
@@ -103,24 +103,24 @@ def baseModuleBuild( moduleTemplateGrp ):
 					'followCtrl',
 					'constraintCtrl',
 					'labelText'	]
-	
+
 	# Check Module Template
 	checkModuleTemplate(moduleTemplateGrp,moduleType='base',moduleAttrs=attrList)
-	
+
 	# =========================
 	# - Get Raw Template Data -
 	# =========================
-	
+
 	data = {}
 	for attr in attrList: data[attr] = mc.getAttr(moduleTemplateGrp+'.'+attr)
-	
+
 	# Encode template override dictionary
 	overrides = ast.literal_eval(data['overrides'])
-	
+
 	# ===================================
 	# - Build Module From Template Data -
 	# ===================================
-	
+
 	base = glTools.nrig.module.base.BaseModule()
 	result = base.build(	name = data['asset_name'],
 							type = data['asset_type'],
@@ -131,11 +131,11 @@ def baseModuleBuild( moduleTemplateGrp ):
 							labelText = bool(data['labelText']),
 							overrides = overrides,
 							prefix = data['moduleName']	)
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return result
 
 def fkChainModuleBuild(	moduleTemplateGrp ):
@@ -147,7 +147,7 @@ def fkChainModuleBuild(	moduleTemplateGrp ):
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Define Attribute List
 	attrList = [	'moduleName',
 					'moduleParent',
@@ -163,35 +163,35 @@ def fkChainModuleBuild(	moduleTemplateGrp ):
 					'controlOrient',
 					'controlScale',
 					'controlLod'	]
-	
+
 	# Check Module Template
 	checkModuleTemplate(moduleTemplateGrp,moduleType='fkChain',moduleAttrs=attrList)
-	
+
 	# =========================
 	# - Get Raw Template Data -
 	# =========================
-	
+
 	data = {}
 	for attr in attrList: data[attr] = mc.getAttr(moduleTemplateGrp+'.'+attr)
-	
+
 	# Encode template override dictionary
 	overrides = ast.literal_eval(data['overrides'])
-	
+
 	# Control Offset
 	controlPosition = data['controlPositionOffset'][0]
 	controlRotate = data['controlRotateOffset'][0]
-	
+
 	# Get control shape
 	ctrlShapeList = glTools.tools.controlBuilder.ControlBuilder().controlType
 	controlShape = ctrlShapeList[data['controlShape']]
-	
+
 	# Get control LOD
 	controlLod = ['primary','secondary','tertiary'][data['controlLod']]
-	
+
 	# ===================================
 	# - Build Module From Template Data -
 	# ===================================
-	
+
 	fkChain = glTools.nrig.module.fkChain.FkChainModule()
 	result = fkChain.build(	startJoint = 	data['startJoint'],
 							endJoint = 		data['endJoint'],
@@ -207,11 +207,11 @@ def fkChainModuleBuild(	moduleTemplateGrp ):
 							allScale = 		data['allScale'],
 							overrides = 	overrides,
 							prefix = 		data['moduleName']	)
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return result
 
 def ikChainModuleBuild(	moduleTemplateGrp ):
@@ -223,7 +223,7 @@ def ikChainModuleBuild(	moduleTemplateGrp ):
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Define Attribute List
 	attrList = [	'moduleName',
 					'moduleParent',
@@ -238,30 +238,30 @@ def ikChainModuleBuild(	moduleTemplateGrp ):
 					'enableFKToggle',
 					'ikFkBlendAttribute',
 					'controlLod'	]
-	
+
 	# Check Module Template
 	checkModuleTemplate(moduleTemplateGrp,moduleType='ikChain',moduleAttrs=attrList)
-	
+
 	# =========================
 	# - Get Raw Template Data -
 	# =========================
-	
+
 	data = {}
 	for attr in attrList: data[attr] = mc.getAttr(moduleTemplateGrp+'.'+attr)
-	
+
 	# Encode template override dictionary
 	overrides = ast.literal_eval(data['overrides'])
-	
+
 	# Get control LOD
 	controlLod = ['primary','secondary','tertiary'][data['controlLod']]
-	
+
 	# Get ikSolver
 	ikSolver = ['ikSCsolver','ikRPsolver'][data['ikSolver']]
-	
+
 	# ===================================
 	# - Build Module From Template Data -
 	# ===================================
-	
+
 	ikChain = glTools.nrig.module.ikChain.IkChainModule()
 	result = ikChain.build(	startJoint =	data['startJoint'],
 							endJoint =		data['endJoint'],
@@ -276,9 +276,9 @@ def ikChainModuleBuild(	moduleTemplateGrp ):
 							allScale = 		data['allScale'],
 							overrides =		overrides,
 							prefix =		data['moduleName']	)
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return result

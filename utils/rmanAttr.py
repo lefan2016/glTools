@@ -18,26 +18,26 @@ def jointDrivenRmanAttr(geo,joint,axis='z',min=0,max=180,prefix=''):
 	'''
 	# Check prefix
 	if not prefix: prefix = joint
-	
+
 	# Check joint
 	if not mc.objExists(joint): raise Exception('Joint "'+joint+'" does not exist!!')
-	
+
 	# Check axis
 	axis = axis.lower()
 	if not ['x','y','z'].count(axis):
 		raise Exception('Invalid rotation axis specified! Acceptable values are "x", "y" or "z"!')
-	
+
 	# Check mesh
 	if not mc.objExists(geo): raise Exception('Object "'+geo+'" does not exist!!')
-	
+
 	# Add renderman variable attr
 	meshShape = mc.listRelatives(mesh,s=True,ni=True,pa=True)[0]
 	mc.addAttr(meshShape,ln='rmanF'+prefix,min=0,max=1,dv=0,k=True)
-	
+
 	# Add joint min/max value attrs
 	mc.addAttr(joint,ln='outputMin',dv=min,k=True)
 	mc.addAttr(joint,ln='outputMax',dv=max,k=True)
-	
+
 	# Remap to 0-1 range
 	remapNode = mc.createNode('remapValue',n=prefix+'_remapValue')
 	mc.connectAttr(joint+'.r'+axis,remapNode+'.inputValue',f=True)
@@ -45,9 +45,9 @@ def jointDrivenRmanAttr(geo,joint,axis='z',min=0,max=180,prefix=''):
 	mc.connectAttr(joint+'.outputMax',remapNode+'.inputMax',f=True)
 	mc.setAttr(remapNode+'.outputMin',0.0)
 	mc.setAttr(remapNode+'.outputMax',1.0)
-	
+
 	# Connect to shape attr
 	mc.connectAttr(remapNode+'.outValue',meshShape+'.rmanF'+prefix,f=True)
-	
+
 	# Return result
 	return meshShape+'.rmanF'+prefix

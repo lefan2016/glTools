@@ -106,15 +106,15 @@ def closestPointOnLine(pt,lineA,lineB,clampSegment=False):
 	# Get Vector Offsets
 	ptOffset = offsetVector(lineA,pt)
 	lineOffset = offsetVector(lineA,lineB)
-	
+
 	# Vector Comparison
 	dot = dotProduct(ptOffset,lineOffset)
-	
+
 	# Clamp Segment
 	if clampSegment:
 		if dot < 0.0: return lineA
 		if dot > 1.0: return lineB
-	
+
 	# Project Vector
 	return [lineA[0]+(lineOffset[0]*dot),lineA[1]+(lineOffset[1]*dot),lineA[2]+(lineOffset[2]*dot)]
 
@@ -157,7 +157,7 @@ def distributeValue(samples,spacing=1.0,rangeStart=0.0,rangeEnd=1.0):
 	vList = [rangeStart]
 	vDist = abs(rangeEnd - rangeStart)
 	unit = 1.0
-	
+
 	# Find the Unit Distance
 	factor = 1.0
 	for i in range(samples-2):
@@ -165,17 +165,17 @@ def distributeValue(samples,spacing=1.0,rangeStart=0.0,rangeEnd=1.0):
 		factor *= spacing
 	unit = vDist/unit
 	totalUnit = unit
-	
+
 	# Build Sample List
 	for i in range(samples-2):
 		multFactor = totalUnit/vDist
 		vList.append(rangeStart-((rangeStart - rangeEnd) * multFactor))
 		unit *= spacing
 		totalUnit += unit
-	
+
 	# Append Final Sample
 	vList.append(rangeEnd)
-	
+
 	# Return Result
 	return vList
 
@@ -194,15 +194,15 @@ def inverseDistanceWeight1D(valueArray,sampleValue,valueDomain=(0,1),cycleValue=
 	# Initialize method varialbles
 	distArray = []
 	totalInvDist = 0.0
-	
+
 	# Initialize weightArray
 	wtArray = []
-	
+
 	# Calculate inverse distance weight
 	for v in range(len(valueArray)):
 		# Calculate distance
 		dist = abs(sampleValue - valueArray[v])
-		
+
 		# Check cycle value
 		if cycleValue:
 			valueDomainLen = valueDomain[1]-valueDomain[0]
@@ -210,17 +210,17 @@ def inverseDistanceWeight1D(valueArray,sampleValue,valueDomain=(0,1),cycleValue=
 			rCycDist = abs(sampleValue - (valueArray[v] - valueDomainLen))
 			if fCycDist < dist: dist = fCycDist
 			if rCycDist < dist: dist = rCycDist
-		
+
 		# Check zero distance
 		if dist < 0.00001: dist = 0.00001
-		
+
 		# Append distance
 		distArray.append(dist)
 		totalInvDist += 1.0/dist
-	
+
 	# Normalize value weights
 	wtArray = [(1.0/d)/totalInvDist for d in distArray]
-	
+
 	# Return result
 	return wtArray
 
@@ -235,24 +235,24 @@ def inverseDistanceWeight3D(pointArray,samplePoint):
 	# Initialize Method Variables
 	distArray = []
 	totalInvDist = 0.0
-	
+
 	# Initialize weightArray
 	wtArray = []
-	
+
 	# Calculate inverse distance weight
 	for i in range(len(pointArray)):
 		# Calculate Distance
 		dist = distanceBetween(samplePoint, pointArray[i])
-		
+
 		# Check Zero Distance
 		if dist < 0.00001: dist = 0.00001
-		
+
 		# Append distance
 		distArray.append(dist)
 		totalInvDist += 1.0/dist
-	
+
 	# Normalize Value Weights
 	wtArray = [(1.0/d)/totalInvDist for d in distArray]
-	
+
 	# Return Result
 	return wtArray

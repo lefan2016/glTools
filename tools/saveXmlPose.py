@@ -6,7 +6,7 @@ from xml_utilities import *
 def save_selectedPose():
 	pose_dict, namespace = record_selectedPose()
 	exportXml(pose_dict, namespace)
-	
+
 def save_pose(controls=[], filePath=""):
 	pose_dict, namespace =record_pose(controls)
 	writePoseXmlDoc( pose_dict, namespace, filePath="" )
@@ -14,7 +14,7 @@ def save_pose(controls=[], filePath=""):
 def record_selectedPose():
 	sel = mc.ls(sl=1)
 	pose_dict, namespace = record_pose(sel)
-	
+
 	return pose_dict, namespace
 
 def record_pose(controls=[]):
@@ -38,17 +38,17 @@ def set_Pose(filePath=""):
 			mc.setAttr(namespace+i, pose_dict.get(i))
 		except:
 			print "Warning : couldn't set "+namespace+i
-		
+
 def readPoseXmlDoc( filePath=""):
 	doc, root = xml_openDocument( filePath )
 	elem = xml_getChildElements(root)
 	info = xml_getChildElements(elem[0])
 	pose = xml_getChildElements(elem[1])
-	
+
 	#read info
 	info_dict = xml_getAttributeDictionary(info[0])
 	namespace = info_dict.get("namespace")
-	
+
 	#read pose
 	pose_dict = {}
 	for i in pose:
@@ -62,11 +62,11 @@ def writePoseXmlDoc( pose_dict={}, namespace="", filePath="" ):
 		return
 	# create doc
 	doc, root = xml_newDocument("pose")
-	
+
 	poseInfo = xml_addElement(doc, root, "poseInfo")
 	info = xml_addElement(doc, poseInfo, "info")
 	xml_addAttr(info, "namespace", namespace )
-	
+
 	# add pose objects
 	objects = xml_addElement(doc, root, "objects")
 	for i in pose_dict:
@@ -75,9 +75,9 @@ def writePoseXmlDoc( pose_dict={}, namespace="", filePath="" ):
 		xml_addAttr(pose, "object", i )
 		xml_addAttr(pose, "value", obj )
 	xml_write(doc, filePath)
-	
+
 def exportXml(pose_dict={}, namespace=""):
-	
+
 	result = mc.promptDialog(
 			title='File Path to Save Pose',
 			message='Enter Path:',
@@ -85,13 +85,13 @@ def exportXml(pose_dict={}, namespace=""):
 			defaultButton='OK',
 			cancelButton='Cancel',
 			dismissString='Cancel')
-	
+
 	if result == 'OK':
 		path = mc.promptDialog(query=True, text=True)
 		writePoseXmlDoc( pose_dict, namespace, path )
-		
+
 def importXml():
-	
+
 	result = mc.promptDialog(
 			title='File Path to Import Pose',
 			message='Enter Path:',
@@ -99,7 +99,7 @@ def importXml():
 			defaultButton='OK',
 			cancelButton='Cancel',
 			dismissString='Cancel')
-	
+
 	if result == 'OK':
 		path = mc.promptDialog(query=True, text=True)
 		pose_dict = readPoseXmlDoc( path )

@@ -22,11 +22,11 @@ def connectionHubNode(prefix):
 	'''
 	# Create Hub Node
 	hub = mc.createNode('transform',n=prefix+'_connectionHub')
-	
+
 	# Add Connection Hub Attribute
 	mc.addAttr(hub,ln='connectionHub',dt='string')
 	mc.setAttr(hub+'.connectionHub',prefix,type='string',l=True,k=False)
-	
+
 	# Return Result
 	return hub
 
@@ -45,33 +45,33 @@ def addConnection(hub,attr,output=True,connect=True):
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	if not isHub(hub):
 		raise Exception('Object "'+hub+'" is not a valid connection hub node!')
-	
+
 	if not glTools.utils.attribute.isAttr(attr):
 		raise Exception('Object "'+attr+'" is not a valid attribute!')
-	
+
 	# ============================
 	# - Add Connection Attribute -
 	# ============================
-	
+
 	# Determine connection attribute name
 	suffix = ''
 	if output: suffix = 'OUT'
 	else: suffix = 'IN'
-	
+
 	connectionAttr = re.sub('\.','__',attr) + suffix
-	
+
 	# Add Attribute
 	mc.addAttr(hub,ln=connectionAttr,k=True)
-	
+
 	# =====================
 	# - Connect Attribute -
 	# =====================
-	
+
 	if connect:
-		
+
 		if output:
 			# Connect Output
 			mc.connectAttr(attr,hub+'.'+connectionAttr,f=True)
@@ -82,11 +82,11 @@ def addConnection(hub,attr,output=True,connect=True):
 			# Connect Input
 			mc.setAttr(attr,l=False)
 			mc.connectAttr(hub+'.'+connectionAttr,attr,f=True)
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return hub+'.'+connectionAttr
 
 def connect(hub):
@@ -94,7 +94,7 @@ def connect(hub):
 	'''
 	# Get Hub Attributes
 	for hubAttr in pm.PyNode(hub).listAttr(ud=True):
-		
+
 		# Get Attribute Name Components
 		inout, node, nodeAttr = hubAttr.attrName().split('__')
 		try:
@@ -118,60 +118,60 @@ def connectToHub(hub1,hub2):
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	if not isHub(hub1):
 		raise Exception('Object "'+hub1+'" is not a valid connection hub node!')
 	if not isHub(hub2):
 		raise Exception('Object "'+hub2+'" is not a valid connection hub node!')
-	
+
 	# ===========
 	# - Connect -
 	# ===========
-	
+
 	# Get connection attribute lists
 	hub1_attrs = mc.listAttr(hub1,ud=True,k=True)
 	hub2_attrs = mc.listAttr(hub2,ud=True,k=True)
-	
+
 	# Connect HUB1 >>> HUB2
 	for attr in hub1_attrs:
-		
+
 		# Check Output
 		if attr.endswith('OUT'):
-			
-			# Get connection source/destination attributes 
+
+			# Get connection source/destination attributes
 			srcAttr = hub1+'.'+attr
 			dstAttr = hub2+'.'+attr.replace('OUT','IN')
 			# Check destination attribute
 			if not glTools.utils.attribute.isAttr(dstAttr):
 				raise Exception('Destination attribute "'+dstAttr+'" does not exist!')
-			
+
 			# Connect
 			print('Connecting hub attributes:')
 			print('\t'+srcAttr+' >>> '+dstAttr+)
 			mc.connectAttr(srcAttr,dstAttr,f=True)
-	
+
 	# Connect HUB2 >>> HUB1
 	for attr in hub2_attrs:
-		
+
 		# Check Output
 		if attr.endswith('OUT'):
-			
-			# Get connection source/destination attributes 
+
+			# Get connection source/destination attributes
 			srcAttr = hub2+'.'+attr
 			dstAttr = hub1+'.'+attr.replace('OUT','IN')
 			# Check destination attribute
 			if not glTools.utils.attribute.isAttr(dstAttr):
 				raise Exception('Destination attribute "'+dstAttr+'" does not exist!')
-			
+
 			# Connect
 			print('Connecting hub attributes:')
 			print('\t'+srcAttr+' >>> '+dstAttr+)
 			mc.connectAttr(srcAttr,dstAttr,f=True)
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	print('Successfully Connected Hubs: ["'+hub1+'" << >> "'+hub2+'"]')
 
 def connectCopy(hub):
@@ -180,6 +180,6 @@ def connectCopy(hub):
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	if not isHub(hub):
 		raise Exception('Object "'+hub+'" is not a valid connection hub node!')

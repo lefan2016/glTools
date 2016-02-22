@@ -34,79 +34,79 @@ def switchConstraint(	attachType,
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Attach Type
 	if not attachType in ['point','orient','parent','scale','all']:
 		raise Exception('Invalid attach type! ("'+attachType+'")')
-	
+
 	# Prefix
 	if not prefix: prefix = transform
-	
+
 	# Transform
 	if not mc.objExists(transform):
 		raise Exception('Transform "'+transform+'" does not exist!')
-	
+
 	# Target
 	for target in targetList:
 		if not mc.objExists(target):
 			raise Exception('Target transform "'+target+'" does not exist!')
-	
+
 	# Target Alias List
 	if not aliasList: aliasList = targetList
-	
+
 	# Switch Control
 	if switchCtrl and not mc.objExists(switchCtrl):
 		raise Exception('Switch control "'+switchCtrl+'" does not exist!')
-	
+
 	# =====================
 	# - Switch Attributes -
 	# =====================
-	
+
 	# Create Switch Attribute
 	if switchCtrl:
 		if not mc.objExists(switchCtrl+'.'+switchAttr):
 			mc.addAttr(switchCtrl,ln=switchAttr,at='enum',en=':'.join(aliasList),k=True)
-		
+
 	# ============================
 	# - Create Target Transforms -
 	# ============================
-	
+
 	# Initialize new target list
 	if createTarget:
-		
+
 		# For Each Target
 		cTargetList = []
 		for t in range(len(targetList)):
-			
+
 			# Duplicate transform to generate new target
 			cTarget = mc.createNode('transform',n=prefix+'_'+aliasList[t]+'_target')
 			glTools.utils.transform.match(cTarget,transform)
-			
+
 			# Parent Control Target to Current Constraint Target
 			try: cTarget = mc.parent(cTarget,targetList[t])[0]
 			except: raise Exception('Unable to parent target null "'+cTarget+'" to target transform "'+targetList[t]+'"!')
-			
+
 			# Target Display Override
 			glTools.utils.base.displayOverride(cTarget,overrideEnable=1,overrideDisplay=2)
-			
+
 			# Append to Target List
 			cTargetList.append(cTarget)
-		
+
 		# Update target list
 		targetList = cTargetList
-		
+
 		# Set Channel States
 		chStateUtil = glTools.utils.channelState.ChannelState()
 		chStateUtil.setFlags([2,2,2,2,2,2,2,2,2,2],objectList=targetList)
-	
+
 	# =====================
 	# - Create Constraint -
 	# =====================
-	
+
 	# Initialize scale constraint valiables ("all" only)
 	scaleConstraint = None
 	scaleWtAlias = []
-	
+
 	if attachType == 'point':
 		constraint = mc.pointConstraint(targetList,transform,mo=False,n=prefix+'_pointConstraint')[0]
 		wtAlias = mc.pointConstraint(constraint,q=True,wal=True)
@@ -124,41 +124,41 @@ def switchConstraint(	attachType,
 		wtAlias = mc.parentConstraint(constraint,q=True,wal=True)
 		scaleConstraint = mc.scaleConstraint(targetList,transform,mo=False,n=prefix+'_scaleConstraint')[0]
 		scaleWtAlias = mc.scaleConstraint(scaleConstraint,q=True,wal=True)
-	
+
 	# =============================
 	# - Connect to Switch Control -
 	# =============================
-	
+
 	if switchCtrl:
-	
+
 		# Initialize switch list
 		switchNodes = []
 		for i in range(len(targetList)):
-			
+
 			# Create Switch Node
 			switchNode = mc.createNode('condition',n=prefix+'_'+wtAlias[i]+'_condition')
-			
+
 			# Connect to switch attr
 			mc.connectAttr(switchCtrl+'.'+switchAttr,switchNode+'.firstTerm',f=True)
 			mc.setAttr(switchNode+'.secondTerm',i)
 			mc.setAttr(switchNode+'.operation',0) # Equal
 			mc.setAttr(switchNode+'.colorIfTrue',1,0,0)
 			mc.setAttr(switchNode+'.colorIfFalse',0,1,1)
-			
+
 			# Connect to constraint target weight
 			mc.connectAttr(switchNode+'.outColorR',constraint+'.'+wtAlias[i])
-			
+
 			# Connect to scale constraint, if necessary ("all" only)
 			if scaleConstraint:
 				mc.connectAttr(switchNode+'.outColorR',scaleConstraint+'.'+scaleWtAlias[i])
-			
+
 			# Append switch list
 			switchNodes.append(switchNode)
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return constraint
 
 def switchTargetVisibility(	switchConstraint,
@@ -177,38 +177,38 @@ def switchTargetVisibility(	switchConstraint,
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Check Constraint
 	if not glTools.utils.constraint.isConstraint(switchConstraint):
 		raise Exception('Object "'+switchConstraint+'" is not a valid constraint!')
-	
+
 	# ===============================
 	# - Get Switch Constraint Nodes -
 	# ===============================
-	
+
 	# Get Switch Conditions from Constraint
 	switchCond = mc.ls(mc.listConnections(switchConstraint,s=True,d=False),type='condition')
-	
+
 	# Get Switch Control from Conditions
 	switchAttr = list(set(mc.listConnections(switchCond,s=True,d=False,p=True)))
 	if len(switchAttr) > 1: raise Exception('Multiple input attributes driving switchConstraint "'+switchConstraint+'"!')
 	switchCtrl = mc.ls(switchAttr[0],o=True)[0]
 	switchAttr = switchAttr[0].split('.')[-1]
-	
+
 	# Get Switch Targets from Constraint
 	switchTargets = glTools.utils.constraint.targetList(switchConstraint)
 	switchAlias = mc.addAttr(switchCtrl+'.'+switchAttr,q=True,en=True).split(':')
-	
+
 	# =============================
 	# - Connect Target Visibility -
 	# =============================
-	
+
 	# Check Target Visibility Attribute
 	if not targetVisAttr: targetVisAttr = switchAttr+'Vis'
 	if not mc.objExists(switchCtrl+'.'+targetVisAttr):
 		mc.addAttr(switchCtrl,ln=targetVisAttr,at='enum',en='Off:On')
 		mc.setAttr(switchCtrl+'.'+targetVisAttr,cb=True,l=False)
-	
+
 	# Target Label Visibility
 	labelVisChoice = None
 	if targetLabels:
@@ -218,14 +218,14 @@ def switchTargetVisibility(	switchConstraint,
 		mc.setAttr(labelVisChoice+'.input[0]',0)
 		mc.setAttr(labelVisChoice+'.input[1]',0)
 		mc.setAttr(labelVisChoice+'.input[2]',1)
-	
+
 	# For Each Target
 	for t in range(len(switchTargets)):
-		
+
 		# Connect Display Handle Visibility
 		mc.setAttr(switchTargets[t]+'.displayHandle',1,l=True)
 		mc.connectAttr(switchCtrl+'.'+targetVisAttr,switchTargets[t]+'.v',f=True)
-		
+
 		# Connect Target Label Visibility
 		if targetLabels:
 			labelShape = mc.createNode('annotationShape',n=switchTargets[t]+'Shape',p=switchTargets[t])

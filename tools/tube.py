@@ -33,17 +33,17 @@ def buildSubCurveDetach(crv):
 	'''
 	# Get Prefix
 	prefix = glTools.utils.stringUtils.stripSuffix(crv)
-	
+
 	# Prep Curve
 	mc.rebuildCurve(crv,ch=False,rpo=True,rt=0,end=1,kr=0,kcp=1,kep=1,kt=0,s=0,d=3)
 	mc.delete(crv,ch=True)
-	
+
 	# Detach Curve
 	detach = mc.detachCurve(crv,p=(0.001,0.999),k=(0,1,0),rpo=False)
 	detachCrv = detach[1]
 	detachNode = detach[-1]
 	mc.delete(detach[0],detach[2])
-	
+
 	# Connect Detach Min/Max
 	mc.addAttr(subCrv,ln='min',min=0,max=0.999,dv=0,k=True)
 	mc.addAttr(subCrv,ln='max',min=0.001,max=1,dv=1,k=True)
@@ -61,7 +61,7 @@ def buildSubCurveDetach(crv):
 	mc.setAttr(minMaxClamp+'.max',0.9999,0,0)
 	mc.connectAttr(minMaxClamp+'.outputR',detachNode+'.parameter[0]',f=True)
 	mc.connectAttr(minMaxClamp+'.outputB',detachNode+'.parameter[1]',f=True)
-	
+
 	# Return Result
 	return detachCrv
 
@@ -70,10 +70,10 @@ def buildCurveRig(crv):
 	'''
 	# Get Prefix
 	prefix = glTools.utils.stringUtils.stripSuffix(crv)
-	
+
 	# Build Joints
 	pts = glTools.utils.base.getPointArray(crv)
-	
+
 	jnts = []
 	mc.select(cl=True)
 	for i in range(len(pts)):
@@ -81,11 +81,11 @@ def buildCurveRig(crv):
 		jnt = mc.joint(p=pts[i],n=prefix+'_fk'+ind+'_jnt')
 		mc.joint()
 		mc.select(jnt)
-	
+
 	# Orient Joints
-	
+
 	# Build FK
-	
+
 	# Build Offset
 
 def buildSubCurve(crv):
@@ -96,28 +96,28 @@ def buildSubCurve(crv):
 	subCrvShape = mc.createNode('nurbsCurve',n=prefix+'_subCrvShape')
 	subCrv = mc.listRelatives(subCrvShape,p=True,pa=True)[0]
 	subCrvNode = mc.createNode('subCurve',n=prefix+'_subCurve')
-	
+
 	# Connect Sub Curve
 	mc.connectAttr(crv+'.worldSpace[0]',subCrvNode+'.inputCurve',f=True)
 	mc.connectAttr(subCrvNode+'.outputCurve',subCrvShape+'.create',f=True)
-	
+
 	# Connect Sub Curve Min/Max
 	mc.addAttr(subCrv,ln='min',min=0,max=0.999,dv=0,k=True)
 	mc.addAttr(subCrv,ln='max',min=0.001,max=1,dv=1,k=True)
 	mc.connectAttr(subCrv+'.min',subCrvNode+'.minValue',f=True)
 	mc.connectAttr(subCrv+'.max',subCrvNode+'.maxValue',f=True)
 	mc.setAttr(subCrvNode+'.relative',1)
-	
+
 	# Return Result
 	return subCrv
-	
+
 def resetCV(cvs):
 	'''
 	'''
 	# Check CVs
 	if not cvs: return None
 	cvList = mc.filterExpand(cvs,ex=True,sm=28)
-	
+
 	# Reset CVs
 	for cv in cvList:
 		crv = mc.ls(cv,o=True)[0]
@@ -132,22 +132,22 @@ def attachCurve(base,crv,cleanup=True):
 	# Get Spans
 	spans = mc.getAttr(crv+'.spans')
 	mc.setAttr(base+'.spans',spans)
-	
+
 	# Match Shape
 	shapeOrig = base+'ShapeOrig'
 	mc.setAttr(shapeOrig+'.intermediateObject',0)
 	mc.rebuildCurve(shapeOrig,ch=True,rpo=True,rt=0,end=1,kr=0,kcp=0,kep=1,kt=0,s=spans,d=3)
 	bs = mc.blendShape(crv,shapeOrig)[0]
 	mc.setAttr(bs+'.w[0]',1)
-	
+
 	# Delete Orig
 	if cleanup:
 		mc.delete(shapeOrig,ch=True)
 		mc.delete(crv)
-	
+
 	# Restore Intermediate Shape
 	mc.setAttr(shapeOrig+'.intermediateObject',1)
-	
+
 	# Return Result
 	return
 
@@ -175,7 +175,7 @@ def addDropoffControls(locs,prefix):
 		mc.addAttr(ctrl,ln='bulge',min=-1,dv=0,k=True)
 		mc.connectAttr(ctrl+'.param',locs[i]+'.param['+str(ind)+']',f=True)
 		mc.connectAttr(ctrl+'.bulge',wire+'.wireLocatorEnvelope['+str(ind)+']',f=True)
-	
+
 
 
 def buildTube(	crv
@@ -197,7 +197,7 @@ def buildTube(	crv
 		scale	= 1,
 		rsp	= 1
 		)
-	
+
 	# Polygon Tube
 	mc.extrude(
 		ch	= True,

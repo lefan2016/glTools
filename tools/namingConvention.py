@@ -1,9 +1,9 @@
 import re
 
 class NamingConvention( object ):
-	
+
 	def __init__(self):
-		
+
 		# Base Hierarchy
 		self.base = {}
 		self.base['all'] = 'all'
@@ -15,14 +15,14 @@ class NamingConvention( object ):
 		self.base['orientOffset'] = 'orientOffset'
 		self.base['supermover'] = 'supermover'
 		self.base['xform'] = 'xform'
-		
+
 		# Valid name elements
 		self.namePattern = ['[a-z]{2}','[a-z]{3}\d{2}','[a-z]{2}\d{2}','[a-z]{3}']
 		self.elemCount = (3,5)
-		
+
 		# Delineator
 		self.delineator = '_'
-		
+
 		# Side
 		self.side = {}
 		self.side['center'] = 'cn'
@@ -37,7 +37,7 @@ class NamingConvention( object ):
 		self.side['high'] = 'hi'
 		self.side['low'] = 'lo'
 		self.side['middle'] = 'md'
-		
+
 		# Part
 		self.part = {}
 		self.part['ankle'] = 'ank'
@@ -87,7 +87,7 @@ class NamingConvention( object ):
 		self.part['whisker'] = 'wsk'
 		self.part['wing'] = 'wng'
 		self.part['wrist'] = 'wst'
-		
+
 		# Sub Part
 		self.subPart = {}
 		self.subPart['ankle'] = 'an'
@@ -140,7 +140,7 @@ class NamingConvention( object ):
 		self.subPart['wire'] = 'wi'
 		self.subPart['wireBase'] = 'wb'
 		self.subPart['wrist'] = 'wr'
-		
+
 		# Node Type
 		self.node = {}
 		self.node['addDoubleLinear'] = 'adl'
@@ -231,7 +231,7 @@ class NamingConvention( object ):
 		self.node['vectorProduct'] = 'vpn'
 		self.node['wire'] = 'wir'
 		self.node['wrap'] = 'wrp'
-		
+
 	def getName(self,side='',part='',optSide='',subPart='',node='',optSideIndex=1,partIndex=1,subPartIndex=1):
 		'''
 		Return a valid control name based on the provided input argument values
@@ -260,7 +260,7 @@ class NamingConvention( object ):
 			if not self.side.has_key(optSide): raise UserInputError('Invalid otional side ("'+optSide+'") provided!')
 		if subPart:
 			if not self.subPart.has_key(subPart): raise UserInputError('Invalid sub-part name ("'+subPart+'") provided!')
-		
+
 		#---------------------
 		# Get index variables
 		optSideInd = str(optSideIndex)
@@ -269,7 +269,7 @@ class NamingConvention( object ):
 		if partIndex < 10: partInd = '0'+partInd
 		subPartInd = str(subPartIndex)
 		if subPartIndex < 10: subPartInd = '0'+subPartInd
-		
+
 		# Build name string1.00
 		#-------------------
 		# Side
@@ -293,9 +293,9 @@ class NamingConvention( object ):
 			nameStr += self.delineator # -
 		# Node type
 		if node: nameStr += self.node[node]
-		
+
 		return nameStr
-	
+
 	def isValid(self,name):
 		'''
 		Compare a name string against the naming convention string patterns
@@ -311,7 +311,7 @@ class NamingConvention( object ):
 		if nameStrCount > self.elemCount[1]:
 			print 'Name element count ('+str(nameStrCount)+') is higher than the maximum ('+str(self.elemCount[1])+') expected by the naming conventions (3-5)!'
 			return False
-		
+
 		# Check prefix
 		if nameElem[0] != re.search(self.namePattern[0],nameElem[0]).group(0):
 			print 'Prefix string ("'+nameElem[0]+'") does not match naming convention pattern (xx)!'
@@ -333,7 +333,7 @@ class NamingConvention( object ):
 		if nameElem[-1] != re.search(self.namePattern[3],nameElem[-1]).group(0):
 			print 'Suffix string ("'+nameElem[-1]+'") does not match naming convention pattern (xxx)!'
 			return False
-		
+
 		# Build regular expression match string
 		regExpStr = self.namePattern[0]+self.delineator			# Prefix: Side
 		regExpStr += self.namePattern[1]+self.delineator		# Part
@@ -342,19 +342,19 @@ class NamingConvention( object ):
 		if nameStrCount > 4:
 			regExpStr += self.namePattern[2]+self.delineator	# OptionalSide / SubPart
 		regExpStr += self.namePattern[-1]				# Suffix: NodeType
-		
+
 		# Match name to expression string
 		match = re.search(regExpStr,name)
 		if not name == match.group(0):
 			print 'Name string pattern does not match naming convention!'
 			return False
-		
+
 		# Return result
 		return True
-	
+
 	def appendName(self,name='',appendString='',stripNameSuffix=False,trimName=False):
 		'''
-		Return a string name based on an original name and an append string. There are options to 
+		Return a string name based on an original name and an append string. There are options to
 		maintain string element count to satisfy the naming convention rules.
 		@param name: Original name string to append to
 		@type name: str
@@ -372,12 +372,12 @@ class NamingConvention( object ):
 		# Check append string
 		appendElem = appendString.split(self.delineator)
 		appendStrCount = len(appendElem)
-		
+
 		# Determine string intersection point
 		if trimName and (nameStrCount + appendStrCount) > self.elemCount[1]:
 			maxNameIndex = self.elemCount[1] - appendStrCount
 		else:	maxNameIndex = nameStrCount
-		
+
 		# Build new name string
 		newName = ''
 		for i in range(maxNameIndex):
@@ -385,10 +385,10 @@ class NamingConvention( object ):
 		for i in range(appendStrCount-1):
 			newName += appendElem[i]+self.delineator
 		newName += appendElem[-1]
-		
+
 		# Return new name
 		return newName
-	
+
 	def stripSuffix(self,name,delineator=''):
 		'''
 		Return the portion of name minus the last element separated by the name delineator.
@@ -408,7 +408,7 @@ class NamingConvention( object ):
 		newName = name.replace(self.delineator+suffix,'')
 		# Return result
 		return newName
-	
+
 	def stringIndex(self,index,padding=2):
 		'''
 		Return the string equivalent for the specified iteger index.

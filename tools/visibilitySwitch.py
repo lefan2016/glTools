@@ -9,7 +9,7 @@ def create(	switchObject,
 			prefix = ''	):
 	'''
 	Create a enumerated visibility switch based on the input arguments
-	@param switchObject: Object to add switch attribute to 
+	@param switchObject: Object to add switch attribute to
 	@type switchObject: str
 	@param switchAttr: Switch attribute name
 	@type switchAttr: str
@@ -28,11 +28,11 @@ def create(	switchObject,
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Check switchObject
 	if not mc.objExists(switchObject):
 		raise Exception('Switch object "'+switchObject+'" does not exist!')
-	
+
 	# Compare target and enum list
 	if not visTargetList or not visEnumList:
 		raise Exception('Visibility target or enum list has zero elements!')
@@ -42,21 +42,21 @@ def create(	switchObject,
 	if visIndexList:
 		if len(visTargetList) != len(visIndexList):
 			raise Exception('Visibility target and index list length mis-match!')
-	
+
 	# =================================
 	# - Create Visibility Switch Attr -
 	# =================================
-	
+
 	# Check Visibility Switch Attr
 	if not mc.objExists(switchObject+'.'+switchAttr):
-		
+
 		# Build Enum Value
 		visEnum = ''
 		for i in visEnumList: visEnum += i+':'
 		# Add switch attr
 		mc.addAttr(switchObject,ln=switchAttr,nn=switchName,at='enum',en=visEnum)
 		mc.setAttr(switchObject+'.'+switchAttr,e=True,cb=True)
-	
+
 	# Create Custom Visibility Index (choice)
 	vis_choice = ''
 	if visIndexList:
@@ -66,43 +66,43 @@ def create(	switchObject,
 		for i in range(len(visIndexList)):
 			mc.setAttr(vis_choice+'.visIndex['+str(i)+']',visIndexList[i])
 			mc.connectAttr(vis_choice+'.visIndex['+str(i)+']',vis_choice+'.input['+str(i)+']',f=True)
-	
+
 	# ======================
 	# - Connect Visibility -
 	# ======================
-	
+
 	for i in range(len(visEnumList)):
-		
+
 		# Check visTargetList
 		if not visTargetList[i]: continue
-		
+
 		# Create Condition Node
 		conditionNode = mc.createNode('condition',n=prefix+'_'+visEnumList[i]+'Vis_condition')
 		mc.setAttr(conditionNode+'.firstTerm',i)
 		mc.setAttr(conditionNode+'.colorIfTrue',1,0,1)
 		mc.setAttr(conditionNode+'.colorIfFalse',0,1,0)
-		
+
 		# Connect Condition Node
 		conditionInput = switchObject+'.'+switchAttr
 		if visIndexList: conditionInput = vis_choice+'.output'
 		mc.connectAttr(conditionInput,conditionNode+'.secondTerm',f=True)
-		
+
 		# Connect Each Item in List - Vis ON
 		for obj in visTargetList[i]:
-			
+
 			# Check visibility attr
 			if not mc.objExists(obj+'.v'):
 				raise Exception('Object "'+obj+'" has no visibility attribute!')
 			if not mc.getAttr(obj+'.v',se=True):
 				raise Exception('Attribute "'+obj+'.v" is locked or has incoming connections!')
-			
+
 			# Connect attribute
 			mc.connectAttr(conditionNode+'.outColorR',obj+'.v',f=True)
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return (switchObject+'.'+switchAttr)
 
 def createEmpty(	switchObject,
@@ -112,7 +112,7 @@ def createEmpty(	switchObject,
 					prefix = ''	):
 	'''
 	Create a enumerated visibility switch based on the input arguments
-	@param switchObject: Object to add switch attribute to 
+	@param switchObject: Object to add switch attribute to
 	@type switchObject: str
 	@param switchAttr: Switch attribute name
 	@type switchAttr: str
@@ -126,27 +126,27 @@ def createEmpty(	switchObject,
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Check switchObject
 	if not mc.objExists(switchObject):
 		raise Exception('Switch object "'+switchObject+'" does not exist!')
-	
+
 	# =================================
 	# - Create Visibility Switch Attr -
 	# =================================
-	
+
 	# Check Visibility Switch Attr
 	if not mc.objExists(switchObject+'.'+switchAttr):
-		
+
 		# Build Enum Value
 		visEnum = ''
 		for i in visEnumList: visEnum += i+':'
 		# Add switch attr
 		mc.addAttr(switchObject,ln=switchAttr,nn=switchName,at='enum',en=visEnum)
 		mc.setAttr(switchObject+'.'+switchAttr,e=True,cb=True)
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return (switchObject+'.'+switchAttr)

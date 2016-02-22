@@ -10,6 +10,6 @@ def replaceGeometryFromUI():
 	if len(sel) != 2:
 		print('Incorrect selection! First select the replacement geometry and then the geometry to be replaced!!')
 		return
-	
+
 	# Replace geometry
 	glTools.utils.geometry.replace(sel[0],sel[1])

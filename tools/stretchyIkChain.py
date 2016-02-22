@@ -25,38 +25,38 @@ def build(ikHandle,scaleAxis='x',scaleAttr='',blendControl='',blendAttr='stretch
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# IkHandle
 	if not mc.objExists(ikHandle): raise Exception('IK handle '+ikHandle+' does not exist!')
-	
+
 	# Blend
 	blend = mc.objExists(blendControl)
 	if blend and not mc.objExists(blendControl+'.'+blendAttr):
 			mc.addAttr(blendControl,ln=blendAttr,at='double',min=0,max=1,dv=1)
 			mc.setAttr(blendControl+'.'+blendAttr,e=True,k=True)
 	blendAttr = blendControl+'.'+blendAttr
-	
+
 	# Prefix
 	if not prefix: prefix = glTools.utils.stringUtils.stripSuffix(ikHandle)
-	
+
 	# =====================
 	# - Get IkHandle Info -
 	# =====================
-	
+
 	# Get IK chain information
 	ikJoints = glTools.utils.ik.getAffectedJoints(ikHandle)
 	ikPos = mc.getAttr(ikHandle+'.t')[0]
-	
+
 	# Calculate actual joint lengths
 	lengthNode = mc.createNode('plusMinusAverage',n=prefix+'length_plusMinusAverage')
 	for j in range(len(ikJoints)-1):
 		mc.connectAttr(ikJoints[j+1]+'.t'+scaleAxis,lengthNode+'.input1D['+str(j)+']')
-	
+
 	# Calculate Distance
 	distNode = mc.createNode('distanceBetween',n=prefix+'_distanceBetween')
 	mc.connectAttr(ikJoints[0]+'.parentMatrix[0]',distNode+'.inMatrix1',f=True)
 	mc.connectAttr(ikHandle+'.parentMatrix[0]',distNode+'.inMatrix2',f=True)
-	
+
 	# -------------!!!!!!!!!!
 	# Currently setting the translate attributes instead of connecting.
 	# Direct connection was causing cycle check warnings
@@ -66,16 +66,16 @@ def build(ikHandle,scaleAxis='x',scaleAttr='',blendControl='',blendAttr='stretch
 	#mc.connectAttr(ik_joint[0]+'.t',distNode+'.point1',f=True)
 	#mc.connectAttr(ikHandle+'.t',distNode+'.point2',f=True)
 	# -------------
-	
+
 	# ===========
 	# - Stretch -
 	# ===========
-	
+
 	# Calculate Stretch Scale Factor
 	stretchNode = mc.createNode('multiplyDivide',n=prefix+'_stretch_multiplyDivide')
 	mc.setAttr(stretchNode+'.operation',2) # Divide
 	mc.connectAttr(distNode+'.distance',stretchNode+'.input1X',f=True)
-	
+
 	# Add Scale Compensation
 	scaleNode = ''
 	if mc.objExists(scaleAttr):
@@ -85,7 +85,7 @@ def build(ikHandle,scaleAxis='x',scaleAttr='',blendControl='',blendAttr='stretch
 		mc.connectAttr(scaleNode+'.output',stretchNode+'.input2X',f=True)
 	else:
 		mc.connectAttr(lengthNode+'.output1D',stretchNode+'.input2X',f=True)
-	
+
 	# Condition
 	condNode = ''
 	if not shrink:
@@ -100,11 +100,11 @@ def build(ikHandle,scaleAxis='x',scaleAttr='',blendControl='',blendAttr='stretch
 		# Set condition results
 		mc.connectAttr(stretchNode+'.outputX',condNode+'.colorIfTrueR',f=True)
 		mc.setAttr(condNode+'.colorIfFalseR',1)
-	
+
 	# =========
 	# - Blend -
 	# =========
-	
+
 	blendNode = ''
 	if blend:
 		blendNode = mc.createNode('blendTwoAttr',n=prefix+'_blend_blendTwoAttr')
@@ -113,11 +113,11 @@ def build(ikHandle,scaleAxis='x',scaleAttr='',blendControl='',blendAttr='stretch
 		mc.setAttr(blendNode+'.input[0]',1.0)
 		if shrink: mc.connectAttr(stretchNode+'.outputX',blendNode+'.input[1]',f=True)
 		else: mc.connectAttr(condNode+'.outColorR',blendNode+'.input[1]',f=True)
-	
+
 	# =====================
 	# - Connect To Joints -
 	# =====================
-	
+
 	# Attach output to joint scale
 	for i in range(len(ikJoints)-1):
 		if blend:
@@ -125,13 +125,13 @@ def build(ikHandle,scaleAxis='x',scaleAttr='',blendControl='',blendAttr='stretch
 		else:
 			if shrink: mc.connectAttr(stretchNode+'.outputX',ikJoints[i]+'.s'+scaleAxis,f=True)
 			else: mc.connectAttr(condNode+'.outColorR',ikJoints[i]+'.s'+scaleAxis,f=True)
-	
+
 	# Set ikHandle position. Make sure IK handle evaluates correctly!
 	mc.setAttr(ikHandle+'.t',ikPos[0],ikPos[1],ikPos[2])
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	result = [lengthNode,distNode,stretchNode,scaleNode,condNode,blendNode]
 	return result

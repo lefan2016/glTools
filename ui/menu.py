@@ -8,47 +8,47 @@ def create():
 	# This is a temporary hack to get maya to evaluate $gMainWindow
 	gMainWindow = mm.eval('string $temp = $gMainWindow')
 	if mc.menu('rigToolsMenu',q=True,ex=True): mc.deleteUI('rigToolsMenu')
-	
+
 	if (len(gMainWindow)):
 		mc.setParent(gMainWindow)
 		mc.menu('rigToolsMenu', label='Rig Tools', tearOff=True, allowOptionBoxes=True)
-		
+
 		#----------------------------------------#
-		
+
 		# > CHECKS
 		mc.menuItem(label='Checks', subMenu=True, tearOff=True)
-		
+
 		mc.menuItem(label='Run Checks', command='import glTools.spotcheck.runChecks;reload(glTools.spotcheck.runChecks);glTools.spotcheck.runChecks.run(envKey="IKA_RIG_SPOTCHECKS",checkTitle="Rig Checks",selectedNodes=False)')
 		mc.menuItem(label='Run Checks On Selected', command='import glTools.spotcheck.runChecks;reload(glTools.spotcheck.runChecks);glTools.spotcheck.runChecks.run(envKey="IKA_RIG_SPOTCHECKS",checkTitle="Rig Checks",selectedNodes=True)')
 		mc.menuItem(divider=True)
 		mc.menuItem(label='Check NonReference Geo Inputs', command='import glTools.tools.fixNonReferenceInputShape;reload(glTools.tools.fixNonReferenceInputShape);glTools.tools.fixNonReferenceInputShape.checkNonReferenceInputShapes(mc.ls(sl=1)[0],verbose=True)')
-		
+
 		mc.setParent('..', menu=True)
-		
+
 		#----------------------------------------#
-		
+
 		# > FIXES
 		mc.menuItem(label='Fixes', subMenu=True, tearOff=True)
-		
+
 		mc.menuItem(label='Fix NonReference Geo Inputs', command='import glTools.tools.fixNonReferenceInputShape;reload(glTools.tools.fixNonReferenceInputShape);glTools.tools.fixNonReferenceInputShape.fixNonReferenceInputShapes(mc.ls(sl=1)[0],verbose=True)')
-		
+
 		mc.setParent('..', menu=True)
-		
+
 		# > MENU
-		
+
 		mc.menuItem(label='Menu', subMenu=True, tearOff=True)
-		
+
 		mc.menuItem(label='Create Surface Skin Menu', command='import glTools.surfaceSkin; glTools.surfaceSkin.SurfaceSkinUI().menu()')
-		
+
 		mc.setParent('..', menu=True)
-		
+
 		#----------------------------------------#
-		
+
 		mc.menuItem(divider=True)
-		
+
 		# > GENERAL
 		mc.menuItem(allowOptionBoxes=True, label='General', subMenu=True, tearOff=True)
-		
+
 		mc.menuItem(label='Renamer', command='mm.eval("renamer")',ann='Open Renamer UI')
 		mc.menuItem(label='Colorize UI', command='mm.eval("colorize")',ann='Open Colorizer UI')
 		mc.menuItem(label='Set Colour', command='import glTools.utils.colorize;reload(glTools.utils.colorize);[glTools.utils.colorize.setColour(i) for i in mc.ls(sl=1)]',ann='Set colours based on object naming')
@@ -67,90 +67,90 @@ def create():
 		mc.menuItem(label='Attribute Presets', command='glTools.ui.attrPreset.ui()',ann='Open attribute presets UI')
 		mc.menuItem(label='Swap Nodes', command='import glTools.utils.connection;reload(glTools.utils.connection);glTools.utils.connection.swap(mc.ls(sl=1)[0],mc.ls(sl=1)[1])',ann='Swap Node Connections')
 		mc.menuItem(label='Delete Unknown Nodes',command='import glTools.utils.cleanup;reload(glTools.utils.cleanup);glTools.utils.cleanup.deleteUnknownNodes()',ann='Delete all "unknown" nodes')
-		
+
 		mc.menuItem(label='Match Transform', command='import glTools.utils.transform;reload(glTools.utils.transform);sel=mc.ls(sl=1);glTools.utils.transform.match(sel[0],sel[1])',ann='Match first selected transform to second selected transform')
 		mc.menuItem(label='Match Bounding Box', command='import glTools.utils.boundingBox;reload(glTools.utils.boundingBox);sel=mc.ls(sl=1);glTools.utils.boundingBox.match(sel[0],sel[1])',ann='Match first selected transform to second selected transform based on bounding box comparison')
 		#mc.menuItem(label='Match Position', command='import glTools.utils.transform;reload(glTools.utils.transform);sel=mc.ls(sl=1);glTools.utils.transform.match(sel[0],sel[1])',ann='Match first selected object position to second selected object')
 		#mc.menuItem(label='Match Orientation', command='import glTools.utils.transform;reload(glTools.utils.transform);sel=mc.ls(sl=1);glTools.utils.transform.match(sel[0],sel[1])',ann='Match first selected object orientation/rotation to second selected object')
 		#mc.menuItem(label='Match Scale', command='import glTools.utils.transform;reload(glTools.utils.transform);sel=mc.ls(sl=1);glTools.utils.transform.match(sel[0],sel[1])',ann='Match first selected object scale to second selected object')
-		
+
 		# >> MATCH ATTRIBUTES
 		mc.menuItem(allowOptionBoxes=True, label='Match Attrs', subMenu=True, tearOff=True)
-		
+
 		mc.menuItem(label='Match All', command='import glTools.tools.match;reload(glTools.tools.match);sel=mc.ls(sl=1);glTools.tools.match.matchAttrs(sel[0],sel[1],["tx","ty","tz","rx","ry","rz","sx","sy","sz"])',ann='Match all local transform values')
 		mc.menuItem(label='Match Translate', command='import glTools.tools.match;reload(glTools.tools.match);sel=mc.ls(sl=1);glTools.tools.match.matchAttrs(sel[0],sel[1],["tx","ty","tz"])',ann='Match local translate values')
 		mc.menuItem(label='Match Rotate', command='import glTools.tools.match;reload(glTools.tools.match);sel=mc.ls(sl=1);glTools.tools.match.matchAttrs(sel[0],sel[1],["rx","ry","rz"])',ann='Match local rotate values')
 		mc.menuItem(label='Match Scale', command='import glTools.tools.match;reload(glTools.tools.match);sel=mc.ls(sl=1);glTools.tools.match.matchAttrs(sel[0],sel[1],["sx","sy","sz"])',ann='Match local scale values')
 		mc.menuItem(label='Match From CB', command='import glTools.tools.match;reload(glTools.tools.match);sel=mc.ls(sl=1);glTools.tools.match.matchAttrs(sel[0],sel[1],"fromChannelBox")',ann='Match all values based on channel selection (channelBox)')
-		
+
 		mc.setParent('..', menu=True)
-		
+
 		mc.menuItem(label='Graph Profiler', command='import glTools.ui.qt.graphProfiler;reload(glTools.ui.qt.graphProfiler);glTools.ui.qt.graphProfiler.GraphProfiler().show()',ann='Tools to Collect and Display Dependency Graph Data')
-		
+
 		mc.setParent('..', menu=True)
-		
+
 		# > TOOLS
 		mc.menuItem(allowOptionBoxes=True, label='Tools', subMenu=True, tearOff=True)
-		
+
 		mc.menuItem(label='Center Pt Locator', command='import glTools.tools.center;reload(glTools.tools.center);glTools.tools.center.centerPointLocator(mc.ls(sl=True,fl=True))',ann='Create locator at center of point selection.')
 		mc.menuItem(label='Center to Geometry', command='import glTools.tools.center;reload(glTools.tools.center);sel = mc.ls(sl=True,fl=True);glTools.tools.center.centerToGeometry(sel[0],sel[1])',ann='Select the geometry and the object to position.')
 		mc.menuItem(label='Center to Points', command='import glTools.tools.center;reload(glTools.tools.center);sel = mc.ls(sl=True,fl=True);glTools.tools.center.centerToPoints(sel[:-1],sel[-1])',ann='Select the points and the object to position.')
 		mc.menuItem(label='Point Face Mesh', command='import glTools.tools.pointFaceMesh;reload(glTools.tools.pointFaceMesh);glTools.tools.pointFaceMesh.pointFaceMesh(mc.ls(sl=True,fl=True),combine=False)',ann='Create single mesh face at each point in selection.')
-		
+
 		mc.menuItem(label='Slide Deformer', command='import glTools.model.utils;reload(glTools.model.utils);[glTools.model.utils.slideDeformer(i) for i in mc.ls(sl=1)]')
 		mc.menuItem(label='Strain Relaxer', command='import glTools.model.utils;reload(glTools.model.utils);[glTools.model.utils.strainRelaxer(i) for i in mc.ls(sl=1)]')
 		mc.menuItem(label='Directional Smooth', command='import glTools.model.utils;reload(glTools.model.utils);[glTools.model.utils.directionalSmooth(i) for i in mc.ls(sl=1)]')
 		mc.menuItem(label='Delta Mush', command='import glTools.model.utils;reload(glTools.model.utils);[glTools.model.utils.deltaMush(i) for i in mc.ls(sl=1)]')
-		
+
 		mc.setParent('..', menu=True)
-		
+
 		# > SELECTION
 		mc.menuItem(allowOptionBoxes=True, label='Select', subMenu=True, tearOff=True)
-		
+
 		mc.menuItem(label='Select Hierarchy', command='mm.eval("SelectHierarchy")')
-		
+
 		mc.menuItem(allowOptionBoxes=True, label='Select All Below (by type)', subMenu=True, tearOff=True)
 		mc.menuItem(label='constraint', command='mc.select(mc.ls(mc.listRelatives(ad=True,pa=True) or [],type="constraint"))')
 		mc.menuItem(label='ikHandle', command='mc.select(mc.ls(mc.listRelatives(ad=True,pa=True) or [],type="ikHandle"))')
 		mc.menuItem(label='joint', command='mc.select(mc.ls(mc.listRelatives(ad=True,pa=True) or [],type="joint"))')
-		
+
 		mc.setParent('..', menu=True)
-		
+
 		mc.menuItem(allowOptionBoxes=True, label='Select Directly Below (by type)', subMenu=True, tearOff=True)
 		mc.menuItem(label='constraint', command='mc.select(mc.ls(mc.listRelatives(c=True,pa=True) or [],type="constraint"))')
 		mc.menuItem(label='ikHandle', command='mc.select(mc.ls(mc.listRelatives(c=True,pa=True) or [],type="ikHandle"))')
 		mc.menuItem(label='joint', command='mc.select(mc.ls(mc.listRelatives(c=True,pa=True) or [],type="joint"))')
-		
+
 		mc.setParent('..', menu=True)
 		mc.menuItem(label='Mirror Polygon Selection', command='import glTools.utils.edgeFlowMirror;reload(glTools.utils.edgeFlowMirror);glTools.utils.edgeFlowMirror.mirrorSelection()')
-		
+
 		mc.setParent('..', menu=True)
-		
+
 		mc.setParent('..', menu=True)
-		
+
 		# > REFERENCE
 		mc.menuItem(allowOptionBoxes=True, label='Reference', subMenu=True, tearOff=True)
-		
+
 		mc.menuItem(label='Reload Reference', command='import glTools.anim.reference_utils;reload(glTools.anim.reference_utils);glTools.anim.reference_utils.reloadSelected()')
 		mc.menuItem(label='Unload Reference', command='import glTools.anim.reference_utils;reload(glTools.anim.reference_utils);glTools.anim.reference_utils.unloadSelected()')
 		mc.menuItem(label='Remove Reference', command='import glTools.anim.reference_utils;reload(glTools.anim.reference_utils);glTools.anim.reference_utils.removeSelected(removeNS=False)')
 		mc.menuItem(label='Remove Reference and NS', command='import glTools.anim.reference_utils;reload(glTools.anim.reference_utils);glTools.anim.reference_utils.removeSelected(removeNS=True)')
 		mc.menuItem(label='Remove Unloaded References', command='import glTools.utils.reference;reload(glTools.utils.reference);glTools.utils.reference.removeUnloadedReferences()')
 		mc.menuItem(label='Remove Reference Edits', command='import glTools.tools.removeReferenceEdits;reload(glTools.tools.removeReferenceEdits);glTools.tools.removeReferenceEdits.removeReferenceEditsUI()')
-		
+
 		mc.setParent('..', menu=True)
-		
+
 		# > SHADER
 		mc.menuItem(allowOptionBoxes=True, label='Shader', subMenu=True, tearOff=True)
-		
+
 		mc.menuItem(label='Apply Reference Shader', command='import glTools.utils.shader;reload(glTools.utils.shader);[glTools.utils.shader.applyReferencedShader(i) for i in mc.ls(sl=1)]')
 		mc.menuItem(label='Reconnect Shader', command='import glTools.utils.shader;reload(glTools.utils.shader);[glTools.utils.shader.reconnectShader(i) for i in mc.ls(sl=1)]')
-		
+
 		mc.setParent('..', menu=True)
-		
+
 		# > RIG
 		mc.menuItem(allowOptionBoxes=True, label= 'Rig', subMenu=True, tearOff=True)
-		
+
 		#mc.menuItem(label='Create Base Rig', command='glTools.builder.BaseRig().build()')
 		mc.menuItem(label='Rename Chain', command='import glTools.utils.base;reload(glTools.utils.base);glTools.utils.base.renameChain(mc.ls(sl=1,l=False)[0])',ann='Rename the selected joint hierarchy')
 		mc.menuItem(label='Control Builder', command='glTools.ui.controlBuilder.controlBuilderUI()',ann='Open ControlBuilder UI')
@@ -159,10 +159,10 @@ def create():
 		mc.menuItem(label='Replace Geometry', command='glTools.ui.replaceGeometry.replaceGeometryFromUI()', ann='First select the replacement geometry and then the geometry to be replaced.')
 		mc.menuItem(label='Create Bind Joint Set', command='mc.sets(mc.ls("*.bindJoint",o=True),n="bindJoints")', ann='Create a bindJoints set for all tagged bind joints. ("*.bindJoint")')
 		mc.menuItem(label='Clean Rig', command='import glTools.rig.cleanup;reload(glTools.rig.cleanup);glTools.rig.cleanup.clean()',ann='Clean Rig Workfile')
-		
+
 		# > > Flatten Scene
 		mc.menuItem(allowOptionBoxes=True, label= 'Flatten Scene', subMenu=True, tearOff=True)
-		
+
 		mc.menuItem(label='Flatten Scene', command='import glTools.tools.flattenScene;reload(glTools.tools.flattenScene);glTools.tools.flattenScene.flatten()',ann='Flatten Scene - Import all references and delete all namespaces etc.')
 		#----------------------------------------#
 		mc.menuItem(divider =True)
@@ -173,12 +173,12 @@ def create():
 		mc.menuItem(label='Add Delete History Attr', command='import glTools.tools.flattenScene;reload(glTools.tools.flattenScene);[glTools.tools.flattenScene.addDeleteHistoryAttr(i) for i in mc.ls(sl=True,dag=True)]',ann='Add "deleteHistoryOnFlatten" attribute based on current selection.')
 		mc.menuItem(label='Add Reference Path Attr', command='import glTools.tools.flattenScene;reload(glTools.tools.flattenScene);[glTools.tools.flattenScene.addReferencePathAttr(i) for i in mc.ls(sl=True)]',ann='Add "fixNonReferenceInputsRoot" attribute based on current selection.')
 		mc.menuItem(label='Add Fix NonReference Inputs Attr', command='import glTools.tools.flattenScene;reload(glTools.tools.flattenScene);[glTools.tools.flattenScene.addFixNonReferenceInputAttr(i) for i in mc.ls(sl=True)]',ann='Add "encodeReferenceFilePath" attribute based on current selection.')
-		
+
 		mc.setParent('..', menu=True)
-		
+
 		# > > Channel State
 		mc.menuItem(allowOptionBoxes=True, label= 'Channel State', subMenu=True, tearOff=True)
-		
+
 		mc.menuItem(label='Channel State', command='import glTools.utils.channelState; reload(glTools.utils.channelState); glTools.utils.channelState.ChannelState().ui()',ann='Open ChannelState UI')
 		mc.menuItem(divider=True)
 		mc.menuItem(label='Record Visibility State', command='import glTools.utils.defaultAttrState;reload(glTools.utils.defaultAttrState);glTools.utils.defaultAttrState.recordVisibility(mc.listRelatives("all",ad=True))',ann='Record default visibility state for all nodes under rig root node ("all").')
@@ -189,24 +189,24 @@ def create():
 		mc.menuItem(divider=True)
 		mc.menuItem(label='Restore Visibility State', command='import glTools.utils.defaultAttrState;reload(glTools.utils.defaultAttrState);glTools.utils.defaultAttrState.setVisibilityState(visibilityState=1)',ann='Restore visibility state for all nodes with recorded default visibility state.')
 		mc.menuItem(label='Restore Display Override State', command='import glTools.utils.defaultAttrState;reload(glTools.utils.defaultAttrState);glTools.utils.defaultAttrState.setDisplayOverridesState(displayOverrideState=1)',ann='Restore display override state for all nodes with recorded default display override state.')
-		
+
 		mc.setParent('..', menu=True)
-		
+
 		# > > Export Attrs
 		mc.menuItem(allowOptionBoxes=True, label= 'Export Attrs', subMenu=True, tearOff=True)
-		
+
 		mc.menuItem(label='Rest Cache Name',command='import glTools.snapshot.utils;reload(glTools.snapshot.utils);[glTools.snapshot.utils.restCacheName(i) for i in mc.ls(sl=1)]',ann='Add "restCacheName" attribute to the selected components')
 		mc.menuItem(label='Include in Snapshot',command='import glTools.snapshot.utils;reload(glTools.snapshot.utils);[glTools.snapshot.utils.includeInSnapshot(i) for i in mc.ls(sl=1)]',ann='Add "includeInSnapshot" attribute to the selected objects')
 		mc.menuItem(label='Distance To Camera',command='import glTools.snapshot.utils;reload(glTools.snapshot.utils);sel = mc.ls(sl=1);glTools.snapshot.utils.distToCamObjAttr(sel[0],sel[1])',ann='Add "distToCamObj" attribute to the first selected object, and connect to the second selected object')
 		mc.menuItem(divider=True)
 		mc.menuItem(label='Set NonRenderable Faces',command='import glTools.rig.utils;reload(glTools.rig.utils);glTools.rig.utils.nonRenderableFaceSet(facelist=mc.ls(sl=1))',ann='Add a non-renderable faceset attribute to a mesh(es) based on the selected polygon faces.')
 		mc.menuItem(label='Select NonRenderable Faces',command='import glTools.rig.utils;reload(glTools.rig.utils);sel = mc.ls(sl=1);glTools.rig.utils.selectNonRenderableFaces(sel[0])',ann='Select non-renderable faces on the first selected mesh.')
-		
+
 		mc.setParent('..', menu=True)
-		
+
 		# > > Proxy Mesh
 		mc.menuItem(allowOptionBoxes=True, label= 'Proxy Mesh', subMenu=True, tearOff=True)
-		
+
 		mc.menuItem(label='Joint Proxy Bounds', command='import glTools.tools.proxyMesh;reload(glTools.tools.proxyMesh);glTools.tools.proxyMesh.skeletonProxyCage(mc.ls(sl=1,type="joint"))')
 		mc.menuItem(label='Joint Proxy Mirror', command='import glTools.tools.proxyMesh;reload(glTools.tools.proxyMesh);[glTools.tools.proxyMesh.mirrorProxy(i) for i in mc.ls(sl=True)]')
 		mc.menuItem(label='Make Proxy Bounds', command='import glTools.tools.proxyMesh;reload(glTools.tools.proxyMesh);[glTools.tools.proxyMesh.makeProxyBounds(i) for i in mc.ls(sl=True)]')
@@ -220,32 +220,32 @@ def create():
 		mc.menuItem(label='Set Apply Initial SG', command='import glTools.tools.proxyMesh;reload(glTools.tools.proxyMesh);glTools.tools.proxyMesh.setApplyInitialSGFromSel()')
 		mc.menuItem(label='Apply Proxies', command='import glTools.tools.proxyMesh;reload(glTools.tools.proxyMesh);glTools.tools.proxyMesh.applyProxies(mc.ls(sl=True,type="transform"))')
 		mc.menuItem(label='Create SkinClusters', command='import glTools.tools.proxyMesh;reload(glTools.tools.proxyMesh);glTools.tools.proxyMesh.proxySkinClusters()')
-		
+
 		mc.setParent('..', menu=True)
-		
+
 		# > > AUTO MODULE
 		mc.menuItem(allowOptionBoxes=True, label= 'Auto Module', subMenu=True, tearOff=True)
-		
+
 		mc.menuItem(label='Base Template', command='import glTools.rig.autoModuleTemplate;reload(glTools.rig.autoModuleTemplate);glTools.rig.autoModuleTemplate.moduleTemplateDialog(glTools.rig.autoModuleTemplate.baseModuleTemplate)')
 		mc.menuItem(label='FK Chain Template', command='import glTools.rig.autoModuleTemplate;reload(glTools.rig.autoModuleTemplate);glTools.rig.autoModuleTemplate.moduleTemplateDialog(glTools.rig.autoModuleTemplate.fkChainModuleTemplate)')
 		mc.menuItem(label='IK Chain Template', command='import glTools.rig.autoModuleTemplate;reload(glTools.rig.autoModuleTemplate);glTools.rig.autoModuleTemplate.moduleTemplateDialog(glTools.rig.autoModuleTemplate.ikChainModuleTemplate)')
 		mc.menuItem(divider=True)
 		mc.menuItem(label='Build Selected Module(s)', command='import glTools.rig.autoModuleBuild;reload(glTools.rig.autoModuleBuild);[glTools.rig.autoModuleBuild.moduleBuild(i) for i in mc.ls(sl=True,type="transform")]')
 		mc.menuItem(label='Build All Modules', command='import glTools.rig.autoModuleBuild;reload(glTools.rig.autoModuleBuild);glTools.rig.autoModuleBuild.moduleBuildAll()')
-		
+
 		mc.setParent('..', menu=True)
-		
+
 		# > PROP
 		mc.menuItem(allowOptionBoxes=True, label= 'Prop', subMenu=True, tearOff=True)
 		mc.menuItem(label='Build Basic Prop', command='import glTools.nrig.rig.prop;reload(glTools.nrig.rig.prop);glTools.nrig.rig.prop.PropRig().build(clean=True)')
-		
+
 		mc.setParent('..', menu=True)
-		
+
 		mc.setParent('..', menu=True)
-		
+
 		# Animation
 		mc.menuItem(allowOptionBoxes=True, label='Animation', subMenu=True, tearOff=True)
-		
+
 		mc.menuItem(label='Set To Default', command='import glTools.rig.utils;reload(glTools.rig.utils);[glTools.rig.utils.setToDefault(i) for i in mc.ls(sl=True)]')
 		mc.menuItem(label='Mirror Selected', command='import glTools.tools.match;reload(glTools.tools.match);glTools.tools.match.Match().twinSelection()')
 		mc.menuItem(label='Swap Selected', command='import glTools.tools.match;reload(glTools.tools.match);glTools.tools.match.Match().swapSelection()')
@@ -253,9 +253,9 @@ def create():
 		mc.menuItem(label='IK/FK Match', command='import glTools.rig.ikFkMatch;reload(glTools.rig.ikFkMatch);[glTools.rig.ikFkMatch.match(i) for i in mc.ls(sl=True)]')
 		mc.menuItem(label='Dk Anim', command='mm.eval("dkAnim")')
 		mc.menuItem(label='Graph Editor Filter', command='glTools.tools.graphFilter.ui()')
-		
+
 		mc.setParent('..', menu=True)
-		
+
 		# > JOINT
 		mc.menuItem(allowOptionBoxes=True, label='Joint', subMenu=True, tearOff=True)
 		mc.menuItem(label='Joint Group', command='import glTools.utils.joint;reload(glTools.utils.joint);[glTools.utils.joint.group(joint=i,indexStr="") for i in mc.ls(sl=1,type="joint")]')
@@ -265,21 +265,21 @@ def create():
 		mc.menuItem(label='Zero Joint Orient', command='[mc.setAttr(jnt+".jo",0,0,0) for jnt in mc.ls(sl=1,type="joint")]')
 		mc.menuItem(label='Freeze Joint Transform', command='mc.makeIdentity(mc.ls(sl=True,type="joint"),apply=True,t=True,r=True,s=True,n=False)')
 		mc.menuItem(label='Draw Style (Bone)', command='import glTools.utils.joint;reload(glTools.utils.joint);jnts = mc.ls(sl=1);glTools.utils.joint.setDrawStyle(jnts,drawStyle="bone")')
-				
+
 		mc.setParent('..', menu=True)
-		
+
 		# > IK
 		mc.menuItem(allowOptionBoxes=True, label='IK', subMenu=True, tearOff=True)
 		mc.menuItem(label='Create IK Handle', command='glTools.ui.ik.ikHandleUI()')
 		mc.menuItem(label='Stretchy IK Chain', command='glTools.ui.ik.stretchyIkChainUI()')
 		mc.menuItem(label='Stretchy IK Limb', command='glTools.ui.ik.stretchyIkLimbUI()')
 		mc.menuItem(label='Stretchy IK Spline', command='glTools.ui.ik.stretchyIkSplineUI()')
-		
+
 		mc.setParent('..', menu=True)
-		
+
 		# > CURVE
 		mc.menuItem(allowOptionBoxes=True, label='Curve', subMenu=True, tearOff=True)
-		
+
 		mc.menuItem(label='Mirror Curve', command='import glTools.ui.curve;reload(glTools.ui.curve);glTools.ui.curve.mirrorCurveFromSel()')
 		mc.menuItem(label='Locator Curve', command='import glTools.ui.curve;reload(glTools.ui.curve);glTools.ui.curve.locatorCurveUI()')
 		mc.menuItem(label='Attach To Curve', command='import glTools.ui.curve;reload(glTools.ui.curve);glTools.ui.curve.attachToCurveUI()')
@@ -288,7 +288,7 @@ def create():
 		mc.menuItem(label='Curve From Edge Loop', command='import glTools.ui.curve;reload(glTools.ui.curve);glTools.ui.curve.edgeLoopCurveUI()')
 		mc.menuItem(label='Build Curve Command', command='import glTools.utils.curve;reload(glTools.utils.curve);print glTools.utils.curve.buildCmd(mc.ls(sl=1)[0],True)')
 		mc.menuItem(label='Uniform Rebuild', command='import glTools.utils.curve;reload(glTools.utils.curve);glTools.ui.curve.uniformRebuildCurveUI()')
-		
+
 		#mc.menuItem(allowOptionBoxes=True, label='LidRails', subMenu=True, tearOff=True)
 		#
 		#mc.menuItem(label='Create LidSurface', command='glTools.ui.lidRails.lidSurfaceCreateUI()')
@@ -296,34 +296,34 @@ def create():
 		#mc.menuItem(label='4 Control Setup', command='glTools.ui.lidRails.fourCtrlSetupUI()')
 		#
 		#mc.setParent('..', menu=True)
-		
+
 		mc.setParent('..', menu=True)
-		
+
 		# > SURFACE
 		mc.menuItem(allowOptionBoxes=True, label='Surface', subMenu=True, tearOff=True)
-		
+
 		mc.menuItem(label='Locator Surface', command='glTools.ui.surface.locatorSurfaceUI()')
 		mc.menuItem(label='Snap To Surface', command='glTools.ui.surface.snapToSurfaceUI()')
 		mc.menuItem(label='Attach To Surface', command='glTools.ui.surface.attachToSurfaceUI()')
 		mc.menuItem(label='Surface Points', command='glTools.ui.surface.surfacePointsUI()')
-		
+
 		mc.setParent('..', menu=True)
-		
+
 		# > MESH
 		mc.menuItem(allowOptionBoxes=True, label='Mesh', subMenu=True, tearOff=True)
-		
+
 		mc.menuItem(label='Snap To Mesh', command='glTools.ui.mesh.snapToMeshUI()')
 		mc.menuItem(label='Interactive Snap Tool', command='glTools.ui.mesh.interactiveSnapToMeshUI()')
 		mc.menuItem(label='Attach To Mesh', command='glTools.ui.mesh.attachToMeshUI()')
 		mc.menuItem(label='Mirror (select middle edge)', command='import glTools.utils.edgeFlowMirror;reload(glTools.utils.edgeFlowMirror);glTools.utils.edgeFlowMirror.mirrorGeo(mc.ls(sl=True,fl=True)[0])')
 		mc.menuItem(label='Reconstruct Mesh', command='import glTools.tools.mesh;reload(glTools.tools.mesh);sel = mc.ls(sl=1);[glTools.tools.mesh.reconstructMesh(i,False) for i in sel]')
 		mc.menuItem(label='Reconstruct and Replace', command='import glTools.tools.mesh;reload(glTools.tools.mesh);sel = mc.ls(sl=1);[glTools.tools.mesh.reconstructMesh(i,True) for i in sel]')
-		
+
 		mc.setParent('..', menu=True)
-		
+
 		# > SKINCLUSTER
 		mc.menuItem(allowOptionBoxes=True, label='SkinCluster', subMenu=True, tearOff=True)
-		
+
 		mc.menuItem(label='Reset', command='glTools.ui.skinCluster.resetFromUI()')
 		mc.menuItem(label='Clean', command='glTools.ui.skinCluster.cleanFromUI()')
 		mc.menuItem(label='Rename', command='for i in mc.ls(sl=1): glTools.utils.skinCluster.rename(i)')
@@ -339,24 +339,24 @@ def create():
 		mc.menuItem(label='Remove Multiple Base Infs', command='import glTools.utils.skinCluster;reload(glTools.utils.skinCluster);sel = mc.ls(sl=1);glTools.utils.skinCluster.removeMultipleInfluenceBases(sel[0],sel[1:])')
 		mc.menuItem(label='SkinCluster Data UI', command='import glTools.ui.skinClusterData;reload(glTools.ui.skinClusterData);glTools.ui.skinClusterData.skinClusterDataUI()')
 		mc.menuItem(label='Weights Manager', command='import glTools.ui.qt.weightsManager;reload(glTools.ui.qt.weightsManager);glTools.ui.qt.weightsManager.WeightsManager().show()')
-		
+
 		mc.setParent('..', menu=True)
-		
+
 		# > BLENDSHAPE
 		mc.menuItem(allowOptionBoxes=True, label='BlendShape', subMenu=True, tearOff=True)
-		
+
 		mc.menuItem(label='Create BlendShape',command='import glTools.tools.blendShape;reload(glTools.tools.blendShape);glTools.tools.blendShape.createFromSelection()',ann='Create basic blendShape from selection')
 		mc.menuItem(label='BlendShape Manager',command='import glTools.ui.blendShape;reload(glTools.ui.blendShape);glTools.ui.blendShape.blendShapeManagerUI()',ann='Open BlendShape Manager UI')
 		mc.menuItem(label='Update Targets',command='import glTools.ui.blendShape;reload(glTools.ui.blendShape);glTools.ui.blendShape.updateTargetsUI()',ann='Open Update BlendShape Targets UI')
 		mc.menuItem(divider=True)
 		mc.menuItem(label='Override BlendShape',command='import glTools.tools.blendShape;reload(glTools.tools.blendShape);[glTools.tools.blendShape.endOfChainBlendShape(i) for i in mc.ls(sl=1)]',ann='Create override (end of chain) blendShape deformers on the selected geometry')
 		mc.menuItem(label='Add Override Target',command='import glTools.tools.blendShape;reload(glTools.tools.blendShape);glTools.tools.blendShape.addOverrideTarget(mc.ls(sl=1)[1],mc.ls(sl=1)[0])',ann='Add override blendShape target based on the selected geometry')
-		
+
 		mc.setParent('..', menu=True)
-		
+
 		# > NDYNAMICS
 		mc.menuItem(allowOptionBoxes=True, label='nDynamics', subMenu=True, tearOff=True)
-		
+
 		mc.menuItem(label='UI', command='glTools.ui.nDynamics.create()')
 		mc.menuItem(divider=True)
 		mc.menuItem(label='Create nucleus', command='glTools.utils.nDynamics.createNucleus()')
@@ -364,27 +364,27 @@ def create():
 		mc.menuItem(label='Create nRigid', command='for i in mc.ls(sl=1): glTools.utils.nDynamics.createNRigid(i)')
 		mc.menuItem(divider=True)
 		mc.menuItem(label='Delete nCloth', command='for i in mc.ls(sl=1): glTools.utils.nDynamics.deleteNCloth(i)')
-		
+
 		mc.setParent('..', menu=True)
-		
+
 		# > SPACES
 		#mc.menuItem(allowOptionBoxes=True, label='Spaces', subMenu=True, tearOff=True)
 		#mc.menuItem(label='Create/Add', command='glTools.ui.spaces.createAddUI()')
 		#mc.menuItem(label='Spaces UI', command='glTools.tools.spaces.Spaces().ui()')
 		#mc.menuItem(ob=True, command='glTools.ui.spaces.charUI()')
 		#mc.setParent('..', menu=True)
-		
+
 		# > POSE MATCH
 		mc.menuItem(allowOptionBoxes=True, label='Pose Match Setup', subMenu=True, tearOff=True)
 		mc.menuItem(label='Evaluation Order', command='glTools.ui.poseMatch.evaluationOrderUI()')
 		mc.menuItem(label='Match Rules', command='glTools.ui.poseMatch.matchRulesUI()')
-		
+
 		mc.setParent('..', menu=True)
-		
+
 		#----------------------------------------#
 		mc.menuItem(divider =True)
 		#----------------------------------------#
-		
+
 		mc.menuItem(label='Refresh Menu', command='import glTools.ui.menu;reload(glTools.ui.menu);glTools.ui.menu.create()')
-		
+
 		mc.setParent('..')

@@ -19,10 +19,10 @@ def isJoint(joint):
 	'''
 	# Check object exists
 	if not mc.objExists(joint): return False
-	
+
 	# Check joint
 	if not mc.ls(type='joint').count(joint): return False
-	
+
 	# Return result
 	return True
 
@@ -35,7 +35,7 @@ def isEndJoint(joint):
 	# Check Joint
 	if not isJoint(joint):
 		raise Exception('Object "'+joint+'" is not a valid joint!')
-	
+
 	# Check Child Joints
 	jointDescendants = mc.ls(mc.listRelatives(joint,ad=True) or [],type='joint')
 	if not jointDescendants: return True
@@ -52,26 +52,26 @@ def getEndJoint(startJoint,includeTransforms=False):
 	# Check Start Joint
 	if not mc.objExists(startJoint):
 		raise Exception('Start Joint "'+startJoint+'" does not exist!')
-	
+
 	# Find End Joint
 	endJoint = None
 	nextJoint = startJoint
 	while(nextJoint):
-		
+
 		# Get Child Joints
 		childList = mc.listRelatives(nextJoint,c=True) or []
 		childJoints = mc.ls(childList,type='joint') or []
 		if includeTransforms:
 			childJoints = list(set(childJoints + mc.ls(childList,transforms=True) or []))
-		
+
 		# Check End Joint
 		if childJoints:
 			nextJoint = childJoints[0]
 		else:
 			endJoint = nextJoint
 			nextJoint = None
-	
-	# Return Result	
+
+	# Return Result
 	return endJoint
 
 def getJointList(startJoint,endJoint):
@@ -89,25 +89,25 @@ def getJointList(startJoint,endJoint):
 		raise Exception('End Joint "'+endJoint+'" does not exist!')
 	# Check Single Joint
 	if startJoint == endJoint: return [startJoint]
-	
+
 	# Check hierarchy
 	decendantList = mc.ls(mc.listRelatives(startJoint,ad=True),type='joint')
 	if not decendantList.count(endJoint):
 		raise Exception('End joint "'+endJoint+'" is not a decendant of start joint "'+startJoint+'"!')
-	
+
 	# Build joint list
 	jntList = [endJoint]
 	while(jntList[-1] != startJoint):
 		pJnt = mc.listRelatives(jntList[-1],p=True,pa=True)
-		if not pJnt: raise Exception('Found root joint while searching for start joint "'+startJoint+'"!')  
+		if not pJnt: raise Exception('Found root joint while searching for start joint "'+startJoint+'"!')
 		jntList.append(pJnt[0])
-	
+
 	# Reverse list
 	jntList.reverse()
-	
+
 	# Return result
 	return jntList
-	
+
 def length(joint):
 	'''
 	Get length of specified joint
@@ -116,11 +116,11 @@ def length(joint):
 	'''
 	# Check Joint
 	if not mc.objExists(joint): raise Exception('Joint "'+joint+'" does not exist!')
-	
+
 	# Get Child Joints
 	cJoints = mc.ls(mc.listRelatives(joint,c=True,pa=True) or [],type='joint')
 	if not cJoints: return 0.0
-	
+
 	# Get Length
 	maxLength = 0.0
 	for cJoint in cJoints:
@@ -129,7 +129,7 @@ def length(joint):
 		offset = glTools.utils.mathUtils.offsetVector(pt1,pt2)
 		length = glTools.utils.mathUtils.mag(offset)
 		if length > maxLength: maxLength = length
-	
+
 	# Return Result
 	return maxLength
 
@@ -144,11 +144,11 @@ def group(joint,indexStr='A'):
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Check Joint
 	if not mc.objExists(joint):
 		raise Exception('Joint "'+joint+'" does not exist!')
-	
+
 	# Check Index String
 	if not indexStr:
 		result = mc.promptDialog(	title='Index String',
@@ -158,35 +158,35 @@ def group(joint,indexStr='A'):
 									defaultButton='Create',
 									cancelButton='Cancel',
 									dismissString='Cancel'	)
-	
+
 		if result == 'Create':
 			indexStr = mc.promptDialog(q=True,text=True)
 		else:
 			print 'User canceled joint group creation...'
 			return
-	
+
 	# Get Name Prefix
 	prefix = glTools.utils.stringUtils.stripSuffix(joint)
-	
+
 	# ======================
 	# - Create Joint Group -
 	# ======================
-	
+
 	grp = mc.duplicate(joint,po=True,n=prefix+'Con'+indexStr+'_jnt')[0]
 	mc.parent(joint,grp)
-	
+
 	# Set Joint Radius
 	if mc.getAttr(grp+'.radius',se=True):
 		try: mc.setAttr(grp+'.radius',0)
 		except: pass
-	
+
 	# Connect Inverse Scale
 	inverseScaleCon = mc.listConnections(joint+'.inverseScale',s=True,d=False)
 	if not inverseScaleCon: inverseScaleCon = []
 	if not inverseScaleCon.count(grp):
 		try: mc.connectAttr(grp+'.scale',joint+'.inverseScale',f=True)
 		except: pass
-	
+
 	# Delete User Attrs
 	udAttrList = mc.listAttr(grp,ud=True)
 	if udAttrList:
@@ -194,15 +194,15 @@ def group(joint,indexStr='A'):
 			if mc.objExists(grp+'.'+attr):
 				mc.setAttr(grp+'.'+attr,l=False)
 				mc.deleteAttr(grp+'.'+attr)
-	
+
 	# Set Display Overrides
 	glTools.utils.base.displayOverride(joint,overrideEnable=1,overrideLOD=0)
 	glTools.utils.base.displayOverride(grp,overrideEnable=1,overrideDisplay=2,overrideLOD=1)
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return grp
 
 def setDrawStyle(joints,drawStyle='bone'):
@@ -216,25 +216,25 @@ def setDrawStyle(joints,drawStyle='bone'):
 	# Check Joints
 	if not joints:
 		raise Exception('No joints specified!')
-	
+
 	# Check Draw Style
 	drawStyle = drawStyle.lower()
 	if not drawStyle in ['bone','box','none']:
 		raise Exception('Invalid drawt style ("'+drawStyle+'")! Accepted values are "bone", "box" and "none"...')
-	
+
 	# For Each Joint
 	for jnt in joints:
-		
+
 		# Check Joint
 		if not isJoint(jnt): continue
-		
+
 		# Bone
 		if drawStyle == 'bone': mc.setAttr(jnt+'.drawStyle',0)
 		# Box
 		if drawStyle == 'box': mc.setAttr(jnt+'.drawStyle',1)
 		# None
 		if drawStyle == 'none': mc.setAttr(jnt+'.drawStyle',2)
-	
+
 	# Return Result
 	return joints
 
@@ -252,15 +252,15 @@ def duplicateJoint(joint,name=None):
 	if not name: name = joint+'_dup'
 	if mc.objExists(str(name)):
 		raise Exception('Joint "'+name+'" already exist!')
-	
+
 	# Duplicate Joint
 	dupJoint = mc.duplicate(joint,po=True)[0]
 	if name: dupJoint = mc.rename(dupJoint,name)
-	
+
 	# Unlock Transforms
 	for at in ['tx','ty','tz','rx','ry','rz','sx','sy','sz','v','radius']:
 		mc.setAttr(dupJoint+'.'+at,l=False,cb=True)
-	
+
 	# Return Result
 	return dupJoint
 
@@ -285,47 +285,47 @@ def duplicateChain(	startJoint,
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Check Joints
 	if not mc.objExists(startJoint):
 		raise Exception('Start Joint "'+startJoint+'" does not exist!')
 	if endJoint and not mc.objExists(str(endJoint)):
 		raise Exception('End Joint "'+endJoint+'" does not exist!')
-	
+
 	# Check Parent
 	if parent:
 		if not mc.objExists(parent):
 			raise Exception('Specified parent transform "'+parent+'" does not exist!')
 		if not glTools.utils.transform.isTransform(parent):
 			raise Exception('Parent object "'+parent+'" is not a valid transform!')
-	
+
 	# =========================
 	# - Duplicate Joint Chain -
 	# =========================
-	
+
 	# Get Full Joint List
 	if not endJoint: endJoint = getEndJoint(startJoint)
 	joints = glTools.utils.joint.getJointList(startJoint,endJoint)
-	
+
 	# Get List of Skip Joints
 	skipJoints = mc.ls(skipJnt) if skipJnt else []
-	
+
 	dupChain = []
 	for i in range(len(joints)):
-		
+
 		# Skip Joints
 		if joints[i] in skipJoints: continue
-		
+
 		# Rename Joint
 		name = None
 		if prefix:
 			ind = glTools.utils.stringUtils.alphaIndex(i,upper=True)
 			if (i == (len(joints)-1)): ind = 'End'
 			name = prefix+ind+'_jnt'
-			
+
 		# Duplicate Joint
 		jnt = duplicateJoint(joints[i],name)
-		
+
 		# Parent Joint
 		if not i:
 			if not parent:
@@ -342,14 +342,14 @@ def duplicateChain(	startJoint,
 					mc.connectAttr(dupChain[-1]+'.scale',jnt+'.inverseScale',f=True)
 			except Exception, e:
 				raise Exception('Error duplicating joint chain! Exception Msg: '+str(e))
-			
+
 		# Append to list
 		dupChain.append(jnt)
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return dupChain
 
 def createFromPointList(ptList,orient=False,side='cn',part='chain',suffix='jnt'):
@@ -368,14 +368,14 @@ def createFromPointList(ptList,orient=False,side='cn',part='chain',suffix='jnt')
 	'''
 	# Clear selection
 	mc.select(cl=True)
-	
+
 	# Create joint chain
 	jntList = []
 	for i in range(len(ptList)):
 		jnt = mc.joint(p=ptList[i],n=side+'_'+part+str(i+1)+'_'+suffix)
 		if i and orient: mc.joint(jntList[-1],e=True,zso=True,oj='xyz',sao='yup')
 		jntList.append(jnt)
-	
+
 	# Return result
 	return jntList
 
@@ -394,53 +394,53 @@ def orient(joint,aimAxis='x',upAxis='y',upVec=(0,1,0)):
 	# Check joint
 	if not mc.objExists(joint):
 		raise Exception('Joint "'+joint+'" does not exist!')
-	
+
 	# Get joint child list
 	childList = mc.listRelatives(joint,c=1)
 	childJointList = mc.listRelatives(joint,c=1,type='joint',pa=True)
-	
+
 	# Unparent children
 	if childList: childList = mc.parent(childList,w=True)
-	
+
 	# Orient joint
 	if not childJointList:
-		
+
 		# End joint - Zero out joint orient
 		mc.setAttr(joint+'.jo',0,0,0)
-		
+
 	else:
-		
+
 		# Get parent joint matrix
 		pMat = OpenMaya.MMatrix()
 		pJoint = mc.listRelatives(joint,p=True,pa=True)
 		if pJoint: pMat = glTools.utils.matrix.getMatrix(pJoint[0])
-		
+
 		# Calculate aim vector
 		p1 = glTools.utils.base.getPosition(joint)
 		p2 = glTools.utils.base.getPosition(childJointList[0])
 		aimVec = glTools.utils.mathUtils.offsetVector(p1,p2)
-		
+
 		# Build target matrix
 		tMat = glTools.utils.matrix.buildRotation(aimVec,upVec,aimAxis,upAxis)
-		
+
 		# Calculate orient matrix
 		oriMat = tMat * pMat.inverse()
-		
+
 		# Extract joint orient values
 		rotOrder = mc.getAttr(joint+'.ro')
 		oriRot = glTools.utils.matrix.getRotation(oriMat,rotOrder)
-		
+
 		# Reset joint rotation and orientation
 		mc.setAttr(joint+'.r',0,0,0)
 		mc.setAttr(joint+'.jo',oriRot[0],oriRot[1],oriRot[2])
-		
+
 	# Reparent children
 	if childList: mc.parent(childList,joint)
 
 def orient_old(joints,aimAxis=(1,0,0),upAxis=(0,1,0),upVec=(0,1,0)):
 	'''
 	Orient joints based on user defined vectors
-	
+
 	@param joints: List of joints to orient
 	@type joints: list
 	@param aimAxis: Axis to be aligned down the length of the joint
@@ -452,7 +452,7 @@ def orient_old(joints,aimAxis=(1,0,0),upAxis=(0,1,0),upVec=(0,1,0)):
 	'''
 	if not joints: joints = []
 	for joint in joints:
-		
+
 		# Get child list
 		childList = mc.listRelatives(joint,c=1)
 		childJointList = mc.listRelatives(joint,c=1,type='joint',pa=True)
@@ -461,27 +461,27 @@ def orient_old(joints,aimAxis=(1,0,0),upAxis=(0,1,0),upVec=(0,1,0)):
 			continue
 		# Unparent children
 		childList = mc.parent(childList,w=True)
-		
+
 		# Reset joint rotation and orientation
 		mc.setAttr(joint+'.r',0,0,0)
 		mc.setAttr(joint+'.jo',0,0,0)
 		mc.makeIdentity(joint,apply=True,t=1,r=1,s=1,n=0,jointOrient=True)
-		
+
 		# Move transform to joint
 		parent = mc.listRelatives(joint,p=True,pa=True)
 		trans = mc.group(em=True,n=joint+'_ORIENT')
 		if parent: mc.parent(trans,parent[0])
 		mc.delete(mc.pointConstraint(joint,trans))
-		
+
 		# Match rotation order
 		mc.setAttr(trans+'.ro',mc.getAttr(joint+'.ro'))
-		
+
 		# Derive orientation
 		mc.aimConstraint(childJointList[0],trans,aimVector=aimAxis,upVector=upAxis,worldUpType='vector',worldUpVector=upVec)
 		rot = mc.getAttr(trans+'.r')[0]
 		mc.setAttr(joint+'.jo',rot[0],rot[1],rot[2])
 		mc.delete(trans)
-		
+
 		# Reparent children
 		mc.parent(childList,joint)
 
@@ -501,30 +501,30 @@ def orientTo(joint,target):
 		raise Exception('Target transform "'+target+'" does not exist!')
 	if not glTools.utils.transform.isTransform(target):
 		raise Exception('Target "'+target+'" is not a valid transform!')
-	
+
 	# Unparent children
 	childList = mc.listRelatives(joint,c=1,type=['joint','transform'])
 	if childList: childList = mc.parent(childList,w=True)
-	
+
 	# Get parent joint matrix
 	pMat = OpenMaya.MMatrix()
 	pJoint = mc.listRelatives(joint,p=True,pa=True)
 	if pJoint: pMat = glTools.utils.matrix.getMatrix(pJoint[0])
-	
+
 	# Get target matrix
 	tMat = glTools.utils.matrix.getMatrix(target)
-	
+
 	# Calculate orient matrix
 	oriMat = tMat * pMat.inverse()
-	
+
 	# Extract joint orient values
 	rotOrder = mc.getAttr(joint+'.ro')
 	oriRot = glTools.utils.matrix.getRotation(oriMat,rotOrder)
-	
+
 	# Reset joint rotation and orientation
 	mc.setAttr(joint+'.r',0,0,0)
 	mc.setAttr(joint+'.jo',oriRot[0],oriRot[1],oriRot[2])
-	
+
 	# Reparent children
 	if childList:
 		mc.parent(childList,joint)
@@ -543,29 +543,29 @@ def flipOrient(joint,target='',axis='x'):
 	# Check joint
 	if not isJoint(joint):
 		raise Exception('Joint "'+joint+'" is not a valid joint')
-	
+
 	# Check target
 	if not target: target = joint
 	if not isJoint(target):
 		raise Exception('Target "'+target+'" is not a valid joint!')
-	
+
 	# Get Joint Matrix
 	jMat = glTools.utils.matrix.getMatrix(joint)
-	
+
 	# Build flip matrix
 	flipMat = None
 	if axis == 'x': flipMat = glTools.utils.matrix.buildMatrix(xAxis=(-1,0,0))
 	if axis == 'y': flipMat = glTools.utils.matrix.buildMatrix(yAxis=(0,-1,0))
 	if axis == 'z': flipMat = glTools.utils.matrix.buildMatrix(zAxis=(0,0,-1))
-	
+
 	# Get Matrix Rotation
 	tMat = OpenMaya.MTransformationMatrix(jMat * flipMat.inverse())
 	flipRot = tMat.eulerRotation()
-	
+
 	# Set Target Joint Orientation
 	radToDeg = 180.0 / math.pi
 	mc.setAttr(target+'.jo',flipRot.x*radToDeg,flipRot.y*radToDeg,flipRot.z*radToDeg)
-	
+
 	# Return Result
 	return (flipRot.x*radToDeg,flipRot.y*radToDeg,flipRot.z*radToDeg)
 
@@ -580,22 +580,22 @@ def mirrorOrient(joint,rollAxis):
 	# Check Joint
 	if not mc.objExists(joint):
 		raise Exception('Joint "'+joint+'" does not exist!')
-	
+
 	# Check Roll Axis
 	if not ['x','y','z'].count(rollAxis):
 		raise Exception('Invalid roll axis "'+rollAxis+'"!')
-	
+
 	# UnParent Children
 	childList = mc.listRelatives(joint,c=True)
 	if childList: mc.parent(childList,w=True)
-	
+
 	# ReOrient Joint
 	rt = [0,0,0]
 	axisDict = {'x':0,'y':1,'z':2}
 	rt[axisDict[rollAxis]] = 180
 	mc.setAttr(joint+'.r',*rt)
 	mc.makeIdentity(joint,apply=True,t=True,r=True,s=True)
-	
+
 	# Reparent children
 	if childList: mc.parent(childList,joint)
 
@@ -608,7 +608,7 @@ def zeroOrient(joint):
 	# Check joint
 	if not mc.objExists(joint):
 		raise Exception('Joint "'+joint+'" does not exist!')
-	
+
 	# Zero Joint Orient
 	mc.setAttr(joint+'.jointOrient',0,0,0)
 
@@ -623,26 +623,26 @@ def connectInverseScale(joint,invScaleObj=None,force=False):
 	# Check Joint
 	if not isJoint(joint):
 		raise Exception('Object '+joint+' is not a valid joint!')
-	
+
 	# Check Inverse Scale Object
 	if not invScaleObj:
-		
+
 		# Get Joint Parent
 		parent = mc.listRelatives(joint,p=True) or []
 		if parent and force: parent = mc.ls(parent, type='joint') or []
 		if not parent:
 			print('No source object specified and no parent joint found for joint "'+joint+'"! Skipping...')
 			return None
-		
+
 		# Set Inverse Scale Object
 		invScaleObj = parent[0]
-	
+
 	# Connect inverseScale
 	invScaleCon = mc.listConnections(joint+'.inverseScale',s=True,d=False) or []
 	if not invScaleObj in invScaleCon:
 		try: mc.connectAttr(invScaleObj+'.scale',joint+'.inverseScale',f=True)
 		except Exception, e: print('Error connecting "'+invScaleObj+'.scale" to "'+joint+'.inverseScale"! Exception msg: '+str(e))
-	
+
 	# Return Result
 	return invScaleObj+'.scale'
 
@@ -673,23 +673,23 @@ def curveIntersectJoints(	curve,
 	# Check curve
 	if not mc.objExists(curve):
 		raise Exception('Curve object '+curve+' does not exist!')
-	
+
 	# Check intersect curve list
 	for i in range(len(intersectCurveList)):
 		if not mc.objExists(intersectCurveList[i]):
 			raise Exception('Object '+intersectCurveList[i]+' is not a valid curve!')
-	
+
 	# Check prefix
 	if not prefix: prefix = glTools.utils.stringUtils.stripSuffix(curve)
-	
+
 	# Get curve Range
 	minU = mc.getAttr(curve+'.minValue')
 	maxU = mc.getAttr(curve+'.maxValue')
-	
+
 	# Initialize return list
 	mc.select(cl=True)
 	jointList = []
-	
+
 	# Create Base Joint
 	if jointAtBase:
 		# Get curve point position
@@ -699,7 +699,7 @@ def curveIntersectJoints(	curve,
 		jnt = prefix+nameUtil.delineator+nameUtil.subPart['joint']+ind+nameUtil.delineator+nameUtil.node['joint']
 		jnt = mc.joint(p=pos,n=jnt)
 		jointList.append(jnt)
-	
+
 	# Create joints at curve intersections
 	for n in range(len(intersectCurveList)):
 		# Get string index
@@ -709,7 +709,7 @@ def curveIntersectJoints(	curve,
 		uList = mc.curveIntersect(curve,intersectCurveList[n],ud=useDirection,d=intersectDirection)
 		if not uList: continue
 		uList = uList.split(' ')
-		
+
 		# Create joints
 		for u in range(len(uList)/2):
 			# Get curve point position
@@ -718,7 +718,7 @@ def curveIntersectJoints(	curve,
 			jnt = prefix+nameUtil.delineator+nameUtil.subPart['joint']+ind+nameUtil.delineator+nameUtil.node['joint']
 			jnt = mc.joint(p=pos,n=jnt)
 			jointList.append(jnt)
-	
+
 	# Create Tip Joint
 	if jointAtTip:
 		# Get string index
@@ -730,7 +730,7 @@ def curveIntersectJoints(	curve,
 		jnt = prefix+nameUtil.delineator+nameUtil.subPart['joint']+ind+nameUtil.delineator+nameUtil.node['joint']
 		jnt = mc.joint(p=pos,n=jnt)
 		jointList.append(jnt)
-	
+
 	# Return result
 	return jointList
 

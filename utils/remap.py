@@ -9,9 +9,9 @@ class Remap(object):
 	Object wrapper for remapValue node in Maya.
 	'''
 	# CONSTANTS
-	
+
 	_REMAPSUFFIX = 'remap'
-	
+
 	def __init__(	self,
 					remapName,
 					inputValue	= None,
@@ -41,16 +41,16 @@ class Remap(object):
 		else:
 			# Create New Node
 			self.create(remapName)
-		
+
 		# Set Input
 		if(inputValue != None): self.setInput(inputValue)
-		
+
 		# Set Range
 		self.setRange(inputMin,inputMax,outputMin,outputMax)
-			
+
 		# Initialize Index
 		self.setIndex(0)
-	
+
 	def create(	self,name ):
 		'''
 		Create new remapValue node with the specified name
@@ -59,20 +59,20 @@ class Remap(object):
 		'''
 		self._name = mc.createNode('remapValue', name='%s_%s' % (name, self._REMAPSUFFIX))
 		return self._name
-		
+
 	#==================
 	# get
 	#==================
 	def getName(self):
 		return self._name
-	
+
 	def getIndex(self):
 		return self._index
-		
+
 	#==================
 	# set
 	#==================
-	
+
 	def setAttribute(self,attr,value):
 		'''
 		Set remapValue node value or source plug.
@@ -83,18 +83,18 @@ class Remap(object):
 		'''
 		# Check None
 		if(value == None): return
-		
+
 		# Check Numeric Input
 		if isinstance(value,(types.IntType,types.FloatType)):
-			
+
 			# Set Numeric Attribute Value
 			try: mc.setAttr(attr,value)
 			except: raise Exception('Error setting remapValue attribute "'+attr+'" value!')
 			return
-		
+
 		# Check String Input
 		elif isinstance(value,types.StringTypes):
-			
+
 			# Connect External Plug
 			if glTools.utils.attribute.isAttr(value):
 				if not mc.isConnected(value,attr):
@@ -106,10 +106,10 @@ class Remap(object):
 					return
 			else:
 				raise Exception('Source plug value is not a valid attribute! ("'+value+'")')
-		
+
 		# Invlaid Type
 		raise Exception('Invalid value type specified for remapValue attribute "'+attr+'"! ('+str(type(value))+')!')
-	
+
 	def setInput(self, inputValue):
 		'''
 		Set remapValue node inputValue.
@@ -118,7 +118,7 @@ class Remap(object):
 		'''
 		attr = self._name+'.inputValue'
 		self.setAttribute(attr,inputValue)
-	
+
 	def setInputMin(self,inputMin):
 		'''
 		Set remapValue node inputMin attribute value
@@ -127,7 +127,7 @@ class Remap(object):
 		'''
 		attr = self._name+'.inputMin'
 		self.setAttribute(attr,inputMin)
-	
+
 	def setInputMax(self,inputMax):
 		'''
 		Set remapValue node inputMax attribute value
@@ -136,7 +136,7 @@ class Remap(object):
 		'''
 		attr = self._name+'.inputMax'
 		self.setAttribute(attr,inputMax)
-	
+
 	def setOutputMin(self,outputMin):
 		'''
 		Set remapValue node outputMin attribute value
@@ -154,7 +154,7 @@ class Remap(object):
 		'''
 		attr = self._name+'.outputMax'
 		self.setAttribute(attr,outputMax)
-	
+
 	def setInputRange(	self,
 						inputMin	= None,
 						inputMax	= None ):
@@ -167,7 +167,7 @@ class Remap(object):
 		'''
 		if(inputMin != None): self.setInputMin(inputMin)
 		if(inputMax != None): self.setInputMax(inputMax)
-		
+
 	def setOutputRange(	self,
 						outputMin	= None,
 						outputMax	= None ):
@@ -180,7 +180,7 @@ class Remap(object):
 		'''
 		if(outputMin != None): self.setOutputMin(outputMin)
 		if(outputMax != None): self.setOutputMax(outputMax)
-	
+
 	def setRange(	self,
 					inputMin	= None,
 					inputMax	= None,
@@ -195,7 +195,7 @@ class Remap(object):
 		'''
 		self.setInputRange(inputMin,inputMax)
 		self.setOutputRange(outputMin,outputMax)
-	
+
 	def setPoint(	self,
 					index,
 					position		= None,
@@ -220,7 +220,7 @@ class Remap(object):
 		self.setValue(value)
 		# Set Interpolation
 		self.setInterpolation(interpolation)
-			
+
 	def setIndex(self,index):
 		'''
 		Set remapValue point index.
@@ -229,7 +229,7 @@ class Remap(object):
 		'''
 		self._index = index
 		self._indexedName = '%s.value[%s]' % (self._name, index)
-		
+
 	def setPosition(self,position):
 		'''
 		Set remapValue point position value.
@@ -238,7 +238,7 @@ class Remap(object):
 		'''
 		attr = self._indexedName+'.value_Position'
 		self.setAttribute(attr,position)
-	
+
 	def setValue(self,value):
 		'''
 		Set remapValue point float value.
@@ -247,7 +247,7 @@ class Remap(object):
 		'''
 		attr = self._indexedName+'.value_FloatValue'
 		self.setAttribute(attr,value)
-		
+
 	def setInterpolation(self,interpolation):
 		'''
 		Set remapValue point interpolation value.
@@ -256,13 +256,13 @@ class Remap(object):
 		'''
 		attr = self._indexedName+'.value_Interp'
 		self.setAttribute(attr,interpolation)
-	
+
 	def connectInput(self, objectAttrName):
 		'''
 		'''
 		if not mc.isConnected(objectAttrName, '%s.inputValue' % self._name):
 			mc.connectAttr(objectAttrName, '%s.inputValue' % self._name, force=True)
-	
+
 	def connectOutput(self,dstAttr):
 		'''
 		Connect remapValue node output to destination plug.
@@ -272,7 +272,7 @@ class Remap(object):
 		# Checks
 		if not glTools.utils.attribute.isAttr(dstAttr):
 			raise Exception('Destination attribute "'+dstAttr+'" is not a valid attribute! Unable to establish output connection...')
-		
+
 		# Connect Output
 		outAttr = self._name+'.outValue'
 		if not mc.isConnected(outAttr,dstAttr):
@@ -280,5 +280,5 @@ class Remap(object):
 			except: raise Exception('Error connecting remapValue output ("'+outAttr+'" >> "'+dstAttr+'")!')
 		else:
 			print('RemapValue node output "'+outAttr+'" already connected to destination plug "'+dstAttr+'"! Skipping...')
-	
+
 

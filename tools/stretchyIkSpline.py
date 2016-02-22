@@ -55,7 +55,7 @@ def stretchyIkSpline(	ikHandle,
 												blendControl=blendControl,
 												blendAttr=blendAttr,
 												prefix=prefix)
-	
+
 	# Return Result
 	return result
 
@@ -91,23 +91,23 @@ def stretchyIkSpline_parametric(	ikHandle,
 	'''
 	# Check prefix
 	if not prefix: prefix = glTools.utils.stringUtils.stripSuffix(ikHandle)
-	
+
 	# Check objects
 	if not mc.objExists(ikHandle): raise UserInputError('IK handle '+ikHandle+' does not exist!')
-	
+
 	# Check scaleAttr
 	scale = mc.objExists(scaleAttr)
-	
+
 	# Check blendControl
 	blend = mc.objExists(blendControl)
 	if blend and not mc.objExists(blendControl+'.'+blendAttr):
 			mc.addAttr(blendControl,ln=blendAttr,at='double',min=0,max=1,dv=1,k=True)
 	blendAttr = blendControl+'.'+blendAttr
-	
+
 	# Get IK spline information
 	ik_joints = glTools.utils.ik.getAffectedJoints(ikHandle)
 	ik_curve = mc.listConnections(ikHandle+'.inCurve',s=True,d=False,sh=True)[0]
-	
+
 	# Get curve parameter information
 	minu = mc.getAttr(ik_curve+'.minValue')
 	maxu = mc.getAttr(ik_curve+'.maxValue')
@@ -117,7 +117,7 @@ def stretchyIkSpline_parametric(	ikHandle,
 		if maxPercent < 1.0: maxu -= udist * (1.0-maxPercent)
 		udist = maxu - minu
 	inc = udist / (len(ik_joints)-1)
-	
+
 	# Create pointOnCurveInfo and attach to curve
 	pointOnCurveList = []
 	for i in range(len(ik_joints)):
@@ -135,7 +135,7 @@ def stretchyIkSpline_parametric(	ikHandle,
 			mc.setAttr(poc+'.parameter',minu+inc*i)
 		# Append To Return List
 		pointOnCurveList.append(poc)
-	
+
 	# Create distanceBetween and connect to curvePoints
 	distNodeList = []
 	for i in range(len(ik_joints)-1):
@@ -145,7 +145,7 @@ def stretchyIkSpline_parametric(	ikHandle,
 		distNodeList.append(dist)
 		mc.connectAttr(pointOnCurveList[i]+'.position',dist+'.point1',f=True)
 		mc.connectAttr(pointOnCurveList[i+1]+'.position',dist+'.point2',f=True)
-	
+
 	# Create multiply node and connect to joints
 	multNodeList = []
 	scaleNodeList = []
@@ -157,14 +157,14 @@ def stretchyIkSpline_parametric(	ikHandle,
 		mc.setAttr(md+'.operation',2) # Divide
 		mc.connectAttr(distNodeList[i]+'.distance',md+'.input1X',f=True)
 		mc.connectAttr(ik_joints[i+1]+'.t'+scaleAxis,md+'.input2X',f=True)
-		
+
 		# Create blend node
 		blendNode = ''
 		if blend:
 			blendNode = mc.createNode('blendTwoAttr',n=prefix+ind+'_blendTwoAttr')
 			mc.connectAttr(blendAttr,blendNode+'.attributesBlender',f=True)
 			mc.setAttr(blendNode+'.input[0]',1.0)
-		
+
 		# Setup scale compensation
 		if scale:
 			# Add global scale contribution
@@ -186,7 +186,7 @@ def stretchyIkSpline_parametric(	ikHandle,
 				mc.connectAttr(blendNode+'.output',ik_joints[i]+'.s'+scaleAxis,f=True)
 			else:
 				mc.connectAttr(md+'.outputX',ik_joints[i]+'.s'+scaleAxis,f=True)
-	
+
 	# Return result
 	return [pointOnCurveList,distNodeList,multNodeList,scaleNodeList]
 
@@ -213,25 +213,25 @@ def stretchyIkSpline_arcLength(	ikHandle,
 	'''
 	# Check prefix
 	if not prefix: prefix = glTools.utils.stringUtils.stripSuffix(ikHandle)
-	
+
 	# Check objects
 	if not mc.objExists(ikHandle): raise UserInputError('IK handle '+ikHandle+' does not exist!')
-	
+
 	# Check blendControl
 	blend = mc.objExists(blendControl)
 	if blend and not mc.objExists(blendControl+'.'+blendAttr):
 			mc.addAttr(blendControl,ln=blendAttr,at='double',min=0,max=1,dv=1,k=True)
 	blendAttr = blendControl+'.'+blendAttr
-	
+
 	# Get IK spline information
 	ik_joints = glTools.utils.ik.getAffectedJoints(ikHandle)
 	ik_curve = mc.listConnections(ikHandle+'.inCurve',s=1,d=0,sh=1)[0]
 	ik_length = mc.arclen(ik_curve)
-	
+
 	# Setup multily node
 	multDbl = mc.createNode('multDoubleLinear',n=prefix+'_multDoubleLinear')
 	mc.setAttr(multDbl+'.input2',1.0/ik_length)
-	
+
 	# Setup blend
 	blendNode = ''
 	if blend:
@@ -239,7 +239,7 @@ def stretchyIkSpline_arcLength(	ikHandle,
 		mc.addAttr(blendNode,ln=self.defaultScaleAttr,at='double',min=1,max=1,dv=1)
 		mc.connectAttr(blendAttr,blendNode+'.attributesBlender',f=True)
 		mc.connectAttr(blendNode+'.'+self.defaultScaleAttr,blendNode+'.input[0]',f=True)
-	
+
 	# Create curveInfo
 	crvInfo = mc.createNode('curveInfo',n=prefix+'_curveInfo')
 	mc.connectAttr(ik_curve+'.worldSpace[0]',crvInfo+'.inputCurve',f=True)
@@ -254,6 +254,6 @@ def stretchyIkSpline_arcLength(	ikHandle,
 	else:
 		for i in range(len(ik_joints)-1):
 			mc.connectAttr(multDbl+'.output',ik_joints[i]+'.s'+scaleAxis,f=True)
-	
+
 	# Return result
 	return [crvInfo,multDbl,blendNode]

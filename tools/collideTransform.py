@@ -39,37 +39,37 @@ def planeCollideTransform(	targetTransform,
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Check Target Transforms
 	if not mc.objExists(targetTransform):
 		raise Exception('Target transform "'+targetTransform+'" does not exist!')
 	if not glTools.utils.transform.isTransform(targetTransform):
 		raise Exception('Object "'+targetTransform+'" is not a valid transform!')
-	
+
 	# Check Collide Plane
 	if collidePlane:
 		if not mc.objExists(str(collidePlane)):
 			raise Exception('Collide plane "'+collidePlane+'" does not exist!')
 		if not glTools.utils.transform.isTransform(collidePlane):
 			raise Exception('Object "'+collidePlane+'" is not a valid transform!')
-	
+
 	# Check Collide Transforms
 	if collideTransform:
 		if not mc.objExists(str(collideTransform)):
 			raise Exception('Collide transform "'+collideTransform+'" does not exist!')
 		if not glTools.utils.transform.isTransform(collideTransform):
 			raise Exception('Object "'+collideTransform+'" is not a valid transform!')
-	
+
 	# Check Distance Axis
 	if distanceAxis: distanceAxis = distanceAxis.upper()
-	
+
 	# Check Prefix
 	if not prefix: prefix = glTools.utils.stringUtils.stripSuffix(targetTransform)
-	
+
 	# ===================
 	# - Build Collision -
 	# ===================
-	
+
 	# Build Collide Objects
 	if not collideTransform:
 		collideTransform = mc.spaceLocator(n=prefix+'_collide_loc')[0]
@@ -77,11 +77,11 @@ def planeCollideTransform(	targetTransform,
 		collidePlaneShape = mc.createNode('renderRect')
 		collidePlane = mc.listRelatives(collidePlaneShape,p=True)[0]
 		collidePlane = mc.rename(collidePlane,prefix+'_collide_plane')
-	
+
 	# Add Collide Attributes
 	if not mc.attributeQuery('collideWeight',n=collidePlane,ex=True):
 		mc.addAttr(collidePlane,ln='collideWeight',min=0,max=1,dv=1,k=True)
-	
+
 	# Build Collide Nodes
 	collideCondition = mc.createNode('condition',n=prefix+'_collide_condition')
 	collideBlend = mc.createNode('blendColors',n=prefix+'_collideWeight_blendColors')
@@ -91,11 +91,11 @@ def planeCollideTransform(	targetTransform,
 	mc.setAttr(collideToWorld+'.operation',4) # Point Matrix Product
 	worldToLocal = mc.createNode('vectorProduct',n=prefix+'_worldToLocal_vectorProduct')
 	mc.setAttr(worldToLocal+'.operation',4) # Point Matrix Product
-	
+
 	# =========================
 	# - Build Collide Network -
 	# =========================
-	
+
 	# World To Collide
 	mc.connectAttr(collidePlane+'.worldInverseMatrix[0]',worldToCollide+'.matrix',f=True)
 	if mc.objExists(targetTransform+'.worldPosition[0]'):
@@ -105,7 +105,7 @@ def planeCollideTransform(	targetTransform,
 		mc.setAttr(localToWorld+'.operation',4) # Point Matrix Product
 		mc.connectAttr(targetTransform+'.worldMatrix[0]',localToWorld+'.matrix',f=True)
 		mc.connectAttr(localToWorld+'.output',worldToCollide+'.input1',f=True)
-	
+
 	# Collide Condition
 	mc.connectAttr(worldToCollide+'.outputZ',collideCondition+'.firstTerm',f=True)
 	mc.setAttr(collideCondition+'.secondTerm',0)
@@ -114,37 +114,37 @@ def planeCollideTransform(	targetTransform,
 	mc.connectAttr(worldToCollide+'.outputX',collideCondition+'.colorIfFalseR',f=True)
 	mc.connectAttr(worldToCollide+'.outputY',collideCondition+'.colorIfFalseG',f=True)
 	mc.setAttr(collideCondition+'.colorIfFalseB',0)
-	
+
 	# Collide Weight Blend
 	mc.connectAttr(collideCondition+'.outColor',collideBlend+'.color1',f=True)
 	mc.connectAttr(worldToCollide+'.output',collideBlend+'.color2',f=True)
 	mc.connectAttr(collidePlane+'.collideWeight',collideBlend+'.blender',f=True)
-	
+
 	# Collide To World
 	mc.connectAttr(collideBlend+'.output',collideToWorld+'.input1',f=True)
 	mc.connectAttr(collidePlane+'.worldMatrix[0]',collideToWorld+'.matrix',f=True)
-	
+
 	# World To Local
 	mc.connectAttr(collideToWorld+'.output',worldToLocal+'.input1',f=True)
 	mc.connectAttr(collideTransform+'.parentInverseMatrix[0]',worldToLocal+'.matrix',f=True)
-	
+
 	# Connect Output
 	mc.connectAttr(worldToLocal+'.output',collideTransform+'.translate',f=True)
-	
+
 	# ============================
 	# - Calculate Offset Falloff -
 	# ============================
-	
+
 	if offsetFalloff != None:
-		
+
 		# Add Collide Attributes
 		if not mc.attributeQuery('offsetFalloff',n=collidePlane,ex=True):
 			mc.addAttr(collidePlane,ln='offsetFalloff',min=0,dv=0.5,k=True)
-		
+
 		# Build Nodes
 		falloffRemap = mc.createNode('remapValue',n=prefix+'_offsetFalloff_remapValue')
 		falloffMult = mc.createNode('multDoubleLinear',n=prefix+'_offsetFalloff_multDoubleLinear')
-		
+
 		# Falloff Remap
 		mc.connectAttr(worldToCollide+'.outputZ',falloffRemap+'.inputValue',f=True)
 		mc.connectAttr(collidePlane+'.offsetFalloff',falloffRemap+'.inputMax',f=True)
@@ -152,31 +152,31 @@ def planeCollideTransform(	targetTransform,
 		mc.connectAttr(collidePlane+'.offsetFalloff',falloffMult+'.input1',f=True)
 		mc.setAttr(falloffMult+'.input2',-1)
 		mc.connectAttr(falloffMult+'.output',falloffRemap+'.inputMin',f=True)
-		
+
 		# Override Collide Condition
 		mc.connectAttr(collidePlane+'.offsetFalloff',collideCondition+'.secondTerm',f=True)
 		mc.connectAttr(falloffRemap+'.outValue',collideCondition+'.colorIfFalseB',f=True)
-		
+
 		# Set Offset Falloff
 		mc.setAttr(collidePlane+'.offsetFalloff',abs(offsetFalloff))
-	
+
 	# ==============================
 	# - Calculate Distance Falloff -
 	# ==============================
-	
+
 	if distanceFalloff != None:
-		
+
 		# Add Collide Attributes
 		if not mc.attributeQuery('distanceFalloff',n=collidePlane,ex=True):
 			mc.addAttr(collidePlane,ln='distanceFalloff',min=0,dv=1,k=True)
-		
+
 		# Distance Remap
 		distRemap = mc.createNode('remapValue',n=prefix+'_collideDist_remapValue')
 		mc.connectAttr(collidePlane+'.distanceFalloff',distRemap+'.inputMax',f=True)
 		mc.setAttr(distRemap+'.outputMin',1)
 		mc.setAttr(distRemap+'.outputMax',0)
 		mc.setAttr(distRemap+'.inputMin',0)
-		
+
 		# Distance Falloff
 		collideDist = mc.createNode('distanceBetween',n=prefix+'_collideDist_distanceBetween')
 		if len(distanceAxis) == 1:
@@ -187,20 +187,20 @@ def planeCollideTransform(	targetTransform,
 		else:
 			raise Exception('Invalid collision distance axis! ('+str(distanceAxis)+')')
 		mc.connectAttr(collideDist+'.distance',distRemap+'.inputValue',f=True)
-		
+
 		# Distance Weight
 		distMult = mc.createNode('multDoubleLinear',n=prefix+'_distanceWeight_multDoubleLinear')
 		mc.connectAttr(collidePlane+'.collideWeight',distMult+'.input1',f=True)
 		mc.connectAttr(distRemap+'.outValue',distMult+'.input2',f=True)
 		mc.connectAttr(distMult+'.output',collideBlend+'.blender',f=True)
-		
+
 		# Set Distance Falloff
 		mc.setAttr(collidePlane+'.distanceFalloff',abs(distanceFalloff))
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return [collidePlane,collideTransform]
 
 def doublePlaneCollideTransform(	targetTransform,
@@ -233,35 +233,35 @@ def doublePlaneCollideTransform(	targetTransform,
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Check Target Transforms
 	if not mc.objExists(targetTransform):
 		raise Exception('Target transform "'+targetTransform+'" does not exist!')
 	if not glTools.utils.transform.isTransform(targetTransform):
 		raise Exception('Object "'+targetTransform+'" is not a valid transform!')
-	
+
 	# Check Collide Transforms
 	if collideTransform and not mc.objExists(str(collideTransform)):
 		raise Exception('Collide transform "'+collideTransform+'" does not exist!')
 	if not glTools.utils.transform.isTransform(collideTransform):
 		raise Exception('Object "'+collideTransform+'" is not a valid transform!')
-	
+
 	# Check Collide Plane
 	if collidePlane and not mc.objExists(str(collidePlane)):
 		raise Exception('Collide plane "'+collidePlane+'" does not exist!')
 	if not glTools.utils.transform.isTransform(collidePlane):
 		raise Exception('Object "'+collidePlane+'" is not a valid transform!')
-	
+
 	# Check Distance Axis
 	if distanceAxis: distanceAxis = distanceAxis.upper()
-	
+
 	# Check Prefix
 	if not prefix: prefix = glTools.utils.stringUtils.stripSuffix(targetTransform)
-	
+
 	# ===================
 	# - Build Collision -
 	# ===================
-	
+
 	# Build Collide Objects
 	if not collideTransform:
 		collideTransform = mc.spaceLocator(n=prefix+'_collide_loc')[0]
@@ -269,11 +269,11 @@ def doublePlaneCollideTransform(	targetTransform,
 		collidePlaneShape = mc.createNode('renderRect')
 		collidePlane = mc.listRelatives(collidePlaneShape,p=True)[0]
 		collidePlane = mc.rename(collidePlane,prefix+'_collide_plane')
-	
+
 	# Add Collide Attributes
 	if not mc.attributeQuery('collideWeight',n=collidePlane,ex=True):
 		mc.addAttr(collidePlane,ln='collideWeight',min=0,max=1,dv=1,k=True)
-	
+
 	# Build Collide Nodes
 	collideCondition = mc.createNode('condition',n=prefix+'_collide_condition')
 	collideBlend = mc.createNode('blendColors',n=prefix+'_collideWeight_blendColors')
@@ -283,11 +283,11 @@ def doublePlaneCollideTransform(	targetTransform,
 	mc.setAttr(collideToWorld+'.operation',4) # Point Matrix Product
 	worldToLocal = mc.createNode('vectorProduct',n=prefix+'_worldToLocal_vectorProduct')
 	mc.setAttr(worldToLocal+'.operation',4) # Point Matrix Product
-	
+
 	# =========================
 	# - Build Collide Network -
 	# =========================
-	
+
 	# World To Collide
 	mc.connectAttr(collidePlane+'.worldInverseMatrix[0]',worldToCollide+'.matrix',f=True)
 	if mc.objExists(targetTransform+'.worldPosition[0]'):
@@ -297,7 +297,7 @@ def doublePlaneCollideTransform(	targetTransform,
 		mc.setAttr(localToWorld+'.operation',4) # Point Matrix Product
 		mc.connectAttr(targetTransform+'.worldMatrix[0]',localToWorld+'.matrix',f=True)
 		mc.connectAttr(localToWorld+'.output',worldToCollide+'.input1',f=True)
-	
+
 	# Collide Condition
 	mc.connectAttr(worldToCollide+'.outputZ',collideCondition+'.firstTerm',f=True)
 	mc.setAttr(collideCondition+'.secondTerm',0)
@@ -306,37 +306,37 @@ def doublePlaneCollideTransform(	targetTransform,
 	mc.connectAttr(worldToCollide+'.outputX',collideCondition+'.colorIfFalseR',f=True)
 	mc.connectAttr(worldToCollide+'.outputY',collideCondition+'.colorIfFalseG',f=True)
 	mc.setAttr(collideCondition+'.colorIfFalseB',0)
-	
+
 	# Collide Weight Blend
 	mc.connectAttr(collideCondition+'.outColor',collideBlend+'.color1',f=True)
 	mc.connectAttr(worldToCollide+'.output',collideBlend+'.color2',f=True)
 	mc.connectAttr(collidePlane+'.collideWeight',collideBlend+'.blender',f=True)
-	
+
 	# Collide To World
 	mc.connectAttr(collideBlend+'.output',collideToWorld+'.input1',f=True)
 	mc.connectAttr(collidePlane+'.worldMatrix[0]',collideToWorld+'.matrix',f=True)
-	
+
 	# World To Local
 	mc.connectAttr(collideToWorld+'.output',worldToLocal+'.input1',f=True)
 	mc.connectAttr(collideTransform+'.parentInverseMatrix[0]',worldToLocal+'.matrix',f=True)
-	
+
 	# Connect Output
 	mc.connectAttr(worldToLocal+'.output',collideTransform+'.translate',f=True)
-	
+
 	# ============================
 	# - Calculate Offset Falloff -
 	# ============================
-	
+
 	if offsetFalloff != None:
-		
+
 		# Add Collide Attributes
 		if not mc.attributeQuery('offsetFalloff',n=collidePlane,ex=True):
 			mc.addAttr(collidePlane,ln='offsetFalloff',min=0,dv=0.5,k=True)
-		
+
 		# Build Nodes
 		falloffRemap = mc.createNode('remapValue',n=prefix+'_offsetFalloff_remapValue')
 		falloffMult = mc.createNode('multDoubleLinear',n=prefix+'_offsetFalloff_multDoubleLinear')
-		
+
 		# Falloff Remap
 		mc.connectAttr(worldToCollide+'.outputZ',falloffRemap+'.inputValue',f=True)
 		mc.connectAttr(collidePlane+'.offsetFalloff',falloffRemap+'.inputMax',f=True)
@@ -344,31 +344,31 @@ def doublePlaneCollideTransform(	targetTransform,
 		mc.connectAttr(collidePlane+'.offsetFalloff',falloffMult+'.input1',f=True)
 		mc.setAttr(falloffMult+'.input2',-1)
 		mc.connectAttr(falloffMult+'.output',falloffRemap+'.inputMin',f=True)
-		
+
 		# Override Collide Condition
 		mc.connectAttr(collidePlane+'.offsetFalloff',collideCondition+'.secondTerm',f=True)
 		mc.connectAttr(falloffRemap+'.outValue',collideCondition+'.colorIfFalseB',f=True)
-		
+
 		# Set Offset Falloff
 		mc.setAttr(collidePlane+'.offsetFalloff',abs(offsetFalloff))
-	
+
 	# ==============================
 	# - Calculate Distance Falloff -
 	# ==============================
-	
+
 	if distanceFalloff != None:
-		
+
 		# Add Collide Attributes
 		if not mc.attributeQuery('distanceFalloff',n=collidePlane,ex=True):
 			mc.addAttr(collidePlane,ln='distanceFalloff',min=0,dv=1,k=True)
-		
+
 		# Distance Remap
 		distRemap = mc.createNode('remapValue',n=prefix+'_collideDist_remapValue')
 		mc.connectAttr(collidePlane+'.distanceFalloff',distRemap+'.inputMax',f=True)
 		mc.setAttr(distRemap+'.outputMin',1)
 		mc.setAttr(distRemap+'.outputMax',0)
 		mc.setAttr(distRemap+'.inputMin',0)
-		
+
 		# Distance Falloff
 		collideDist = mc.createNode('distanceBetween',n=prefix+'_collideDist_distanceBetween')
 		if len(distanceAxis) == 1:
@@ -379,20 +379,20 @@ def doublePlaneCollideTransform(	targetTransform,
 		else:
 			raise Exception('Invalid collision distance axis! ('+str(distanceAxis)+')')
 		mc.connectAttr(collideDist+'.distance',distRemap+'.inputValue',f=True)
-		
+
 		# Distance Weight
 		distMult = mc.createNode('multDoubleLinear',n=prefix+'_distanceWeight_multDoubleLinear')
 		mc.connectAttr(collidePlane+'.collideWeight',distMult+'.input1',f=True)
 		mc.connectAttr(distRemap+'.outValue',distMult+'.input2',f=True)
 		mc.connectAttr(distMult+'.output',collideBlend+'.blender',f=True)
-		
+
 		# Set Distance Falloff
 		mc.setAttr(collidePlane+'.distanceFalloff',abs(distanceFalloff))
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return
 
 def surfaceCollideTransform(targetTransform,slaveTransform,collideSurface,inside=True,prefix=''):
@@ -401,7 +401,7 @@ def surfaceCollideTransform(targetTransform,slaveTransform,collideSurface,inside
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	if not mc.objExists(targetTransform):
 		raise Exception('Target transform "'+targetTransform+'" does not exist!')
 	if not mc.objExists(slaveTransform):
@@ -410,43 +410,43 @@ def surfaceCollideTransform(targetTransform,slaveTransform,collideSurface,inside
 		raise Exception('Collide surface "'+collideSurface+'" does not exist!')
 	if not glTools.utils.surface.isSurface(collideSurface):
 		raise Exception('Collide object "'+collideSurface+'" is not a valid NURBS surface!')
-	
+
 	if not prefix: prefix = 'collideSurface'
-	
+
 	# ===================
 	# - Create Locators -
 	# ===================
-	
+
 	slave_loc = mc.spaceLocator(n=slaveTransform+'_loc')[0]
 	target_loc = mc.spaceLocator(n=targetTransform+'_loc')[0]
 	target_ptCon = mc.pointConstraint(targetTransform,target_loc)[0]
-	
+
 	# - Setup -
 	con = mc.createNode('condition',n=prefix+'_condition')
 	vp = mc.createNode('vectorProduct',n=prefix+'_vectorProduct')
 	pma = mc.createNode('plusMinusAverage',n=prefix+'_plusMinusAverage')
 	posi = mc.createNode('pointOnSurfaceInfo',n=prefix+'_pointOnSurfaceInfo')
 	cpos = mc.createNode('closestPointOnSurface',n=prefix+'_closestPointOnSurface')
-	
+
 	# Surface Connect
 	mc.connectAttr(collideSurface+'.worldSpace[0]',posi+'.inputSurface',f=True)
 	mc.connectAttr(collideSurface+'.worldSpace[0]',cpos+'.inputSurface',f=True)
 	mc.connectAttr(target_loc+'.worldPosition[0]',cpos+'.inPosition',f=True)
-	
+
 	# Parameter Connect
 	mc.connectAttr(cpos+'.parameterU',posi+'.parameterU',f=True)
 	mc.connectAttr(cpos+'.parameterV',posi+'.parameterV',f=True)
-	
+
 	# Offset Calc
 	mc.setAttr(pma+'.operation',2) # SUBTRACT
 	mc.connectAttr(target_loc+'.worldPosition[0]',pma+'.input3D[0]',f=True)
 	mc.connectAttr(cpos+'.position',pma+'.input3D[1]',f=True)
-	
+
 	# Dot Product
 	mc.setAttr(vp+'.operation',1) # DOT PRODUCT
 	mc.connectAttr(posi+'.normal',vp+'.input1',f=True)
 	mc.connectAttr(pma+'.output3D',vp+'.input2',f=True)
-	
+
 	# Condition
 	if inside: mc.setAttr(con+'.operation',2) # Greater Than
 	else: mc.setAttr(con+'.operation',4) # Less Than
@@ -454,7 +454,7 @@ def surfaceCollideTransform(targetTransform,slaveTransform,collideSurface,inside
 	mc.connectAttr(vp+'.outputX',con+'.secondTerm',f=True)
 	mc.connectAttr(target_loc+'.worldPosition[0]',con+'.colorIfTrue',f=True)
 	mc.connectAttr(cpos+'.position',con+'.colorIfFalse',f=True)
-	
+
 	# Output
 	mc.connectAttr(con+'.outColor',slave_loc+'.t',f=True)
 

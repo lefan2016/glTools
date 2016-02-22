@@ -70,14 +70,14 @@ class MeshIntersectData( meshData.MeshData ):
 		# =================
 		# - Return Result -
 		# =================
-		
+
 		# End Progress
-		if showProgress: glTools.utils.progressBar.end()	
+		if showProgress: glTools.utils.progressBar.end()
 
 		# Print timer result
 		buildTime = mc.timerX(st=timer)
 		print('MeshIntersectData: Closest Point search time for mesh "'+self._data['name']+'": '+str(buildTime))
-		
+
 		return pntList
 
 	def getClosestPointCoords(self,ptList):
@@ -88,7 +88,7 @@ class MeshIntersectData( meshData.MeshData ):
 
 		# Display Progress
 		glTools.utils.progressBar.init(status=('Building Closest Point Coord Array...'),maxValue=int(len(ptList)*0.1))
-		
+
 		# =====================
 		# - Rebuild Mesh Data -
 		# =====================
@@ -147,12 +147,12 @@ class MeshIntersectData( meshData.MeshData ):
 		# =================
 		# - Return Result -
 		# =================
-		
+
 		# End Progress
-		if showProgress: glTools.utils.progressBar.end()	
-		
+		if showProgress: glTools.utils.progressBar.end()
+
 		# Print timer result
 		buildTime = mc.timerX(st=timer)
 		print('MeshIntersectData: Data search time for mesh "'+self._data['name']+'": '+str(buildTime))
-		
+
 		return baryCoords

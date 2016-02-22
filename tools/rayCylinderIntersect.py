@@ -37,15 +37,15 @@ def intersect(c,r):
 	'''
 	'''
 	result = 0
-	
+
 	# Matrix and Inverse
 	T = c.matrix()
 	iT = T.inverse()
-	
+
 	# Point and Ray
 	p = r.p*iT
 	v = r.v*iT
-	
+
 	# Solve the 2D Equation for X and Y radii
 	AapBb = (p.x*v.x) + (p.y*v.y)
 	A2pB2 = (v.x*v.x) + (v.y*v.y)
@@ -53,21 +53,21 @@ def intersect(c,r):
 	if disc < 0:
 		print('No intersection with the infinite cylinder!')
 		return result
-	
+
 	s = math.sqrt(disc)
 	inv_A2pB2 = 1.0/A2pB2
 	t1 = (-AapBb-s)*inv_A2pB2
 	t2 = (-AapBb+s)*inv_A2pB2
 	pt1 = p+v*t1
 	pt2 = p+v*t2
-	
+
 	# Check Cylinder Bounds
 	pt1v = (pt1.z>0) and (pt1.z<1) and (((pt1-p)*v)>0)
 	pt2v = (pt2.z>0) and (pt2.z<1) and (((pt2-p)*v)>0)
 	if not pt1v and not pt2v:
 		print('No intersection with the finite cylinder!')
 		return result
-	
+
 	# To World Space
 	pt1 *= T
 	pt2 *= T
@@ -77,5 +77,5 @@ def intersect(c,r):
 	if pt2v:
 		mc.spaceLocator(p=[pt2.x,pt2.y,pt2.z])
 		result += 1
-	
+
 	return result

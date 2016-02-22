@@ -41,22 +41,22 @@ def buildEdgeCurves(edges,name,color=None):
 	# Get Edges
 	edges = mc.filterExpand(ex=True,sm=32) # Poly Edges
 	if not edges: raise Exception('Invalid or empty edge list!')
-	
+
 	# Get Master Group
 	masterGrp = buildMasterCurveGroup('edgeCurveGroup')
-	
+
 	# Get Curve Group
 	curveGrp = buildCurveGroup(name,color)
 	try: mc.parent(curveGrp,masterGrp)
 	except: pass
-	
+
 	# Build Edge Curves
 	crvList = []
 	for edge in edges:
 		crv = mc.polyToCurve(edge,form=2,degree=1)[0]
 		for at in 'trs': mc.setAttr(crv+'.'+at,l=True,cb=False)
 		mc.parent(crv,curveGrp)
-	
+
 	# Return Result
 	return curveGrp
 
@@ -68,15 +68,15 @@ def buildEdgeCurvesUI():
 	window = 'buildEdgeCurvesUI'
 	if mc.window(window,q=True,ex=1): mc.deleteUI(window)
 	window = mc.window(window,t='Build PolyEdge Curves',s=True)
-	
+
 	# Layout
 	CL = mc.columnLayout()
-	
+
 	# UI Elements
 	mc.textFieldGrp('buildEdgeCurves_nameTFG',label='Curve Group Name',text='',editable=True)
 	mc.colorIndexSliderGrp('buildEdgeCurves_colorCISG',label="Curve Color",min=1,max=32,value=16)
 	mc.button('buildEdgeCurvesB',l='Create',w=390,c='glTools.tools.polyEdgeCurve.buildEdgeCurvesFromUI()')
-	
+
 	# Show Window
 	mc.window(window,e=True,wh=[392,64])
 	mc.showWindow(window)
@@ -91,11 +91,11 @@ def buildEdgeCurvesFromUI():
 	if not edges:
 		print('Invalid Selection! Select polygon edges and run again...')
 		return
-	
+
 	# Get UI Parameters
 	name = mc.textFieldGrp('buildEdgeCurves_nameTFG',q=True,text=True)
 	color = mc.colorIndexSliderGrp('buildEdgeCurves_colorCISG',q=True,v=True) - 1
-	
+
 	# Build Edge Curves
 	crvGrp = buildEdgeCurves(edges,name,color)
 	mc.select(crvGrp)

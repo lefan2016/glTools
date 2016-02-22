@@ -13,18 +13,18 @@ def isCamera(obj):
 	'''
 	# Check object exists
 	if not mc.objExists(obj): return False
-	
+
 	# Get Shapes
 	objShapes = [obj]
 	if glTools.utils.transform.isTransform(obj):
 		objShapes = mc.listRelatives(obj,s=True,pa=True)
 		if not objShapes: return False
-	
+
 	# Check Shapes
 	for shape in objShapes:
 		if mc.objectType(shape) == 'camera':
 			return True
-	
+
 	# Return Result
 	return False
 
@@ -41,13 +41,13 @@ def getEyePoint(camera):
 	# Check Camera
 	if not isCamera(camera):
 		raise Exception('Object "'+camera+'" is not a valid camera!')
-	
+
 	# Get Eye Point
 	cameraShape = mc.ls(mc.listRelatives(camera,s=True,pa=True),type='camera')[0]
 	cameraDagPath = glTools.utils.base.getMDagPath(cameraShape)
 	cameraFn = OpenMaya.MFnCamera(cameraDagPath)
 	cameraPt = cameraFn.eyePoint(OpenMaya.MSpace.kWorld)
-	
+
 	# Return Result
 	return [cameraPt.x,cameraPt.y,cameraPt.z]
 
@@ -68,11 +68,11 @@ def distToCam(node,cam):
 		raise Exception('Camera "'+cam+'" does not exist!')
 	if not isCamera(cam):
 		raise Exception('Object "'+cam+'" is not a valid camera!')
-	
+
 	# Get Dist to Camera
 	camPt = getEyePoint(cam)
 	nodePt = mc.xform(node,q=True,ws=True,rp=True)
 	dist = glTools.utils.mathUtils.distanceBetween(camPt,nodePt)
-	
+
 	# Return Result
 	return dist

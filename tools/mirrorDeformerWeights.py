@@ -23,27 +23,27 @@ def mirrorWeights(mesh,deformer,axis='x',posToNeg=True,refMesh=''):
 	# Check deformers
 	if not mc.objExists(deformer):
 		raise Exception('Deformer "'+deformer+'" does not exist!!')
-	
+
 	# Check refMesh
 	if not refMesh: refMesh = mesh
-	
+
 	# Get symmetry table
 	axisIndex = {'x':0,'y':1,'z':2}[axis]
 	sTable = glTools.tools.symmetryTable.SymmetryTable()
 	symTable = sTable.buildSymTable(refMesh,axisIndex)
-	
+
 	# Get current weights
 	wt = glTools.utils.deformer.getWeights(deformer)
 	mem = glTools.utils.deformer.getDeformerSetMemberIndices(deformer,mesh)
-	
+
 	# Mirror weights
 	for i in [sTable.negativeIndexList,sTable.positiveIndexList][int(posToNeg)]:
 		if mem.count(i) and mem.count(symTable[i]):
 			wt[mem.index(symTable[i])] = wt[mem.index(i)]
-	
+
 	# Apply mirrored weights
 	glTools.utils.deformer.setWeights(deformer,wt,mesh)
-	
+
 def flipWeights(mesh,sourceDeformer,targetDeformer='',axis='x',refMesh=''):
 	'''
 	Flip deformer weights
@@ -65,25 +65,25 @@ def flipWeights(mesh,sourceDeformer,targetDeformer='',axis='x',refMesh=''):
 		raise Exception('Traget deformer '+targetDeformer+' does not exist!!')
 	if not targetDeformer:
 		targetDeformer = sourceDeformer
-	
+
 	# Check refMesh
 	if not refMesh: refMesh = mesh
-	
+
 	# Get mesh shape
 	meshShape = mesh
 	if mc.objectType(meshShape) == 'transform':
 		meshShape = mc.listRelatives(mesh,s=True,ni=True)[0]
-	
+
 	# Get symmetry table
 	axisIndex = {'x':0,'y':1,'z':2}[axis]
 	symTable = glTools.tools.symmetryTable.SymmetryTable().buildSymTable(refMesh,axisIndex)
-	
+
 	# Get current weights
 	wt = glTools.utils.deformer.getWeights(sourceDeformer,mesh)
 	sourceMem = glTools.utils.deformer.getDeformerSetMemberIndices(sourceDeformer,meshShape)
 	targetMem = glTools.utils.deformer.getDeformerSetMemberIndices(targetDeformer,meshShape)
 	targetWt = [0.0 for i in range(len(targetMem))]
-	
+
 	# Mirror weights
 	for i in sourceMem:
 		if targetMem.count(symTable[i]):
@@ -93,7 +93,7 @@ def flipWeights(mesh,sourceDeformer,targetDeformer='',axis='x',refMesh=''):
 				pass
 		else:
 			print('Cant find sym index for '+str(i))
-	
+
 	# Apply mirrored weights
 	glTools.utils.deformer.setWeights(targetDeformer,targetWt,mesh)
 
@@ -115,18 +115,18 @@ def copyWeights(sourceMesh,targetMesh,sourceDeformer,targetDeformer):
 		raise Exception('Source mesh "'+sourceMesh+'" does not exist!!')
 	if not mc.objExists(targetMesh):
 		raise Exception('Target mesh "'+targetMesh+'" does not exist!!')
-	
+
 	# Check deformers
 	if not mc.objExists(sourceDeformer):
 		raise Exception('Source deformer "'+sourceDeformer+'" does not exist!!')
 	if targetDeformer and not mc.objExists(targetDeformer):
 		raise Exception('Target deformer "'+targetDeformer+'" does not exist!!')
 	if not targetDeformer: targetDeformer = sourceDeformer
-	
+
 	# Compare vertex count
 	if mc.polyEvaluate(sourceMesh,v=True) != mc.polyEvaluate(targetMesh,v=True):
 		raise Exception('Source and Target mesh vertex counts do not match!!')
-	
+
 	# Copy weights
 	wtList = glTools.utils.deformer.getWeights(sourceDeformer,sourceMesh)
 	# Paste weights

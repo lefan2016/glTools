@@ -4,10 +4,10 @@ import maya.mel as mm
 class UserInputError(Exception): pass
 
 def create(piv=[0,0,0],axis=[0,0,-1],rad=1,dilate_ctrl='',prefix='eyeball'):
-	
+
 	#------------------------
 	# Generate Profile Curve
-	
+
 	# sphere
 	eye_sphere = mc.sphere(p=piv,ax=axis,r=rad,n=prefix+'_history')
 	# curve from sphere
@@ -15,10 +15,10 @@ def create(piv=[0,0,0],axis=[0,0,-1],rad=1,dilate_ctrl='',prefix='eyeball'):
 	eye_crv[0] = mc.rename(eye_crv[0],prefix+'_pfl01_crv')
 	# rebuild curve 0-1
 	mc.rebuildCurve(eye_crv[0],rpo=1,end=1,kcp=1,kr=0,d=3,tol=0.01)
-	
+
 	#------------------------
 	# Extract Curve Segments
-	
+
 	# detach curve
 	eye_crv_detach = mc.detachCurve(eye_crv[0]+'.u[0.125]',eye_crv[0]+'.u[0.25]',rpo=0,ch=1)
 	eye_crv_detach[0] = mc.rename(eye_crv_detach[0],prefix+'_pl01_crv')
@@ -32,10 +32,10 @@ def create(piv=[0,0,0],axis=[0,0,-1],rad=1,dilate_ctrl='',prefix='eyeball'):
 	pupil_rebuild[1] = mc.rename(pupil_rebuild[1],prefix+'_pl01_rbc')
 	iris_rebuild[1] = mc.rename(iris_rebuild[1],prefix+'_ir01_rbc')
 	sclera_rebuild[1] = mc.rename(sclera_rebuild[1],prefix+'_sc01_rbc')
-	
+
 	#------------------------
 	# Generate Eye Surfaces
-	
+
 	# revolve
 	pupil_revolve = mc.revolve(eye_crv_detach[0],po=0,rn=0,ut=0,tol=0.01,degree=3,s=8,ulp=1,ax=[0,0,1])
 	iris_revolve = mc.revolve(eye_crv_detach[1],po=0,rn=0,ut=0,tol=0.01,degree=3,s=8,ulp=1,ax=[0,0,1])
@@ -51,16 +51,16 @@ def create(piv=[0,0,0],axis=[0,0,-1],rad=1,dilate_ctrl='',prefix='eyeball'):
 	mc.connectAttr(eye_sphere[0]+'.t',pupil_revolve[1]+'.pivot',f=1)
 	mc.connectAttr(eye_sphere[0]+'.t',iris_revolve[1]+'.pivot',f=1)
 	mc.connectAttr(eye_sphere[0]+'.t',sclera_revolve[1]+'.pivot',f=1)
-	
+
 	#------------------------
 	# Connect Dilate Control
-	
+
 	if len(dilate_ctrl):
-		
+
 		# Verify Control
 		if not mc.objExists(dilate_ctrl):
 			raise UserInputError('Object ' + dilate_ctrl + ' does not exist!')
-		
+
 		# Check Attributes Exist
 		if not mc.objExists(dilate_ctrl+'.iris'):
 			mc.addAttr(dilate_ctrl,ln='iris',min=0,max=4,dv=1)
@@ -68,7 +68,7 @@ def create(piv=[0,0,0],axis=[0,0,-1],rad=1,dilate_ctrl='',prefix='eyeball'):
 		if not mc.objExists(dilate_ctrl+'.pupil'):
 			mc.addAttr(dilate_ctrl,ln='pupil',min=0,max=1,dv=0.5)
 			mc.setAttr(dilate_ctrl+'.pupil',k=1)
-		
+
 		# Connect Attributes
 		iris_md = mc.createNode('multDoubleLinear',n=prefix+'_irs01_mdl')
 		pupil_md = mc.createNode('multDoubleLinear',n=prefix+'_ppl01_mdl')
@@ -80,11 +80,11 @@ def create(piv=[0,0,0],axis=[0,0,-1],rad=1,dilate_ctrl='',prefix='eyeball'):
 		mc.connectAttr(pupil_md+'.output',eye_crv_detach[3]+'.parameter[0]')
 
 def setup_aim(lf_pivot,rt_pivot,head_ccc,aim_dist,prefix):
-	
+
 	aim_axis=[0.0,0.0,1.0]
 	up_axis=[0.0,1.0,0.0]
 	worldUp_axis = up_axis
-	
+
 	# LEFT
 	eye_pos = mc.xform(lf_pivot,q=1,ws=1,rp=1)
 	# create eye aim transform
@@ -92,7 +92,7 @@ def setup_aim(lf_pivot,rt_pivot,head_ccc,aim_dist,prefix):
 	mc.xform(eye_aim,ws=1,t=(eye_pos[0],eye_pos[1],(eye_pos[2] + aim_dist)))
 	# create aim constraint
 	aim_con = mc.aimConstraint(eye_aim,lf_pivot,aim=aim_axis,u=up_axis,wu=worldUp_axis,wuo=head_ccc,wut='objectrotation')
-	
+
 	# RIGHT
 	eye_pos = mc.xform(rt_pivot,q=1,ws=1,rp=1)
 	# create eye aim transform
@@ -100,4 +100,4 @@ def setup_aim(lf_pivot,rt_pivot,head_ccc,aim_dist,prefix):
 	mc.xform(eye_aim,ws=1,t=(eye_pos[0],eye_pos[1],(eye_pos[2] + aim_dist)))
 	# create aim constraint
 	aim_con = mc.aimConstraint(eye_aim,rt_pivot,aim=aim_axis,u=up_axis,wu=worldUp_axis,wuo=head_ccc,wut='objectrotation')
-	
+

@@ -24,15 +24,15 @@ def setDrivenKeyToRemapValue(animCurve,remapValueNode='',interpType=3,deleteAnim
 		raise Exception('AnimCurve node "'+animCurve+'" does not exist!!')
 	if remapValueNode and not mc.objExists(remapValueNode):
 		raise Exception('RemapValue node "'+remapValueNode+'" does not exist!!')
-	
+
 	# Get connections to animCurve
 	inConn = mc.listConnections(animCurve+'.input',s=True,d=False,p=True)
 	outConn = mc.listConnections(animCurve+'.output',s=False,d=True,p=True)
-	
+
 	# Get keyframe data
 	valList = mc.keyframe(animCurve,q=True,vc=True)
 	floatList = mc.keyframe(animCurve,q=True,fc=True)
-	
+
 	# Get min/max input and output values
 	orderValList = copy.deepcopy(valList)
 	orderFloatList = copy.deepcopy(floatList)
@@ -42,23 +42,23 @@ def setDrivenKeyToRemapValue(animCurve,remapValueNode='',interpType=3,deleteAnim
 	maxVal = orderValList[-1]
 	minFloat = orderFloatList[0]
 	maxFloat = orderFloatList[-1]
-	
+
 	# Create remapValue node
 	if not remapValueNode:
 		remapValueNode = mc.createNode('remapValue',n=animCurve+'_remapValue')
-	
+
 	# Set Remap attribute values
 	mc.setAttr(remapValueNode+'.inputMin',minFloat)
 	mc.setAttr(remapValueNode+'.inputMax',maxFloat)
 	mc.setAttr(remapValueNode+'.outputMin',minVal)
 	mc.setAttr(remapValueNode+'.outputMax',maxVal)
-	
+
 	# Remove existing ramp widgets
 	indexList = range(mc.getAttr(remapValueNode+'.value',s=True))
 	indexList.reverse()
 	for i in indexList:
 		mc.removeMultiInstance(remapValueNode+'.value['+str(i)+']',b=True)
-		
+
 	# Set ramp widgets based on keys
 	valRange = maxVal - minVal
 	floatRange = maxFloat - minFloat
@@ -76,13 +76,13 @@ def setDrivenKeyToRemapValue(animCurve,remapValueNode='',interpType=3,deleteAnim
 			mc.setAttr(remapValueNode+'.value['+str(i)+'].value_Position',l=True)
 		if lockValue:
 			mc.setAttr(remapValueNode+'.value['+str(i)+'].value_FloatValue',l=True)
-	
+
 	# Replace animCurve connections
 	mc.connectAttr(inConn[0],remapValueNode+'.inputValue',f=True)
 	mc.connectAttr(remapValueNode+'.outValue',outConn[0],f=True)
-	
+
 	# Delete unused animCurve
 	if deleteAnimCurve: mc.delete(animCurve)
-	
+
 	# Return result
 	return remapValueNode

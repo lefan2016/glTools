@@ -14,13 +14,13 @@ def isCharacterDefinition(char,verbose=False):
 		if verbose:
 			print('Object "'+char+'" does not exist!')
 		return False
-	
+
 	# Check Object Type
 	if mc.objectType(char) != 'HIKCharacterNode':
 		if verbose:
 			print('Object "'+char+'" is not a valid "HIKCharacterNode"!')
 		return False
-	
+
 	# Return Result
 	return True
 
@@ -41,12 +41,12 @@ def createCharacterDefinition(characterName=''):
 	if characterName and isCharacterDefinition(characterName,False):
 		raise Exception('Character definition "'+characterName+'" already exists!')
 	if not characterName: characterName = 'Character1'
-	
+
 	# Create New Definition
 	charStr = mm.eval('newCharacterWithName("'+characterName+'")')
 	# Extract Definition Name from Return String - WTF!!
 	char = charStr.split("'")[1]
-	
+
 	# Return Result
 	return char
 
@@ -68,11 +68,11 @@ def setCurrentCharacter(char):
 	# Check Character Definition
 	if not isCharacterDefinition(char,verbose=True):
 		raise Exception('"'+char+'" is not a valid "HIKCharacterNode"!')
-	
+
 	# Set Current Character
 	mc.optionMenuGrp('hikCharacterList',e=True,v=char)
 	mm.eval('hikUpdateCurrentCharacterFromUI();')
-	
+
 	# Return Result
 	current_char = getCurrentCharacter()
 	return current_char
@@ -83,7 +83,7 @@ def setCharacterLock(char,lock=True):
 	# Check Character Definition
 	if not isCharacterDefinition(char,verbose=True):
 		raise Exception('"'+char+'" is not a valid "HIKCharacterNode"!')
-	
+
 	# Set Character Current
 	activeChar = getCurrentCharacter()
 	setCurrentCharacter(char)
@@ -94,11 +94,11 @@ def setCharacterSource(char,source):
 	# Check Character Definition
 	if not isCharacterDefinition(char,verbose=True):
 		raise Exception('"'+char+'" is not a valid "HIKCharacterNode"!')
-	
+
 	# Set Character Source
 	mm.eval('hikSetCurrentSource("'+source+'");')
 	mm.eval('hikUpdateSourceList();')
 	mm.eval('hikUpdateSkeletonUI();')
-	
+
 	# Return Result
 	return source

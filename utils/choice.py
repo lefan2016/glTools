@@ -21,14 +21,14 @@ def create(inputType='string',selectInput=None,inputVal=None,inputSrc=None,dst=N
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Selector Input
 	if selectInput:
 		if not mc.objExists(selectInput):
 			raise Exception('Selector input source "'+selectInput+'" does not exist!')
 		if not glTools.utils.attribute.isAttr(selectInput):
 			raise Exception('Selector input source "'+selectInput+'" is not a valid attribute!')
-	
+
 	# Input
 	if inputSrc:
 		for inSrc in inputSrc:
@@ -36,29 +36,29 @@ def create(inputType='string',selectInput=None,inputVal=None,inputSrc=None,dst=N
 				raise Exception('Input source "'+inSrc+'" does not exist!')
 			if not glTools.utils.attribute.isAttr(inSrc):
 				raise Exception('Input source "'+inSrc+'" is not a valid attribute!')
-	
+
 	# Destination
 	if dst:
 		if not mc.objExists(selectInput):
 			raise Exception('Destination plug "'+dst+'" does not exist!')
 		if not glTools.utils.attribute.isAttr(dst):
 			raise Exception('Destination plug "'+dst+'" is not a valid attribute!')
-	
+
 	# Prefix
 	if not prefix:
 		prefix = ''
 		if dst: prefix = dst.split('.')[0]
-	
+
 	# ======================
 	# - Create Choice Node -
 	# ======================
-	
+
 	choiceNode = mc.createNode('choice',n=prefix+('_'*int(bool(prefix)))+'choice')
-	
+
 	# =======================
 	# - Connect Choice Node -
 	# =======================
-	
+
 	# Selector Input
 	if selectInput:
 		try:
@@ -67,7 +67,7 @@ def create(inputType='string',selectInput=None,inputVal=None,inputSrc=None,dst=N
 			raise Exception('Error connecting selector input "'+selectInput+'" >> "'+choiceNode+'.selector"! Exception msg: '+str(e))
 		else:
 			print ('Connected "'+selectInput+'" >> "'+choiceNode+'.selector"')
-	
+
 	# Input
 	inputLen = 0
 	if inputVal:
@@ -76,9 +76,9 @@ def create(inputType='string',selectInput=None,inputVal=None,inputSrc=None,dst=N
 	if inputSrc:
 		if len(inputSrc) > inputLen:
 			inputLen = len(inputSrc)
-	
+
 	if inputLen:
-		
+
 		# Create Attribute (based on input type)
 		if inputType == 'string':
 			mc.addAttr(choiceNode,ln='inputValue',dt=inputType,m=True)
@@ -86,7 +86,7 @@ def create(inputType='string',selectInput=None,inputVal=None,inputSrc=None,dst=N
 			mc.addAttr(choiceNode,ln='inputValue',at=inputType,m=True)
 		else:
 			raise Exception('Invalid input type "'+inputType+'"!')
-		
+
 		# Set Input Values
 		if inputVal:
 			for i in range(len(inputVal)):
@@ -99,27 +99,27 @@ def create(inputType='string',selectInput=None,inputVal=None,inputSrc=None,dst=N
 						except Exception, e: raise Exception('Error setting input value "'+choiceNode+'.inputValue['+str(i)+']"! Exception msg: '+str(e))
 					else:
 						raise Exception('Invalid input type "'+inputType+'"!')
-		
+
 		# Connect Input Source
 		if inputSrc:
 			for i in range(len(inputSrc)):
 				if not inputSrc[i] == None:
 					try: mc.connectAttr(inputSrc[i],choiceNode+'.inputValue['+str(i)+']',f=True)
 					except Exception, e: raise Exception('Error connecting input source "'+inputSrc[i]+'" >> "'+choiceNode+'.inputValue['+str(i)+']"! Exception msg: '+str(e))
-		
+
 		# Connect Input
 		for i in range(inputLen):
 			try: mc.connectAttr(choiceNode+'.inputValue['+str(i)+']',choiceNode+'.input['+str(i)+']',f=True)
 			except Exception, e: raise Exception('Error connecting input value "'+choiceNode+'.inputValue['+str(i)+']" >> "'+choiceNode+'.input['+str(i)+']"! Exception msg: '+str(e))
-		
+
 		# Connect Destination
 		if dst:
 			try: mc.connectAttr(choiceNode+'.output',dst,f=True)
 			except Exception, e: raise Exception('Error connecting to choice destination "'+dst+'"! Exception msg: '+str(e))
 			else: print('Connected "'+choiceNode+'.output" >> "'+dst+'"')
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return choiceNode

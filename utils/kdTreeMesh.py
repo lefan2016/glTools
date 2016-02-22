@@ -21,14 +21,14 @@ class _Node(list):
 	Simple wrapper around tree nodes - mainly to make the code a little more readable (although
 	members are generally accessed via indices because its faster)
 	'''
-	
+
 	@property
 	def point( self ): return self[0]
 	@property
 	def left( self ): return self[1]
 	@property
 	def right( self ): return self[2]
-	
+
 	def is_leaf( self ):
 		return self[1] is None and self[2] is None
 
@@ -43,23 +43,23 @@ class KdTree():
 		'''
 		'''
 		self.performPopulate( mesh )
-	
+
 	def performPopulate( self, mesh ):
 		'''
 		'''
 		dimension = self.DIMENSION
-		
+
 		# Build Mesh Pt List
 		meshFn = glTools.utils.mesh.getMeshFn(mesh)
 		meshPtUtil = OpenMaya.MScriptUtil()
 		meshPts = meshFn.getRawPoints()
-		
+
 		meshPtList = []
 		for i in range(meshFn.numVertices()):
 			pt = [	meshPtUtil.getFloatArrayItem(meshPts,i*3+0),
 					meshPtUtil.getFloatArrayItem(meshPts,i*3+1),
 					meshPtUtil.getFloatArrayItem(meshPts,i*3+2)	]
-			
+
 			meshPtList.append(Pt(pt,i))
 
 		def populateTree( points, depth ):
@@ -82,14 +82,14 @@ class KdTree():
 			return node
 
 		self.root = populateTree( meshPtList, 0 )
-	
+
 	def getClosest( self, queryPoint, returnDistances=False ):
 		'''
 		Returns the closest point in the tree to the given point
 		NOTE: see the docs for getWithin for info on the returnDistances arg
 		'''
 		dimension = self.DIMENSION
-		
+
 		distBest = ((self.root[0].pnt[0]-queryPoint[0]) ** 2) + ((self.root[0].pnt[1]-queryPoint[1]) ** 2) + ((self.root[0].pnt[2]-queryPoint[2]) ** 2)
 		bestList = [ (distBest, self.root[0]) ]
 
@@ -142,7 +142,7 @@ class KdTree():
 			return bestList[0]
 
 		return bestList[0][1]
-	
+
 	def getWithin( self, queryPoint, threshold=1e-6, returnDistances=False ):
 		'''
 		Returns all points that fall within the radius of the queryPoint within the tree.
@@ -168,7 +168,7 @@ class KdTree():
 			'''
 			nodePoint = node[0].pnt
 			axis = depth % dimension
-			
+
 			if queryPoint[axis] < nodePoint[axis]:
 				nearNode = node[1]
 				farNode = node[2]
@@ -194,17 +194,17 @@ class KdTree():
 			if farNode is not None:
 				if (nodePoint[ axis ] - queryPoint[ axis ])**2 < sqThreshold:
 					search( farNode, depth+1 )
-		
+
 		search( self.root, 0 )
-		
+
 		# The best is guaranteed to be at the head of the list
 		# But consequent points might be out of order - so order them now
 		matches.sort()
-		
+
 		# Return Result
 		if returnDistances: return matches
 		return [ m[1] for m in matches ]
-	
+
 	def getDistanceRatioWeightedVector( self, queryPoint, ratio=2, returnDistances=False ):
 		'''
 		Finds the closest point to the queryPoint in the tree and returns all points within a distance
@@ -218,21 +218,21 @@ class KdTree():
 		'''
 		# Check Ratio
 		assert ratio > 1
-		
+
 		# Get Closest
 		closestDist, closest = self.getClosest( queryPoint, returnDistances=True )
-		
+
 		# Check Coincident
 		if closestDist == 0:
 			if returnDistances:
 				return [ (0, closest) ]
 			else:
 				return [ closest ]
-		
+
 		# Get Dist / Max Dist
 		closestDist = sqrt( closestDist )
 		maxDist = closestDist * ratio
-		
+
 		# Return Result
 		return self.getWithin( queryPoint, maxDist, returnDistances=returnDistances )
 

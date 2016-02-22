@@ -27,7 +27,7 @@ def locatorSurfaceUI():
 	scaleFSG = mc.floatSliderGrp('locatorSurfaceScaleFSG',label='Locator Scale',field=True,minValue=0.0,maxValue=1.0,fieldMinValue=0.0,fieldMaxValue=10.0,value=0.75,pre=3)
 	# Use Control Points
 	useCvCBG = mc.checkBoxGrp('locatorSurfaceUseCvCBG',l='Specify CVs',ncb=1,v1=False)
-	
+
 	# Control Points layout
 	cvFrameL = mc.frameLayout('locatorSurfaceCvFL',l='Control Points',cll=0,en=0)
 	cvFormL = mc.formLayout(numberOfDivisions=100)
@@ -35,20 +35,20 @@ def locatorSurfaceUI():
 	# TSL Buttons
 	cvAddB = mc.button('locatorSurfaceAddCvB',l='Add',c='glTools.ui.utils.addCvsToTSL("'+controlPointTSL+'")',en=False)
 	cvRemB = mc.button('locatorSurfaceRemCvB',l='Remove',c='glTools.ui.utils.removeFromTSL("'+controlPointTSL+'")',en=False)
-	
+
 	mc.setParent('..')
 	mc.setParent('..')
-	
+
 	# Separator
 	SEP = mc.separator(height=10,style='single')
 	# Buttons
 	createB = mc.button('locatorSurfaceCreateB',l='Create',c='glTools.ui.surface.locatorSurfaceFromUI()')
 	cancelB = mc.button('locatorSurfaceCancelB',l='Cancel',c='mc.deleteUI("'+window+'")')
-	
+
 	# UI callback commands
 	mc.textFieldButtonGrp(surfaceTFB,e=True,bc='glTools.ui.utils.loadSurfaceSel("'+surfaceTFB+'","'+prefixTFG+'")')
 	mc.checkBoxGrp('locatorSurfaceUseCvCBG',e=True,cc='glTools.ui.utils.checkBoxToggleLayout("'+useCvCBG+'","'+cvFrameL+'")')
-	
+
 	# Form Layout - MAIN
 	mc.formLayout(FL,e=True,af=[(surfaceTFB,'top',5),(surfaceTFB,'left',5),(surfaceTFB,'right',5)])
 	mc.formLayout(FL,e=True,ac=[(prefixTFG,'top',5,surfaceTFB)])
@@ -65,7 +65,7 @@ def locatorSurfaceUI():
 	mc.formLayout(FL,e=True,ac=[(createB,'bottom',5,cancelB)])
 	mc.formLayout(FL,e=True,af=[(createB,'left',5),(createB,'right',5)])
 	mc.formLayout(FL,e=True,af=[(cancelB,'left',5),(cancelB,'right',5),(cancelB,'bottom',5)])
-	
+
 	# Form Layout - Control Points
 	mc.formLayout(cvFormL,e=True,af=[(controlPointTSL,'top',5),(controlPointTSL,'left',5),(controlPointTSL,'right',5)])
 	mc.formLayout(cvFormL,e=True,ac=[(controlPointTSL,'bottom',5,cvAddB)])
@@ -73,7 +73,7 @@ def locatorSurfaceUI():
 	mc.formLayout(cvFormL,e=True,ap=[(cvAddB,'right',5,50)])
 	mc.formLayout(cvFormL,e=True,af=[(cvRemB,'right',5),(cvRemB,'bottom',5)])
 	mc.formLayout(cvFormL,e=True,ap=[(cvRemB,'left',5,50)])
-	
+
 	# Show Window
 	mc.showWindow(window)
 
@@ -95,10 +95,10 @@ def locatorSurfaceFromUI():
 	cvList = mc.textScrollList('locatorSurfaceCpTSL',q=True,ai=True)
 	if useCvs and not cvList:
 		raise UserInputError('No control points specified!!')
-	
+
 	# Execute command
 	glTools.utils.surface.locatorSurface(surface=surface,controlPoints=cvList,locatorScale=scale*0.1,prefix=prefix)
-	
+
 	# Cleanup
 	mc.deleteUI(window)
 
@@ -120,7 +120,7 @@ def snapToSurfaceUI():
 	surfaceTFB = mc.textFieldButtonGrp('snapToSurfaceTFB',label='Source Surface',text='',buttonLabel='Load Selected')
 	# Orient
 	orientCBG = mc.checkBoxGrp('snapToSurfaceOrientCBG',label='Orient To Surface',ncb=1,v1=False)
-	
+
 	# Orient Frame
 	orientFrameL = mc.frameLayout('snapToSurfaceOriFL',l='Orient Options',cll=0,en=0)
 	orientFormL = mc.formLayout(numberOfDivisions=100)
@@ -134,19 +134,19 @@ def snapToSurfaceUI():
 	for ax in ['U','V']: mc.menuItem(label=ax)
 	# Set Default Value
 	mc.optionMenuGrp('snapToSurfaceVAxisOMG',e=True,sl=2)
-	
+
 	mc.setParent('..')
 	mc.setParent('..')
-	
+
 	# UI callback commands
 	mc.textFieldButtonGrp(surfaceTFB,e=True,bc='glTools.ui.utils.loadSurfaceSel("'+surfaceTFB+'")')
 	mc.checkBoxGrp(orientCBG,e=True,cc='glTools.ui.utils.checkBoxToggleLayout("'+orientCBG+'","'+orientFrameL+'")')
-	
+
 	# Buttons
 	snapB = mc.button('snapToSurfaceSnapB',l='Snap!',c='glTools.ui.surface.snapToSurfaceFromUI(False)')
 	snapCloseB = mc.button('snapToSurfaceSnapCloseB',l='Snap and Close',c='glTools.ui.surface.snapToSurfaceFromUI(True)')
 	cancelB = mc.button('snapToSurfaceCancelB',l='Cancel',c='mc.deleteUI("'+window+'")')
-	
+
 	# Form Layout - MAIN
 	mc.formLayout(FL,e=True,af=[(surfaceTFB,'top',5),(surfaceTFB,'left',5),(surfaceTFB,'right',5)])
 	mc.formLayout(FL,e=True,ac=[(orientCBG,'top',5,surfaceTFB)])
@@ -159,14 +159,14 @@ def snapToSurfaceUI():
 	mc.formLayout(FL,e=True,ac=[(snapCloseB,'bottom',5,cancelB)])
 	mc.formLayout(FL,e=True,af=[(snapCloseB,'left',5),(snapCloseB,'right',5)])
 	mc.formLayout(FL,e=True,af=[(cancelB,'left',5),(cancelB,'right',5),(cancelB,'bottom',5)])
-	
+
 	# Form Layout - Orient
 	mc.formLayout(orientFormL,e=True,af=[(orientUAxisOMG,'top',5),(orientUAxisOMG,'left',5),(orientUAxisOMG,'right',5)])
 	mc.formLayout(orientFormL,e=True,ac=[(orientVAxisOMG,'top',5,orientUAxisOMG)])
 	mc.formLayout(orientFormL,e=True,af=[(orientVAxisOMG,'left',5),(orientVAxisOMG,'right',5)])
 	mc.formLayout(orientFormL,e=True,ac=[(orientAlignToOMG,'top',5,orientVAxisOMG)])
 	mc.formLayout(orientFormL,e=True,af=[(orientAlignToOMG,'left',5),(orientAlignToOMG,'right',5)])
-	
+
 	# Show Window
 	mc.showWindow(window)
 
@@ -188,10 +188,10 @@ def snapToSurfaceFromUI(close=False):
 	tanU = str.lower(str(mc.optionMenuGrp('snapToSurfaceUAxisOMG',q=True,v=True)))
 	tanV = str.lower(str(mc.optionMenuGrp('snapToSurfaceVAxisOMG',q=True,v=True)))
 	align = str.lower(str(mc.optionMenuGrp('snapToSurfaceAlignToOMG',q=True,v=True)))
-	
+
 	# Get User Selection
 	sel = mc.ls(sl=True,fl=True)
-	
+
 	# Execute Command
 	glTools.utils.surface.snapPtsToSurface(surface,sel)
 	# Orient
@@ -201,7 +201,7 @@ def snapToSurfaceFromUI(close=False):
 				glTools.utils.surface.orientToSurface(surface=surface,obj=obj,useClosestPoint=True,tangentUAxis=tanU,tangentVAxis=tanV,alignTo=align)
 			except:
 				print('Object "'+obj+'" is not a valid transform!! Unable to orient!')
-	
+
 	# Cleanup
 	if close: mc.deleteUI(window)
 
@@ -234,7 +234,7 @@ def attachToSurfaceUI():
 	vParamAttrTFG = mc.textFieldGrp('attachToSurfaceVAttrTFG',label='V Param Attribute', text='vCoord')
 	# Orient
 	orientCBG = mc.checkBoxGrp('attachToSurfaceOrientCBG',label='Orient To Surface',ncb=1,v1=False)
-	
+
 	# Orient Frame
 	orientFrameL = mc.frameLayout('attachToSurfaceOriFL',l='Orient Options',cll=0,en=0)
 	orientFormL = mc.formLayout(numberOfDivisions=100)
@@ -248,20 +248,20 @@ def attachToSurfaceUI():
 	for ax in ['U','V']: mc.menuItem(label=ax)
 	# Set Default Value
 	mc.optionMenuGrp('attachToSurfaceVAxisOMG',e=True,sl=2)
-	
+
 	mc.setParent('..')
 	mc.setParent('..')
-	
+
 	# Buttons
 	attachB = mc.button('attachToSurfaceAttachB',l='Attach',c='glTools.ui.surface.attachToSurfaceFromUI(False)')
 	cancelB = mc.button('snapToSurfaceCancelB',l='Cancel',c='mc.deleteUI("'+window+'")')
-	
+
 	# UI callback commands
 	mc.textFieldButtonGrp(surfaceTFB,e=True,bc='glTools.ui.utils.loadSurfaceSel("'+surfaceTFB+'")')
 	mc.textFieldButtonGrp(transformTFB,e=True,bc='glTools.ui.utils.loadObjectSel("'+transformTFB+'","'+prefixTFG+'")')
 	mc.checkBoxGrp(closePointCBG,e=True,cc='glTools.ui.utils.checkBoxToggleControl("'+closePointCBG+'","'+uvParamFFG+'",invert=True)')
 	mc.checkBoxGrp(orientCBG,e=True,cc='glTools.ui.utils.checkBoxToggleLayout("'+orientCBG+'","'+orientFrameL+'")')
-	
+
 	# Form Layout - Main
 	mc.formLayout(FL,e=True,af=[(surfaceTFB,'top',5),(surfaceTFB,'left',5),(surfaceTFB,'right',5)])
 	mc.formLayout(FL,e=True,ac=[(transformTFB,'top',5,surfaceTFB)])
@@ -283,14 +283,14 @@ def attachToSurfaceUI():
 	mc.formLayout(FL,e=True,af=[(attachB,'left',5),(attachB,'right',5)])
 	mc.formLayout(FL,e=True,ac=[(attachB,'bottom',5,cancelB)])
 	mc.formLayout(FL,e=True,af=[(cancelB,'left',5),(cancelB,'right',5),(cancelB,'bottom',5)])
-	
+
 	# Form Layout - Orient
 	mc.formLayout(orientFormL,e=True,af=[(orientUAxisOMG,'top',5),(orientUAxisOMG,'left',5),(orientUAxisOMG,'right',5)])
 	mc.formLayout(orientFormL,e=True,ac=[(orientVAxisOMG,'top',5,orientUAxisOMG)])
 	mc.formLayout(orientFormL,e=True,af=[(orientVAxisOMG,'left',5),(orientVAxisOMG,'right',5)])
 	mc.formLayout(orientFormL,e=True,ac=[(orientAlignToOMG,'top',5,orientVAxisOMG)])
 	mc.formLayout(orientFormL,e=True,af=[(orientAlignToOMG,'left',5),(orientAlignToOMG,'right',5)])
-	
+
 	# Show Window
 	mc.showWindow(window)
 
@@ -319,10 +319,10 @@ def attachToSurfaceFromUI(close=True):
 	tanU = str.lower(str(mc.optionMenuGrp('attachToSurfaceUAxisOMG',q=True,v=True)))
 	tanV = str.lower(str(mc.optionMenuGrp('attachToSurfaceVAxisOMG',q=True,v=True)))
 	align = str.lower(str(mc.optionMenuGrp('attachToSurfaceAlignToOMG',q=True,v=True)))
-	
+
 	# Execute command
 	result = glTools.utils.attach.attachToSurface(surface=surf,transform=trans,uValue=uParam,vValue=vParam,useClosestPoint=closePnt,orient=orient,uAxis=tanU,vAxis=tanV,uAttr=uAttr,vAttr=vAttr,alignTo=align,prefix=pre)
-	
+
 	# Cleanup
 	if close: mc.deleteUI(window)
 

@@ -10,7 +10,7 @@ def longestEdges(mesh,faceSel=[]):
 	meshFn = glTools.utils.mesh.getMeshFn(mesh)
 	edgeIter = glTools.utils.mesh.getMeshEdgeIter(mesh)
 	faceIter = glTools.utils.mesh.getMeshFaceIter(mesh)
-	
+
 	# Check face selection
 	if faceSel:
 		faceSel = mc.ls(faceSel,fl=1)
@@ -20,18 +20,18 @@ def longestEdges(mesh,faceSel=[]):
 		compObj = OpenMaya.MObject()
 		selList.getDagPath(0,meshPath,compObj)
 		faceIter = OpenMaya.MItMeshPolygon(meshPath,compObj)
-	
+
 	# Get edge array wrapper
 	faceEdges = OpenMaya.MIntArray()
-	
+
 	# Initialize longest edge list
 	longEdgeList = []
-	
+
 	# Build edge ID pointer
 	edgeId = OpenMaya.MScriptUtil()
 	edgeId.createFromInt(0)
 	edgeIdPtr = edgeId.asIntPtr()
-	
+
 	# Iterate through faces
 	while not faceIter.isDone():
 		# Reset max edge length
@@ -48,9 +48,9 @@ def longestEdges(mesh,faceSel=[]):
 				maxEdgeLen = edgeLen
 		longEdgeList.append(longEdge)
 		faceIter.next()
-	
+
 	# Build selection list
 	sel = [mesh+'.e['+str(i)+']' for i in longEdgeList]
-	
+
 	# Return result
 	return sel

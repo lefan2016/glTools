@@ -22,7 +22,7 @@ def create(	path,
 			prefix=''	):
 	'''
 	Create objects along a curve
-	
+
 	# INPUTS:
 	@input path: Input nurbs curve path
 	@inputType path: str
@@ -40,48 +40,48 @@ def create(	path,
 	@inputType max: float
 	@input prefix: Name prefix for builder created nodes. If left at default ("") prefix will be derived from path name.
 	@inputType prefix: str
-	
+
 	# OUTPUTS:
 	@output outObjectList: List of objects placed along path
 	@outputType outObjectList: list
 	'''
-	
+
 	# Check Path
 	if not glTools.utils.curve.isCurve(path):
 		raise Exception('Path object '+path+' is not a valid nurbs curve!')
-	
+
 	# Check prefix
 	if not prefix: prefix = glTools.utils.stringUtils.stripSuffix(path)
-	
+
 	# Check object count
 	if not num: num = mc.getAttr(path+'.spans') + 1
-	
+
 	# Get curve sample points
 	paramList = glTools.utils.curve.sampleParam(path,num,useDist,min,max)
-	
+
 	# Create object along path
 	objList = []
 	for i in range(num):
-		
+
 		# Get string index
 		ind = glTools.utils.stringUtils.stringIndex(i+1)
-		
+
 		# Create object
 		obj = mc.createNode(objectType,n=prefix+ind+'_'+objectType)
 		if not glTools.utils.base.isTransform(obj): obj = mc.listRelatives(obj,p=True,pa=True)[0]
-		
+
 		# Position
 		pos = mc.pointOnCurve(path,pr=paramList[i])
 		mc.xform(obj,t=pos,ws=True)
-		
+
 		# Parent
 		if parent and i: obj = mc.parent(obj,objList[-1])[0]
-		
+
 		# Orient Joint
 		if objectType == 'joint' and i: mc.joint(objList[-1],e=True,zso=True,oj='xyz',sao='yup')
-		
+
 		# Append result
 		objList.append( str(obj) )
-	
+
 	# Return result
 	return objList

@@ -39,34 +39,34 @@ class NurbsSurfaceData( data.Data ):
 		# ==========
 		# - Checks -
 		# ==========
-		
+
 		# Check Surface
 		if not glTools.utils.surface.isSurface(surface):
 			raise Exception('Object "'+surface+'" is not a vaild NURBS surface node!')
-		
+
 		# World Space
 		space = OpenMaya.MSpace.kObject
 		if worldSpace: space = OpenMaya.MSpace.kWorld
-		
+
 		# ==============
 		# - Build Data -
 		# ==============
-		
+
 		# Start timer
 		timer = mc.timerX()
-		
+
 		# Get basic surface info
 		self._data['name'] = surface
 
 		# Get Surface Function Class
 		surfaceFn = glTools.utils.surface.getSurfaceFn(surface)
-		
+
 		# Get Surface Degree and Form
 		self._data['degreeU'] = surfaceFn.degreeU()
 		self._data['degreeV'] = surfaceFn.degreeV()
 		self._data['formU'] = int(surfaceFn.formInU())
 		self._data['formV'] = int(surfaceFn.formInV())
-		
+
 		# Get Surface Knots
 		knotsUarray = OpenMaya.MDoubleArray()
 		knotsVarray = OpenMaya.MDoubleArray()
@@ -79,15 +79,15 @@ class NurbsSurfaceData( data.Data ):
 		cvArray = OpenMaya.MPointArray()
 		surfaceFn.getCVs(cvArray,space)
 		self._data['cv'] = [(cvArray[i].x,cvArray[i].y,cvArray[i].z) for i in range(cvArray.length())]
-		
+
 		# =================
 		# - Return Result -
 		# =================
-		
+
 		# Print timer result
 		buildTime = mc.timerX(st=timer)
 		print('NurbsSurfaceData: Data build time for surface "'+surface+'": '+str(buildTime))
-		
+
 		return self._data['name']
 
 	def rebuild(self):
@@ -99,13 +99,13 @@ class NurbsSurfaceData( data.Data ):
 		# ========================
 		# - Rebuild Surface Data -
 		# ========================
-		
+
 		# Rebuild Control Vertices
 		numCVs = len(self._data['cv'])
 		cvArray = OpenMaya.MPointArray(numCVs,OpenMaya.MPoint.origin)
 		for i in range(numCVs):
 			cvArray.set(OpenMaya.MPoint(self._data['cv'][i][0],self._data['cv'][i][1],self._data['cv'][i][2],1.0),i)
-		
+
 		# Rebuild Surface Knot Arrays
 		numKnotsU = len(self._data['knotsU'])
 		numKnotsV = len(self._data['knotsV'])
@@ -131,11 +131,11 @@ class NurbsSurfaceData( data.Data ):
 		# =================
 		# - Return Result -
 		# =================
-		
+
 		# Print Timed Result
 		buildTime = mc.timerX(st=timer)
 		print('NurbsSurfaceData: Data rebuild time for surface "'+self._data['name']+'": '+str(buildTime))
-		
+
 		return surfaceObjHandle
 
 	def rebuildSurface(self):
@@ -143,17 +143,17 @@ class NurbsSurfaceData( data.Data ):
 		'''
 		# Start timer
 		timer = mc.timerX()
-		
+
 		# ========================
 		# - Rebuild Surface Data -
 		# ========================
-		
+
 		# Rebuild Control Vertices
 		numCVs = len(self._data['cv'])
 		cvArray = OpenMaya.MPointArray(numCVs,OpenMaya.MPoint.origin)
 		for i in range(numCVs):
 			cvArray.set(OpenMaya.MPoint(self._data['cv'][i][0],self._data['cv'][i][1],self._data['cv'][i][2],1.0),i)
-		
+
 		# Rebuild Surface Knot Arrays
 		numKnotsU = len(self._data['knotsU'])
 		numKnotsV = len(self._data['knotsV'])
@@ -185,9 +185,9 @@ class NurbsSurfaceData( data.Data ):
 		# =================
 		# - Return Result -
 		# =================
-		
+
 		# Print timer result
 		buildTime = mc.timerX(st=timer)
 		print('NurbsSurfaceData: Geometry rebuild time for surface "'+surface+'": '+str(buildTime))
-		
+
 		return surface

@@ -27,7 +27,7 @@ def isSkinCluster(skinCluster):
 	if mc.objectType(skinCluster) != 'skinCluster':
 		print('Object "'+skinCluster+'" is not a vaild skinCluster node!')
 		return False
-	
+
 	# Retrun result
 	return True
 
@@ -44,14 +44,14 @@ def findRelatedSkinCluster(geometry):
 	if mc.objectType(geometry) == 'transform':
 		try: geometry = mc.listRelatives(geometry,s=True,ni=True,pa=True)[0]
 		except: raise Exception('Object '+geometry+' has no deformable geometry!')
-	
+
 	# Determine skinCluster
 	skin = mm.eval('findRelatedSkinCluster "'+geometry+'"')
-	if not skin: 
+	if not skin:
 		skin = mc.ls(mc.listHistory(geometry),type='skinCluster')
 		if skin: skin = skin[0]
 	if not skin: skin = ''
-	
+
 	# Return result
 	return skin
 
@@ -64,16 +64,16 @@ def getSkinClusterFn(skinCluster):
 	# Verify skinCluster
 	if not isSkinCluster(skinCluster):
 		raise Exception('Invalid skinCluster "' + skinCluster + '" specified!')
-	
+
 	# Get skinCluster node
 	skinClusterSel = OpenMaya.MSelectionList()
 	skinClusterObj = OpenMaya.MObject()
 	OpenMaya.MGlobal.getSelectionListByName(skinCluster,skinClusterSel)
 	skinClusterSel.getDependNode(0,skinClusterObj)
-	
+
 	# Initialize skinCluster function class
 	skinClusterFn = OpenMayaAnim.MFnSkinCluster(skinClusterObj)
-	
+
 	# Return function class
 	return skinClusterFn
 
@@ -88,17 +88,17 @@ def getInfluenceIndex(skinCluster,influence):
 	# Verify skinCluster
 	if not isSkinCluster(skinCluster):
 		raise Exception('Invalid skinCluster "'+skinCluster+'" specified!')
-	
+
 	# Check influence
 	if not mc.objExists(influence):
 		raise Exception('Influence object "'+influence+'" does not exist!')
-	
+
 	# Get skinCluster node
 	skinClusterFn = getSkinClusterFn(skinCluster)
-	
+
 	# Get influence object
 	influencePath = glTools.utils.base.getMDagPath(influence)
-	
+
 	# Get influence index
 	return skinClusterFn.indexForInfluenceObject(influencePath)
 
@@ -113,13 +113,13 @@ def getInfluenceAtIndex(skinCluster,influenceIndex):
 	# Verify skinCluster
 	if not isSkinCluster(skinCluster):
 		raise Exception('Invalid skinCluster "'+skinCluster+'" specified!')
-	
+
 	# Get Influence at Index
 	infConn = mc.listConnections(skinCluster+'.matrix['+str(influenceIndex)+']',s=True,d=False)
-	
+
 	# Check Connection
 	if not infConn: raise Exception('No influence at specified index!')
-	
+
 	# Return Result
 	return infConn[0]
 
@@ -134,24 +134,24 @@ def getInfluencePhysicalIndex(skinCluster,influence):
 	# Verify skinCluster
 	if not isSkinCluster(skinCluster):
 		raise Exception('Invalid skinCluster "'+skinCluster+'" specified!')
-	
+
 	# Check influence
 	if not mc.objExists(influence):
 		raise Exception('Influence object "'+influence+'" does not exist!')
-	
+
 	# Get skinCluster node
 	skinClusterFn = getSkinClusterFn(skinCluster)
-	
+
 	# Get influence path list
 	infPathArray = OpenMaya.MDagPathArray()
 	skinClusterFn.influenceObjects(infPathArray)
 	infNameArray = [infPathArray[i].partialPathName() for i in range(infPathArray.length())]
-	
+
 	# Check influence
 	if not influence in infNameArray:
 		raise Exception('Unable to determine influence index for "'+influence+'"!')
 	infIndex = infNameArray.index(influence)
-	
+
 	# Retrun result
 	return infIndex
 
@@ -168,29 +168,29 @@ def getInfluenceWeights(skinCluster,influence,componentList=[]):
 	# Verify skinCluster
 	if not isSkinCluster(skinCluster):
 		raise Exception('Invalid skinCluster "' + skinCluster + '" specified!')
-	
+
 	# Check influence
 	if not mc.objExists(influence):
 		raise Exception('Influence object "'+influence+'" does not exists!')
-	
+
 	# Get geometry
 	affectedGeo = glTools.utils.deformer.getAffectedGeometry(skinCluster).keys()[0]
-	
+
 	# Check component list
 	if not componentList:
 		componentList = glTools.utils.component.getComponentStrList(affectedGeo)
 	componentSel = glTools.utils.selection.getSelectionElement(componentList,0)
-	
+
 	# Get skinCluster Fn
 	skinFn = getSkinClusterFn(skinCluster)
-	
+
 	# Get Influence Index
 	influenceIndex = getInfluencePhysicalIndex(skinCluster,influence)
-	
+
 	# Get weight values
 	weightList = OpenMaya.MDoubleArray()
 	skinFn.getWeights(componentSel[0],componentSel[1],influenceIndex,weightList)
-	
+
 	# Return weight array
 	return list(weightList)
 
@@ -208,7 +208,7 @@ def getInfluenceWeightsAll(skinCluster,componentList=[]):
 
 	# Get Geometry
 	affectedGeo = glTools.utils.deformer.getAffectedGeometry(skinCluster).keys()[0]
-	
+
 	# Check component list
 	if not componentList: componentList = glTools.utils.component.getComponentStrList(affectedGeo)
 	componentSel = glTools.utils.selection.getSelectionElement(componentList,0)
@@ -222,11 +222,11 @@ def getInfluenceWeightsAll(skinCluster,componentList=[]):
 	infCountPtr = infCountUtil.asUintPtr()
 	skinFn.getWeights(componentSel[0],componentSel[1],weightList,infCountPtr)
 	infCount = OpenMaya.MScriptUtil(infCountPtr).asUint()
-	
+
 	# Break List Per Influence
 	wtList = list(weightList)
 	infWtList = [wtList[i::infCount] for i in xrange(infCount)]
-	
+
 	# Return Result
 	return infWtList
 
@@ -243,22 +243,22 @@ def getInfluenceWeightsSlow(skinCluster,influence,componentList=[]):
 	# Verify skinCluster
 	if not isSkinCluster(skinCluster):
 		raise Exception('Invalid skinCluster "' + skinCluster + '" specified!')
-	
+
 	# Check influence
 	if not mc.objExists(influence):
 		raise Exception('Influence object "'+influence+'" does not exists!')
-	
+
 	# Get geometry
 	affectedGeo = glTools.utils.deformer.getAffectedGeometry(skinCluster).keys()[0]
-	
+
 	# Check component list
 	if not componentList: componentList = glTools.utils.component.getComponentStrList(affectedGeo)
 	componentIndexList = glTools.utils.component.getComponentIndexList(componentList)
 	componentIndexList = componentIndexList[componentIndexList.keys()[0]]
-	
+
 	# Get weight values
 	weightList = [mc.skinPercent(skinCluster,affectedGeo+'.vtx['+str(i)+']',transform=influence,q=True) for i in componentIndexList]
-	
+
 	# Return weight array
 	return weightList
 
@@ -279,36 +279,36 @@ def setInfluenceWeights(skinCluster,influence,weightList,normalize=True,componen
 	# Verify skinCluster
 	if not isSkinCluster(skinCluster):
 		raise Exception('Invalid skinCluster "' + skinCluster + '" specified!')
-	
+
 	# Check influence
 	if not mc.objExists(influence):
 		raise Exception('Influence object "'+influence+'" does not exists!')
-	
+
 	# Get geometry
 	affectedGeo = glTools.utils.deformer.getAffectedGeometry(skinCluster).keys()[0]
-	
+
 	# Get skinCluster Fn
 	skinFn = getSkinClusterFn(skinCluster)
-	
+
 	# Get Influence Index
 	influenceIndex = getInfluencePhysicalIndex(skinCluster,influence)
-	
+
 	# Check component list
 	if not componentList:
 		componentList = glTools.utils.component.getComponentStrList(affectedGeo)
 	componentSel = glTools.utils.selection.getSelectionElement(componentList,0)
-	
+
 	# Encode argument arrays
 	infIndexArray = OpenMaya.MIntArray()
 	infIndexArray.append(influenceIndex)
-	
+
 	wtArray = OpenMaya.MDoubleArray()
 	oldWtArray = OpenMaya.MDoubleArray()
 	[wtArray.append(i) for i in weightList]
-	
+
 	# Set skinCluster weight values
 	skinFn.setWeights(componentSel[0],componentSel[1],infIndexArray,wtArray,normalize,oldWtArray)
-	
+
 	# Return result
 	return list(oldWtArray)
 
@@ -329,25 +329,25 @@ def setInfluenceWeightsSlow(skinCluster,influence,weightList,normalize=True,comp
 	# Verify skinCluster
 	if not isSkinCluster(skinCluster):
 		raise Exception('Invalid skinCluster "' + skinCluster + '" specified!')
-	
+
 	# Check influence
 	if not mc.objExists(influence):
 		raise Exception('Influence object "'+influence+'" does not exists!')
 	if not mc.skinCluster(skinCluster,q=True,inf=True).count(influence):
 		raise Exception('Influence "'+influence+'" not connected to skinCluster "'+skinCluster+'"!')
-	
+
 	# Get geometry
 	affectedGeo = glTools.utils.deformer.getAffectedGeometry(skinCluster).keys()[0]
-	
+
 	# Check component list
 	if not componentList: componentList = glTools.utils.component.getComponentStrList(affectedGeo)
 	componentIndexList = glTools.utils.component.getComponentIndexList(componentList)
 	componentIndexList = componentIndexList[componentIndexList.keys()[0]]
-	
+
 	# Check component and weight list lengths
 	if len(componentIndexList) != len(weightList):
 		raise Exception('List length mis-match!')
-	
+
 	# Set weight values
 	for i in range(len(componentIndexList)):
 		comp = glTools.utils.component.getComponentStrList(affectedGeo,[componentIndexList[i]])[0]
@@ -359,43 +359,43 @@ def setInfluenceWeightsAll(skinCluster,weightList,normalize=True,componentList=[
 	# Verify skinCluster
 	if not isSkinCluster(skinCluster):
 		raise Exception('Invalid skinCluster "' + skinCluster + '" specified!')
-	
+
 	# Get SkinCluster Influence List
 	influenceList = mc.skinCluster(skinCluster,q=True,inf=True)
 	infIndexArray = OpenMaya.MIntArray()
 	[infIndexArray.append(getInfluencePhysicalIndex(skinCluster,inf)) for inf in influenceList]
 	infDict = {}
 	for inf in influenceList: infDict[inf] = getInfluencePhysicalIndex(skinCluster,inf)
-	
+
 	# Get SkinCluster Geometry
 	skinGeo = glTools.utils.deformer.getAffectedGeometry(skinCluster).keys()[0]
 	if not mc.objExists(skinGeo):
 		raise Exception('SkinCluster geometry "'+skinGeo+'" does not exist!')
-	
+
 	# Check Component List
 	if not componentList: componentList = glTools.utils.component.getComponentStrList(skinGeo)
 	componentSel = glTools.utils.selection.getSelectionElement(componentList,0)
-	
+
 	# Get Component Index List
 	indexList =  OpenMaya.MIntArray()
 	componentFn = OpenMaya.MFnSingleIndexedComponent(componentSel[1])
 	componentFn.getElements(indexList)
 	componentIndexList = list(indexList)
-	
+
 	# Check SkinCluster Weights List
 	if len(weightList) != len(influenceList):
 		raise Exception('Influence and weight list miss-match!')
-	
+
 	# Build Master Weight Array
 	wtArray = OpenMaya.MDoubleArray()
 	oldWtArray = OpenMaya.MDoubleArray()
 	for c in componentIndexList:
 		for inf in influenceList:
 			wtArray.append(weightList[infDict[inf]][c])
-	
+
 	# Get skinCluster function set
 	skinFn = glTools.utils.skinCluster.getSkinClusterFn(skinCluster)
-	
+
 	# Set skinCluster weights
 	skinFn.setWeights(componentSel[0],componentSel[1],infIndexArray,wtArray,False,oldWtArray)
 
@@ -412,18 +412,18 @@ def lockInfluenceWeights(influence,lock=True,lockAttr=False):
 	# Check SkinCluster
 	if not mc.objExists(influence):
 		raise Exception('Influence "'+influence+'" does not exist!')
-	
+
 	# Check Lock Influence Weights Attr
 	if not mc.attributeQuery('liw',n=influence,ex=True):
 		raise Exception('Influence ("'+influence+'") does not contain attribute "lockInfluenceWeights" ("liw")!')
-		
+
 	# Set Lock Influence Weights Attr
 	try:
 		mc.setAttr(influence+'.liw',l=False)
 		mc.setAttr(influence+'.liw',lock)
 		if lockAttr: mc.setAttr(influence+'.liw',l=True)
 	except: pass
-	
+
 	# Return Result
 	return lock
 
@@ -440,16 +440,16 @@ def lockSkinClusterWeights(skinCluster,lock=True,lockAttr=False):
 	# Check SkinCluster
 	if not isSkinCluster(skinCluster):
 		raise Exception('Object "'+skinCluster+'" is not a valid skinCluster node!')
-	
+
 	# Get Influence List
 	influenceList = mc.skinCluster(skinCluster,q=True,inf=True) or []
-	
+
 	# For Each Influence
 	for influence in influenceList:
-		
+
 		# Set Lock Influence Weights Attr
 		lockInfluenceWeights(influence,lock=lock,lockAttr=lockAttr)
-	
+
 	# Return Result
 	return influenceList
 
@@ -466,17 +466,17 @@ def lockSkinClusterWeightsFromGeo(geo,lock=True,lockAttr=False):
 	# Check SkinCluster
 	if not mc.objExists(geo):
 		raise Exception('Geometry "'+geo+'" does not exist!')
-	
+
 	# Get skinCluster
 	skinCluster = findRelatedSkinCluster(geo)
 	if not skinCluster: return []
-	
+
 	# Lock Weights
 	influenceList = lockSkinClusterWeights(skinCluster,lock=lock,lockAttr=lockAttr)
-	
+
 	# Return Result
 	return influenceList
-	
+
 def getAffectedPoints(skinCluster,influence):
 	'''
 	Get a list of points affected by a specific influence of a named skinCluster.
@@ -488,22 +488,22 @@ def getAffectedPoints(skinCluster,influence):
 	# Verify skinCluster
 	if not isSkinCluster(skinCluster):
 		raise Exception('Object "'+skinCluster+'" is not a valid skinCluster!!')
-	
+
 	# Get skinCluster function set
 	skinClusterFn = getSkinClusterFn(skinCluster)
-	
+
 	# Get influence DAG path
 	influencePath = glTools.utils.base.getMDagPath(influence)
-	
+
 	# Get affected points
 	pointSel = OpenMaya.MSelectionList()
 	weightList = OpenMaya.MDoubleArray()
 	skinClusterFn.getPointsAffectedByInfluence(influencePath,pointSel,weightList)
-	
+
 	# Return result
 	pointList = []
 	pointSel.getSelectionStrings(pointList)
-	return pointList 
+	return pointList
 
 def rename(geometry,suffix='skinCluster'):
 	'''
@@ -514,20 +514,20 @@ def rename(geometry,suffix='skinCluster'):
 	# Check geometry
 	if not mc.objExists(geometry):
 		raise Exception('Geometry "'+geometry+'" does not exist!')
-	
+
 	# Get name prefix
 	prefix = geometry.split(':')[-1] # glTools.utils.stringUtils.stripSuffix(geometry)
-	
+
 	# Get connected skinCluster
 	try:
 		skinCluster = findRelatedSkinCluster(geometry)
 	except:
 		print ('Object "'+geometry+'" is not connected to a valid skinCluster!!')
 		skinCluster = ''
-	
+
 	# Check skinCluster
 	if not skinCluster: return ''
-	
+
 	# Rename skinCluster
 	skinCluster = mc.rename(skinCluster,prefix+'_'+suffix)
 	return skinCluster
@@ -540,26 +540,26 @@ def reset(geometry):
 	'''
 	# Delete bind pose nodes
 	deleteBindPose()
-	
+
 	# Determine skinCluster
 	skinCluster = findRelatedSkinCluster(geometry)
-	
+
 	# Detach skinCluster
 	mc.skinCluster(geometry,e=True,ubk=True)
-	
+
 	# Get influence list
 	influenceList = mc.skinCluster(skinCluster,q=True,inf=True)
-	
+
 	# Get MaxInfluence settings
 	maxInfluences = mc.getAttr(skinCluster+'.maxInfluences')
 	useMaxInfluences = mc.getAttr(skinCluster+'.maintainMaxInfluences')
-	
+
 	# Rebuild skinCluster
 	skinCluster = mc.skinCluster(geometry,influenceList,dr=4,mi=maxInfluences,omi=useMaxInfluences,tsb=True)
-	
+
 	# Delete bind pose nodes
 	deleteBindPose()
-	
+
 	# Return skinCluster
 	return skinCluster
 
@@ -572,36 +572,36 @@ def clearWeights(geometry):
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Check Geometry
 	if not mc.objExists(geometry):
 		raise Exception('Geometry object "'+geometry+'" does not exist!')
-	
+
 	# Get SkinCluster
 	skinCluster = findRelatedSkinCluster(geometry)
 	if not mc.objExists(skinCluster):
 		raise Exception('Geometry object "'+geometry+'" is not attached to a valid skinCluster!')
-	
+
 	# =================
 	# - Clear Weights -
 	# =================
-	
+
 	# Get geometry component list
 	componentList = glTools.utils.component.getComponentStrList(geometry)
 	componentSel = glTools.utils.selection.getSelectionElement(componentList,0)
-	
+
 	# Build influence index array
 	infList = mc.skinCluster(skinCluster,q=True,inf=True)
 	infIndexArray = OpenMaya.MIntArray()
 	for inf in infList:
 		infIndex = getInfluencePhysicalIndex(skinCluster,inf)
 		infIndexArray.append(infIndex)
-	
+
 	# Build master weight array
 	wtArray = OpenMaya.MDoubleArray()
 	oldWtArray = OpenMaya.MDoubleArray()
 	[wtArray.append(0.0) for i in range(len(componentList)*len(infList))]
-	
+
 	# Set skinCluster weights
 	skinFn = glTools.utils.skinCluster.getSkinClusterFn(skinCluster)
 	skinFn.setWeights(componentSel[0],componentSel[1],infIndexArray,wtArray,False,oldWtArray)
@@ -626,37 +626,37 @@ def mirrorSkinWIP(	srcGeo,
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Check Source Geometry and SkinCluster
 	if not mc.objExists(srcGeo):
 		raise Exception('Source geometry "'+srcGeo+'" does not exist!')
 	srcSkin = findRelatedSkinCluster(srcGeo)
 	if not srcSkin:
 		raise Exception('No skinCluster found for source geometry "'+srcGeo+'"!')
-	
+
 	# Check Destination Geometry and SkinCluster
 	if not mc.objExists(dstGeo):
 		raise Exception('Destination geometry "'+dstGeo+'" does not exist!')
 	dstSkin = findRelatedSkinCluster(dstGeo)
 	if not dstSkin: dstSkin = dstGeo.split(':')[-1]+'_skinCluster'
-	
+
 	# Get Source Influence List
 	srcInfluenceList = mc.skinCluster(srcSkin,q=True,inf=True)
-	
+
 	# Check Joint List
 	if not jointList: jointList = mc.ls(type='joint')
-	
+
 	# ====================================
 	# - Build Destination Influence List -
 	# ====================================
-	
+
 	# Get Destination Influence List
 	dstInfluenceList = []
 	if mc.objExists(dstSkin):
 		dstInfluenceList = mc.skinCluster(dstSkin,q=True,inf=True)
-	
-	
-	
+
+
+
 
 def mirrorSkin(skinCluster,search='lf_',replace='rt_',destGeo=''):
 	'''
@@ -673,31 +673,31 @@ def mirrorSkin(skinCluster,search='lf_',replace='rt_',destGeo=''):
 	# Check skinCluster
 	if not isSkinCluster(skinCluster):
 		raise Exception('Object "'+skinCluster+'" is not a valid skinCluster!')
-	
+
 	# Check Source Geometry
 	sourceGeo = glTools.utils.deformer.getAffectedGeometry(skinCluster).keys()[0]
-	
+
 	# Get Destination Geometry
 	if not destGeo:
 		destGeo = sourceGeo.replace(search,replace)
 	if not mc.objExists(destGeo):
 		raise Exception('Destination geometry "'+destGeo+'" does not exist!')
-	
+
 	# Get influence list
 	influenceList = mc.skinCluster(skinCluster,q=True,inf=True)
-	
+
 	# Check destination skinCluster
 	mSkinCluster = skinCluster.replace(search,replace)
 	destSkinCluster = findRelatedSkinCluster(destGeo)
 	if destSkinCluster and destSkinCluster != mSkinCluster:
 		mc.rename(destSkinCluster,mSkinCluster)
-	
+
 	# Check influenceList
 	mInfluenceList = [inf.replace(search,replace) for inf in influenceList]
 	for mInf in mInfluenceList:
 		if not mc.objExists(mInf):
 			raise Exception('Mirror influence "'+mInf+'" does not exist!!')
-	
+
 	# Check mirror skinCluster
 	if not mc.objExists(mSkinCluster):
 		# Create skinCluster
@@ -708,54 +708,54 @@ def mirrorSkin(skinCluster,search='lf_',replace='rt_',destGeo=''):
 		for mInf in mInfluenceList:
 			if not destInfluenceList.count(mInf):
 				mc.skinCluster(mSkinCluster,e=True,ai=mInf)
-	
+
 	# Get Mirror Weights
 	mirroWeightList = {}
 	for inf in influenceList:
 		mirroWeightList[inf] = getInfluenceWeights(skinCluster,inf)
-	
+
 	# Clear mirrorSkin weights
 	clearWeights(destGeo)
-	
+
 	# Apply mirror weights
 	for i in range(len(influenceList)):
 		setInfluenceWeights(mSkinCluster,mInfluenceList[i],mirroWeightList[influenceList[i]])
-		
+
 def createMirrorInfluenceList(influenceList, searchJointList=None, flipAxis	= [-1,1,1]):
-	
+
 	# Check Joint List
 	if not searchJointList: searchJointList = mc.ls(type='joint')
-	
+
 	mInfluenceList = [i for i in influenceList]
 	for i in range(len(influenceList)):
-		
+
 		# Get Joint Mirror Position
 		inf = influenceList[i]
 		pos = mc.xform(inf,q=True,ws=True,rp=True)
 		mirrorPos = [pos[x]*flipAxis[x] for x in range(len(pos))]
-		
+
 		closestJoint = inf
 		smallestDist = 1000
 		for jnt in searchJointList:
-			
+
 			# Check Mirror Joint
 			testPos = mc.xform(jnt,q=True,ws=True,rp=True)
 			dist = glTools.utils.mathUtils.distanceBetween(point1=mirrorPos,point2=testPos)
-			
+
 			# Test Distance
 			if dist < smallestDist:
 				closestJoint = jnt
 				smallestDist = dist
-		
+
 		# Append Mirror Influence List
 		mInfluenceList[i] = closestJoint
-	
+
 	# Check influenceList
 	for mInf in mInfluenceList:
 		if not mc.objExists(mInf):
 			print ('Warning :: Mirror influence "'+mInf+'" does not exist!!')
 			mInfluenceList.remove(mInf)
-			
+
 	return mInfluenceList
 
 def mirrorSkinToNewGeom(	srcSkin,
@@ -777,63 +777,63 @@ def mirrorSkinToNewGeom(	srcSkin,
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Check skinCluster
 	if not isSkinCluster(srcSkin):
 		raise Exception('Object "'+srcSkin+'" is not a valid skinCluster!')
-	
+
 	# Get Destination Geometry
 	if not mc.objExists(dstGeo):
 		raise Exception('Destination geometry "'+dstGeo+'" does not exist!')
-	
+
 	# Get Destination SkinCluster
 	dstSkin = findRelatedSkinCluster(dstGeo)
 	if not dstSkin: dstSkin = dstGeo+'_skinCluster'
-	
+
 	# Get Influence List
 	influenceList = mc.skinCluster(srcSkin,q=True,inf=True)
-	
+
 	# Check Joint List
 	if not jointList: jointList = mc.ls(type='joint')
-	
+
 	# =============================
 	# - Get Mirror Influence List -
 	# =============================
-	
+
 	mInfluenceList = [i for i in influenceList]
 	for i in range(len(influenceList)):
-		
+
 		# Get Joint Mirror Position
 		inf = influenceList[i]
 		pos = mc.xform(inf,q=True,ws=True,rp=True)
 		mirrorPos = [pos[x]*flipAxis[x] for x in range(len(pos))]
-		
+
 		closestJoint = inf
 		smallestDist = 1000
 		for jnt in jointList:
-			
+
 			# Check Mirror Joint
 			testPos = mc.xform(jnt,q=True,ws=True,rp=True)
 			dist = glTools.utils.mathUtils.distanceBetween(point1=mirrorPos,point2=testPos)
-			
+
 			# Test Distance
 			if dist < smallestDist:
 				closestJoint = jnt
 				smallestDist = dist
-		
+
 		# Append Mirror Influence List
 		mInfluenceList[i] = closestJoint
-	
+
 	# Check influenceList
 	for mInf in mInfluenceList:
 		if not mc.objExists(mInf):
 			print ('Warning :: Mirror influence "'+mInf+'" does not exist!!')
 			mInfluenceList.remove(mInf)
-	
+
 	# ============================
 	# - Build Mirror SkinCluster -
 	# ============================
-	
+
 	if not mc.objExists(dstSkin):
 		# Create SkinCluster
 		dstSkin = mc.skinCluster(mInfluenceList,dstGeo,tsb=True,n=dstSkin)[0]
@@ -844,20 +844,20 @@ def mirrorSkinToNewGeom(	srcSkin,
 			if not mInf in dstInfluenceList:
 				try: mc.skinCluster(dstSkin,e=True,ai=mInf)
 				except: print "Warning :: Could not add %s to %s" % (mInf, dstSkin)
-	
+
 	# Clear Weights
 	mc.setAttr(dstSkin+'.normalizeWeights',0)
 	clearWeights(dstGeo)
-	
-	
+
+
 	# Mirror Weights
 	for i in range(len(influenceList)):
 		print(influenceList[i]+' : '+mInfluenceList[i])
 		wt = getInfluenceWeights(srcSkin,influenceList[i])
 		setInfluenceWeights(dstSkin,mInfluenceList[i],wt)
-	
+
 	mc.setAttr(dstSkin+'.normalizeWeights',1)
-	
+
 def bindPreMatrix(skinCluster,influence,influenceBase=None,parent=True):
 	'''
 	Set a skinCluster influences deformation relative to a specified transform.
@@ -873,34 +873,34 @@ def bindPreMatrix(skinCluster,influence,influenceBase=None,parent=True):
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Check SkinCluster
 	if not isSkinCluster(skinCluster):
 		raise Exception('Invalid skinCluster "'+skinCluster+'" specified!')
-	
+
 	# Check Influence
 	if not mc.objExists(influence):
 		raise Exception('Influence "'+influence+'" does not exist!')
-	
+
 	# Check InfluenceBase
 	if influenceBase:
 		if not mc.objExists(influenceBase):
 			raise Exception('Influence base "'+influenceBase+'" does not exist!')
 	if not influenceBase: influenceBase = influence
-	
+
 	# =========================
 	# - Connect BindPreMatrix -
 	# =========================
-	
+
 	# Get Influence Index
 	infIndex = getInfluenceIndex(skinCluster,influence)
-	
+
 	# Check influence == influenceBase
 	if influence == influenceBase:
 		print('BindPreMatrix >> '+influence)
 		mc.connectAttr(influence+'.parentInverseMatrix[0]',skinCluster+'.bindPreMatrix['+str(infIndex)+']',f=True)
 		return influence
-	
+
 	# Create BindPreMatrix Transform
 	bpm = None
 	if influenceBase:
@@ -912,21 +912,21 @@ def bindPreMatrix(skinCluster,influence,influenceBase=None,parent=True):
 		mc.delete(mc.scaleConstraint(influence,bpm))
 		# Parent bindPreMatrix transform to relativeTo object
 		if parent: mc.parent(influence,bpm)
-	
+
 	# Connect bindPreMatrix message to skinCluster influence
 	if not mc.objExists(influence+'.influenceBase'):
 		mc.addAttr(influence,ln='influenceBase',at='message')
 	try: mc.connectAttr(bpm+'.message',influence+'.influenceBase',f=True)
 	except: pass
-	
+
 	# Connect bindPreMatrix to skinCluster
 	try: mc.connectAttr(bpm+'.worldInverseMatrix[0]',skinCluster+'.bindPreMatrix['+str(infIndex)+']',f=1)
 	except: pass
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return bpm
 
 def setGeomMatrix(geo):
@@ -934,11 +934,11 @@ def setGeomMatrix(geo):
 	'''
 	# Determine skinCluster
 	skinCluster = findRelatedSkinCluster(geo)
-	
+
 	# Get Geometry Matrix
 	mat = mc.getAttr(geo+'.worldMatrix[0]')
 	mc.setAttr(skinCluster+'.geomMatrix',mat,type='matrix')
-	
+
 	# Return Result
 	return skinCluster
 
@@ -953,19 +953,19 @@ def makeRelative(skinCluster,relativeTo):
 	# Verify skinCluster
 	if not isSkinCluster(skinCluster):
 		raise Exception('Invalid skinCluster "' + skinCluster + '" specified!')
-	
+
 	# Verify relativeTo object
 	if not mc.objExists(relativeTo):
 		raise Exception('Object "'+relativeTo+'" does not exist!')
 	else:
 		if mc.objectType(relativeTo) != 'transform':
 			raise Exception('Object "'+relativeTo+'" is not a valid transform!')
-	
+
 	# Build bindPreMatrix network
 	influenceList = mc.skinCluster(skinCluster,q=1,inf=1)
 	infBaseList = []
 	for inf in influenceList:
-		
+
 		# Determine influenceIndex
 		infInd = -1
 		plugConnection = mc.listConnections(inf+'.worldMatrix[0]',s=0,d=1,p=1,type="skinCluster")
@@ -978,7 +978,7 @@ def makeRelative(skinCluster,relativeTo):
 				break
 		if infInd < 0:
 			raise Exception('Influence index could not be determined!')
-		
+
 		# Create bindPreMatrix transform
 		bpm = ''
 		try:
@@ -1007,12 +1007,12 @@ def makeRelative(skinCluster,relativeTo):
 			if bpm != bpmConn[0]: mc.connectAttr(bpm+'.worldInverseMatrix[0]',skinCluster+'.bindPreMatrix['+str(infInd)+']',f=1)
 		else:
 			mc.connectAttr(bpm+'.worldInverseMatrix[0]',skinCluster+'.bindPreMatrix['+str(infInd)+']',f=1)
-	
+
 	# Determine skin object
 	obj = glTools.utils.deformer.getAffectedGeometry(skinCluster).keys()[0]
 	# Connect skinned geometry parent matrix to skinCluster.geomMatrix
 	mc.connectAttr(obj+'.parentMatrix[0]',skinCluster+'.geomMatrix',f=1)
-	
+
 	# Return InfluenceBase List
 	return infBaseList
 
@@ -1029,19 +1029,19 @@ def skinAs(src,dst,smooth=False):
 	# Check inputs
 	if not mc.objExists(src): raise Exception('Source object "'+src+'" does not exist!')
 	if not mc.objExists(dst): raise Exception('Destination object "'+dst+'" does not exist!')
-	
+
 	# Get source skinCluster
 	srcSkin = findRelatedSkinCluster(src)
-	
+
 	# Check destination skinCluster
 	dstSkin = findRelatedSkinCluster(dst)
-	
+
 	# Build destination skinCluster
 	if not dstSkin:
 		dstPrefix = dst.split(':')[-1]
 		srcInfList = mc.skinCluster(srcSkin,q=True,inf=True)
 		dstSkin = mc.skinCluster(srcInfList,dst,toSelectedBones=True,rui=False,n=dstPrefix+'_skinCluster')[0]
-	
+
 	# Copy skin weights
 	mc.copySkinWeights(	sourceSkin=str(srcSkin),
 						destinationSkin=str(dstSkin),
@@ -1049,7 +1049,7 @@ def skinAs(src,dst,smooth=False):
 						influenceAssociation='name',
 						noMirror=True,
 						smooth=smooth	)
-	
+
 	# Return result
 	return dstSkin
 
@@ -1064,39 +1064,39 @@ def skinObjectList(objList,jntList):
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Check Geometry
 	for obj in objList:
 		if not mc.objExists(obj):
 			raise Exception('Object "'+obj+'" does not exist!')
-	
+
 	# Check Joints
 	for jnt in jntList:
 		if not mc.objExists(jnt):
 			raise Exception('Joint "'+jnt+'" does not exist!')
-	
+
 	# =======================
 	# - Create SkinClusters -
 	# =======================
-	
+
 	# Initialize SkinCluster List
 	skinClusterList = []
-	
+
 	for obj in objList:
-		
+
 		# Get Short Name
 		objName = mc.ls(obj,sn=True)[0].split(':')[-1]
-		
+
 		# Create SkinCluster
 		skinCluster = mc.skinCluster(jntList,obj,toSelectedBones=True,rui=False,n=objName+'_skinCluster')[0]
-		
+
 		# Append to Return List
 		skinClusterList.append(skinCluster)
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return skinClusterList
 
 def skinObjectListFromUI():
@@ -1105,14 +1105,14 @@ def skinObjectListFromUI():
 	'''
 	# Get User Selection
 	sel = mc.ls(sl=1,o=True)
-	
+
 	# Sort Geometry from Joints
 	jntList = [jnt for jnt in sel if glTools.utils.joint.isJoint(jnt)]
 	objList = [jnt for jnt in sel if not glTools.utils.joint.isJoint(jnt)]
-	
+
 	# Create SkinClusters
 	skinClusterList = skinObjectList(objList,jntList)
-	
+
 	# Return Result
 	return skinClusterList
 
@@ -1126,7 +1126,7 @@ def clean(skinCluster,tolerance=0.005):
 	'''
 	# Print Message
 	print('Cleaning skinCluster: '+skinCluster)
-	
+
 	# Get Affected Geometry
 	geoShape = mc.skinCluster(skinCluster,q=True,g=True)
 	if not geoShape:
@@ -1136,16 +1136,16 @@ def clean(skinCluster,tolerance=0.005):
 		raise Exception('Unable to determine geometry from deformed shape "'+geoShape[0]+'"!')
 	# Select Geometry
 	mc.select(geo[0])
-	
+
 	# Unlock Influence Weights
 	lockSkinClusterWeights(skinCluster,lock=False,lockAttr=False)
-	
+
 	# Prune weights
 	mm.eval('doPruneSkinClusterWeightsArgList 1 { "'+str(tolerance)+'" }')
-	
+
 	# Remove unused influences
 	mm.eval('removeUnusedInfluences')
-	
+
 	# Lock Influence Weights
 	lockSkinClusterWeights(skinCluster,lock=True,lockAttr=True)
 
@@ -1163,26 +1163,26 @@ def removeMultipleInfluenceBases(base,duplicates):
 	baseShape = mc.listRelatives(base,s=True,ni=True)[0]
 	if not baseShape:
 		raise Exception('Unable to determine base influence shape for "'+base+'"!')
-	
+
 	# For Each Duplicate Base
 	for dup in duplicates:
-		
+
 		# Get Duplicate Base Shape
 		dupShape = mc.listRelatives(dup,s=True,ni=True)
 		if not dupShape:
 			print('Unable to determine base influence shape for "'+base+'"! Skipping...')
 			continue
-		
+
 		# Get SkinCluster Connection
 		dupConn = mc.listConnections(dup+'.outMesh',s=0,d=1,p=True,type='skinCluster')
 		if not dupConn:
 			print('Base influence "'+dup+'" deleted! No outgoing skinCluster connections...')
 			mc.delete(dup)
 			continue
-		
+
 		# Get SkinCluster
 		dupConnSkin = mc.ls(dupConn[0],o=True)[0]
-		
+
 		# Override Connection
 		try:
 			mc.connectAttr(baseShape+'.outMesh',dupConn[0],f=True)
@@ -1190,10 +1190,10 @@ def removeMultipleInfluenceBases(base,duplicates):
 		except:
 			print('Unable to override base influence connection to skinCluster"'+dupConnSkin+'" ('+dup+' >>> '+base+' )! Skipping...')
 			continue
-		
+
 		# Delete Duplicate Base Influence
 		mc.delete(dup)
-	
+
 	# Return Result
 	return
 
@@ -1203,34 +1203,34 @@ def replaceGeomInfluenceBase(skinCluster,influence,influenceBase,deleteOldBase=F
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	# Verify skinCluster
 	if not isSkinCluster(skinCluster):
 		raise Exception('Invalid skinCluster "' + skinCluster + '" specified!')
-	
+
 	# Influence
 	infList = mc.skinCluster(skinCluster,q=True,inf=True)
 	if not infList.count(influence):
 		raise Exception('Object "'+influence+'" is not a valid influence of skinCluster "'+skinCluster+'"!')
-	
+
 	# ==========================
 	# - Replace Influence Base -
 	# ==========================
-	
+
 	# Get influence index
 	infIndex = getInfluenceIndex(skinCluster,influence)
-	
+
 	# Get Existing Influence Base
 	oldBase = mc.listConnections(skinCluster+'.basePoints['+str(infIndex)+']',s=True,d=False)
-	
+
 	# Connect to SkinCluster
 	mc.connectAttr(influenceBase+'.outMesh',skinCluster+'.basePoints['+str(infIndex)+']',f=True)
-	
+
 	# Delete Old Influence Base
 	if deleteOldBase: mc.delete(oldBase)
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return infIndex

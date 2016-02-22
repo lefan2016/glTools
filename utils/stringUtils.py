@@ -17,7 +17,7 @@ def stripSuffix(name,delineator='_'):
 	result = name.replace(delineator+suffix,'')
 	# Return Result
 	return result
-		
+
 def stringIndex(index,padding=2):
 	'''
 	Return the string equivalent for the specified iteger index.
@@ -32,7 +32,7 @@ def stringIndex(index,padding=2):
 	for i in range(padding-len(strInd)): strInd = '0'+strInd
 	# Return Result
 	return strInd
-	
+
 def alphaIndex(index,upper=True):
 	'''
 	Return the alpha string equivalent for the specified iteger index.
@@ -43,16 +43,16 @@ def alphaIndex(index,upper=True):
 	'''
 	# Define Alpha List
 	alpha = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
-		
+
 	# Build Alpha Index
 	alphaInd = alpha[index % 26]
 	depth = index / 26.0
 	while int(math.floor(depth)):
 		alphaInd = alpha[int(depth % 26)-1] + alphaInd
 		depth = depth / 26.0
-	
+
 	# Check Case
 	if upper: alphaInd = alphaInd.upper()
-	
+
 	# Return result
 	return alphaInd

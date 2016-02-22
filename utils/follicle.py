@@ -12,16 +12,16 @@ def isFollicle(follicle):
 	'''
 	# Check Object Exists
 	if not mc.objExists(follicle): return False
-	
+
 	# Check Shape
 	if 'transform' in mc.nodeType(follicle,i=True):
 		follicleShape = mc.ls(mc.listRelatives(follicle,s=True,ni=True,pa=True) or [],type='follicle')
 		if not follicleShape: return False
 		follicle = follicleShape[0]
-	
+
 	# Check Follicle
 	if mc.objectType(follicle) != 'follicle': return False
-	
+
 	# Return Result
 	return True
 
@@ -45,9 +45,9 @@ def create(	targetGeo,
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	if not prefix: prefix = targetGeo
-	
+
 	# Check Target Geo Type
 	validType = False
 	targetIsMesh = False
@@ -59,48 +59,48 @@ def create(	targetGeo,
 		validType = True
 		targetIsSurface = True
 	if not validType: raise Exception('Invalid target geometry type! ('+targetGeo+')')
-	
+
 	# UV Set
 	if uvSet and targetIsMesh:
 		if not uvSet in mc.polyUVSet(targetGeo,q=True,auv=True):
 			raise Exception('Target geometry has no UV set "'+uvSet+'"!')
-	
+
 	# ===================
 	# - Create Follicle -
 	# ===================
-	
+
 	follicleShape = mc.createNode('follicle')
 	follicle = mc.listRelatives(follicleShape,p=True)[0]
 	follicle = mc.rename(follicle,prefix+'_follicle')
-	
+
 	# Connect Translate/Rotate
 	if translate:
 		mc.connectAttr(follicle+'.outTranslate',follicle+'.translate',f=True)
 	if rotate:
 		mc.connectAttr(follicle+'.outRotate',follicle+'.rotate',f=True)
-	
+
 	# Set Parameter
 	mc.setAttr(follicle+'.parameterU',parameter[0])
 	mc.setAttr(follicle+'.parameterV',parameter[1])
-	
+
 	# UV Set
 	if uvSet: mc.setAttr(follicle+'.mapSetName',uvSet,type='string')
-	
+
 	# ==============================
 	# - Connect to Target Geometry -
 	# ==============================
-	
+
 	# Connect Geometry
 	if targetIsMesh: mc.connectAttr(targetGeo+'.outMesh',follicle+'.inputMesh',f=True)
 	if targetIsSurface: mc.connectAttr(targetGeo+'.localSpace[0]',follicle+'.inputSurface',f=True)
-	
+
 	# Connect WorldSpace
 	mc.connectAttr(targetGeo+'.worldMatrix[0]',follicle+'.inputWorldMatrix',f=True)
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return follicle
 
 def buildAtPoint(	pt,
@@ -129,9 +129,9 @@ def buildAtPoint(	pt,
 	# ==========
 	# - Checks -
 	# ==========
-	
+
 	if not prefix: prefix = geo
-	
+
 	# Check Target Geo Type
 	validType = False
 	targetIsMesh = False
@@ -143,41 +143,41 @@ def buildAtPoint(	pt,
 		validType = True
 		targetIsSurface = True
 	if not validType: raise Exception('Invalid target geometry type! ('+geo+')')
-	
+
 	# UV Set
 	if uvSet and targetIsMesh:
 		if not uvSet in mc.polyUVSet(geo,q=True,auv=True):
 			raise Exception('Target geometry has no UV set "'+uvSet+'"!')
-	
+
 	# =====================================
 	# - Get Point Position and Closest UV -
 	# =====================================
-	
+
 	# Get Point Position
 	pos = glTools.utils.base.getPosition(pt)
-	
+
 	# Get Closest UV
 	parameter = [0,0]
 	if targetIsMesh: parameter = list(glTools.utils.mesh.closestUV(geo,point=pos))
 	if targetIsSurface: parameter = list(glTools.utils.surface.closestPoint(geo,pos))
-	
+
 	# Override UV
 	if overrideU != None: parameter[0] = overrideU
 	if overrideV != None: parameter[1] = overrideV
-	
+
 	# ==================
 	# - Build Follicle -
 	# ==================
-	
+
 	follicle = create(	geo,
 						parameter	= parameter,
 						uvSet		= uvSet,
 						translate   = translate,
 						rotate      = rotate,
 						prefix		= prefix )
-	
+
 	# =================
 	# - Return Result -
 	# =================
-	
+
 	return follicle
